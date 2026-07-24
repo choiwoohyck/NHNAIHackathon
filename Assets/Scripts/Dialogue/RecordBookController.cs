@@ -1,0 +1,75 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+// 취조 중지/종료 시 진술을 "기록지 오브젝트"로 만들어 책상 위에 보관/전시하는 매니저.
+// 용의자별로 RecordSheetCard 오브젝트 하나씩을 만들고, 같은 용의자가 재호출되어
+// 진술이 추가되면 새 카드를 만들지 않고 기존 카드 내용만 갱신한다.
+public class RecordBookController : MonoBehaviour
+{
+    RectTransform bookPanel;
+    RectTransform cardContainer;
+
+    readonly Dictionary<string, RecordSheetCard> cards = new Dictionary<string, RecordSheetCard>();
+
+    void Awake()
+    {
+        DialogueUIUtil.EnsureEventSystem();
+        BuildUI();
+        bookPanel.gameObject.SetActive(false);
+    }
+
+    void BuildUI()
+    {
+        var canvas = DialogueUIUtil.CreateCanvas("RecordBookCanvas", 20);
+
+        bookPanel = DialogueUIUtil.CreatePanel(canvas.transform, "RecordBookPanel", new Color(0.05f, 0.05f, 0.05f, 0.92f));
+        DialogueUIUtil.Stretch(bookPanel, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero);
+
+        var title = DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
+        title.fontStyle = FontStyle.Bold;
+        title.text = "취조 기록지";
+        DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
+
+        var closeBtn = DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
+        DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
+        closeBtn.onClick.AddListener(() => bookPanel.gameObject.SetActive(false));
+
+        var containerGO = new GameObject("CardContainer", typeof(RectTransform));
+        containerGO.transform.SetParent(bookPanel, false);
+        cardContainer = containerGO.GetComponent<RectTransform>();
+        DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0f), new Vector2(1f, 0.9f), new Vector2(20, 20), new Vector2(-20, -10));
+
+        var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 15;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = true;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+    }
+
+    public void ToggleVisible()
+    {
+        bookPanel.gameObject.SetActive(!bookPanel.gameObject.activeSelf);
+    }
+
+    /// <summary>
+    /// 세션 데이터를 기반으로 기록지 카드 오브젝트를 생성하거나 이미 있으면 내용만 갱신한다.
+    /// </summary>
+    public void AddOrUpdateSheet(SuspectSession session)
+    {
+        RecordSheetCard card;
+        if (!cards.TryGetValue(session.suspectId, out card))
+        {
+            var cardGO = new GameObject("RecordCard_" + session.suspectId, typeof(RectTransform));
+            cardGO.transform.SetParent(cardContainer, false);
+            cardGO.AddComponent<LayoutElement>().preferredWidth = 320;
+
+            card = cardGO.AddComponent<RecordSheetCard>();
+            card.Build();
+            cards[session.suspectId] = card;
+        }
+
+        card.Refresh(session);
+    }
+}
