@@ -24,6 +24,7 @@ public class DialogueManager : MonoBehaviour
     public Color dialoguePanelColor = new Color(0f, 0f, 0f, 0.75f);
     public Color choicePanelColor = new Color(0f, 0f, 0f, 0.85f);
     public Color choiceButtonColor = new Color(1f, 1f, 1f, 0.08f);
+    public Color contradictionChoiceColor = new Color(0.5f, 0.12f, 0.12f, 0.55f); // 모순 질문은 붉게 강조
 
     public DialogueState State { get; private set; } = DialogueState.Idle;
 
@@ -183,8 +184,9 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// 선택 가능한 질문 목록을 보여준다. 대사창은 꺼지고 선택지창이 켜진다.
     /// 플레이어가 하나를 고르면 선택지창이 다시 꺼지고 onSelected가 호출된다.
+    /// 목록은 CaseGraph가 현재 진행 상태에 맞춰 계산해 넘겨준다(방향 그래프 해금 결과).
     /// </summary>
-    public void ShowChoices(List<Question> questions, Action<Question> onSelected)
+    public void ShowChoices(List<QuestionNode> questions, Action<QuestionNode> onSelected)
     {
         SetDialoguePanelVisible(false);
         SetChoicePanelVisible(true);
@@ -205,7 +207,8 @@ public class DialogueManager : MonoBehaviour
 
         foreach (var q in questions)
         {
-            var button = DialogueUIUtil.CreateButton(choiceListContainer, "Choice_" + q.id, q.label, choiceButtonColor);
+            var color = q.kind == NodeKind.Contradiction ? contradictionChoiceColor : choiceButtonColor;
+            var button = DialogueUIUtil.CreateButton(choiceListContainer, "Choice_" + q.id, q.label, color);
             var le = button.gameObject.AddComponent<LayoutElement>();
             le.preferredHeight = 50;
 

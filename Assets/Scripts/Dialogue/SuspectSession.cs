@@ -1,30 +1,30 @@
 using System.Collections.Generic;
 
-// 용의자 한 명의 취조 진행 상태 (씬에만 존재하는 런타임 데이터).
-// 취조를 중지해도 파괴되지 않고 InterrogationController가 들고 있다가 재호출 시 이어서 사용한다.
+// 용의자 한 명의 '런타임 기록 상태' (확보한 진술 문장 모음).
+// 취조를 중지해도 파괴되지 않고 InterrogationController가 들고 있다가 재호출/기록지 생성에 쓴다.
+//
+// 어떤 질문을 물어볼 수 있는지(해금 판정)는 이제 이 클래스가 아니라 CaseGraph + CaseProgress가
+// 담당한다. 그래서 여기서는 순수하게 "기록지에 올릴 문장"만 관리한다.
 public class SuspectSession
 {
     public string suspectId;
     public string suspectName;
-    public List<Question> questions;
-    public List<StatementRecord> statements = new List<StatementRecord>();
+    public string occupation;
+    public readonly List<StatementRecord> statements = new List<StatementRecord>();
     public bool completed;
 
-    public SuspectSession(string suspectId, string suspectName, List<Question> questions)
+    public SuspectSession(string suspectId, string suspectName, string occupation)
     {
         this.suspectId = suspectId;
         this.suspectName = suspectName;
-        this.questions = questions;
+        this.occupation = occupation;
     }
 
-    public List<Question> GetAvailableQuestions()
+    // 같은 증언이 중복 기록되지 않도록(반복 질문/재확보 대비).
+    public void AddStatement(StatementRecord record)
     {
-        var result = new List<Question>();
-        foreach (var q in questions)
-        {
-            if (q.oneTime && q.asked) continue;
-            result.Add(q);
-        }
-        return result;
+        if (record == null) return;
+        if (statements.Exists(r => r.recordId == record.recordId)) return;
+        statements.Add(record);
     }
 }

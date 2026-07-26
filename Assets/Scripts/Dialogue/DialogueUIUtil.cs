@@ -19,14 +19,39 @@ public static class DialogueUIUtil
         }
     }
 
+    static Font _koreanFont;
+    // 한글 표시/입력(InputField)용 동적 폰트. OS의 맑은 고딕 등을 사용하고, 실패 시 기본 폰트로 대체.
+    public static Font KoreanFont
+    {
+        get
+        {
+            if (_koreanFont != null) return _koreanFont;
+            try
+            {
+                _koreanFont = Font.CreateDynamicFontFromOSFont(
+                    new[] { "Malgun Gothic", "맑은 고딕", "Gulim", "Dotum", "Batang", "Arial" }, 16);
+            }
+            catch { }
+            if (_koreanFont == null) _koreanFont = DefaultFont;
+            return _koreanFont;
+        }
+    }
+
     public static void EnsureEventSystem()
     {
         if (Object.FindFirstObjectByType<EventSystem>() != null) return;
 
         var go = new GameObject("EventSystem");
         go.AddComponent<EventSystem>();
-#if ENABLE_INPUT_SYSTEM
-        go.AddComponent<InputSystemUIInputModule>();
+
+        // 주의: 런타임에 코드로 InputSystemUIInputModule을 AddComponent 하면 기본 UI 액션이 비어 있어
+        // 마우스 클릭이 UI에 전달되지 않는다(→ 버튼/대사 진행 불가). 레거시 입력이 켜져 있으면(Old/Both)
+        // StandaloneInputModule이 가장 확실하고, New 전용 환경에서는 기본 액션을 직접 할당한다.
+#if ENABLE_LEGACY_INPUT_MANAGER
+        go.AddComponent<StandaloneInputModule>();
+#elif ENABLE_INPUT_SYSTEM
+        var uiModule = go.AddComponent<InputSystemUIInputModule>();
+        uiModule.AssignDefaultActions();
 #else
         go.AddComponent<StandaloneInputModule>();
 #endif

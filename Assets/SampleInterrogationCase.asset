@@ -1,0 +1,362 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d608b9d9a55a2646918144c0cc2dce0, type: 3}
+  m_Name: SampleInterrogationCase
+  m_EditorClassIdentifier: Assembly-CSharp::InterrogationCase
+  caseId: CASE_NETWORK_INTRUSION
+  caseTitle: "\uC544\uC2AC\uB77C\uB2C8\uC544 \uAD6D\uAC00 \uC804\uC0B0\uB9DD \uCE68\uC785
+    \uC0AC\uAC74"
+  briefing: "7\uC6D4 23\uC77C \uC624\uD6C4 3\uC2DC 20\uBD84, \uAD6D\uAC00 DB\uC5D0
+    \uBE44\uC778\uAC00 \uC811\uADFC\uC774 \uBC1C\uC0DD\uD574 \uC804\uC0B0\uB9DD\uC774
+    \uC57D 15\uBD84\uAC04 \uB9C8\uBE44\uB418\uC5C8\uB2E4.\n\uCE68\uC785 \uACFC\uC815\uC5D0\uC11C
+    \uB0B4\uBD80 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC0AC\uC6A9\uB418\uC5C8\uB2E4.
+    \uB0B4\uBD80 \uC2DC\uC2A4\uD15C\uC5D0 \uC811\uADFC \uAC00\uB2A5\uD55C 3\uC778\uC744
+    \uCDE8\uC870\uD558\uB77C."
+  testimonies:
+  - id: T_A_ALIBI
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uD68C\uC0AC\uC5D0\uC11C
+      \uC815\uC0C1 \uADFC\uBB34\uD588\uB2E4\uACE0 \uC8FC\uC7A5\uD568."
+    keywords:
+    - "\uD68C\uC0AC"
+    - "\uADFC\uBB34"
+    - "\uC54C\uB9AC\uBC14\uC774"
+  - id: T_A_NOAUTH
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uAD8C\uD55C\uC774
+      \uC5C6\uB2E4\uACE0 \uC9C4\uC220\uD568."
+    keywords:
+    - "\uAD8C\uD55C"
+    - "\uAD00\uB9AC\uC790"
+  - id: T_A_RELATION
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uD53C\uD574 \uAE30\uAD00\uACFC \uAC1C\uC778\uC801
+      \uC774\uD574\uAD00\uACC4\uAC00 \uC5C6\uB2E4\uACE0 \uC8FC\uC7A5\uD568."
+    keywords:
+    - "\uAD00\uACC4"
+  - id: T_B_LEAVE
+    ownerSuspectId: B
+    ownerSuspectName: "\uB9AC\uB098"
+    text: "\uB3D9\uB8CC\uB294 \uD074\uB85C\uBC84\uAC00 \uC0AC\uAC74 \uB2F9\uC77C
+      \uC5F0\uCC28\uB77C \uD68C\uC0AC\uC5D0 \uC5C6\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
+    keywords:
+    - "\uC5F0\uCC28"
+    - "\uACB0\uADFC"
+  - id: T_B_CONFLICT
+    ownerSuspectId: B
+    ownerSuspectName: "\uB9AC\uB098"
+    text: "\uB3D9\uB8CC\uB294 \uCD5C\uADFC \uD074\uB85C\uBC84\uC640 \uC5C5\uBB34\uC0C1
+      \uAC08\uB4F1\uC774 \uC788\uC5C8\uB2E4\uACE0 \uC778\uC815\uD568."
+    keywords:
+    - "\uAC08\uB4F1"
+  - id: T_C_ADMIN
+    ownerSuspectId: C
+    ownerSuspectName: "\uAC00\uB81B"
+    text: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uD074\uB85C\uBC84\uC5D0\uAC8C \uC9C0\uB09C\uB2EC\uBD80\uD130
+      \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0
+      \uC9C4\uC220\uD568."
+    keywords:
+    - "\uAD00\uB9AC\uC790"
+    - "\uAD8C\uD55C"
+  - id: T_C_INTERNAL
+    ownerSuspectId: C
+    ownerSuspectName: "\uAC00\uB81B"
+    text: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uCE68\uC785 \uB85C\uADF8\uAC00
+      \uC678\uBD80\uAC00 \uC544\uB2CC \uB0B4\uBD80 \uC811\uC18D\uC774\uC5C8\uB2E4\uACE0
+      \uC9C4\uC220\uD568."
+    keywords:
+    - "\uB0B4\uBD80"
+    - "\uB85C\uADF8"
+  - id: T_A_RECANT_LEAVE
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uCD94\uAD81\uB2F9\uD558\uC790 \uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C
+      \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC74C\uC744 \uC778\uC815\uD568."
+    keywords:
+    - "\uBC88\uBCF5"
+    - "\uACB0\uADFC"
+  - id: T_A_RECANT_ADMIN
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC744
+      \uAC16\uACE0 \uC788\uC5C8\uC74C\uC744 \uC778\uC815\uD568."
+    keywords:
+    - "\uBC88\uBCF5"
+    - "\uAD8C\uD55C"
+  - id: T_A_KNOWLEDGE
+    ownerSuspectId: A
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uAC00 \uBBF8\uACF5\uAC1C \uC815\uBCF4\uC778 '\uAE30\uB85D
+      \uC0AD\uC81C' \uC0AC\uC2E4\uC744 \uC54C\uACE0 \uC788\uC5C8\uC74C\uC774 \uB4DC\uB7EC\uB0A8."
+    keywords:
+    - "\uBBF8\uACF5\uAC1C"
+    - "\uC9C0\uC2DD\uBAA8\uC21C"
+  suspects:
+  - id: A
+    suspectName: "\uD074\uB85C\uBC84"
+    occupation: "\uC815\uBD80\uAE30\uAD00 \uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uC9C1\uC6D0"
+    questions:
+    - id: A_WHERE
+      label: "\uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC77C \uC624\uD6C4 3\uC2DC, \uC5B4\uB514\uC5D0
+          \uACC4\uC168\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uD68C\uC0AC\uC5D0\uC11C \uACC4\uC18D \uADFC\uBB34\uD558\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_A_ALIBI
+      repeatable: 0
+    - id: A_AUTH
+      label: "\uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uAD8C\uD55C\uC774 \uC788\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uC218 \uC788\uB294 \uAD8C\uD55C\uC744
+          \uAC16\uACE0 \uACC4\uC168\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uC544\uB2C8\uC694. \uC800\uC5D0\uAC8C \uADF8\uB7F0 \uAD8C\uD55C\uC740
+          \uC5C6\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_A_NOAUTH
+      repeatable: 0
+    - id: A_RELATION
+      label: "\uD53C\uD574 \uAE30\uAD00\uACFC \uC5B4\uB5A4 \uAD00\uACC4\uC785\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uD53C\uD574\uB97C \uC785\uC740 \uAE30\uAD00\uACFC \uAC1C\uC778\uC801\uC778
+          \uC774\uD574\uAD00\uACC4\uAC00 \uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uC804\uD600\uC694. \uADF8\uC800 \uC5C5\uBB34\uB85C \uC5EE\uC600\uC744
+          \uBFD0\uC785\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_A_RELATION
+      repeatable: 0
+    - id: A_WHO_WITH
+      label: "\uADF8 \uC2DC\uAC04 \uD68C\uC0AC\uC5D0 \uB204\uAC00 \uD568\uAED8 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uADFC\uBB34 \uC911\uC774\uC5C8\uB2E4\uBA74, \uADF8 \uC2DC\uAC04 \uACC1\uC5D0
+          \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uB2E4\uB4E4 \uAC01\uC790 \uC790\uB9AC\uC5D0 \uC788\uC5B4\uC11C\u2026
+          \uB531\uD788 \uC800\uB97C \uBCF8 \uC0AC\uB78C\uC740 \uC5C6\uC744 \uAC81\uB2C8\uB2E4."
+      requiredQuestionIds:
+      - A_WHERE
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds: []
+      repeatable: 0
+    - id: A_C_LEAVE
+      label: "\uB3D9\uB8CC\uB294 \uB2F9\uC2E0\uC774 \uADF8\uB0A0 \uC5F0\uCC28\uC600\uB2E4\uACE0
+        \uD569\uB2C8\uB2E4. \uC5B4\uB290 \uCABD\uC774 \uC0AC\uC2E4\uC785\uB2C8\uAE4C?"
+      kind: 1
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uB2F9\uC2E0\uC740 \uADF8\uB0A0 \uD68C\uC0AC\uC5D0\uC11C \uADFC\uBB34\uD588\uB2E4\uACE0
+          \uD588\uC2B5\uB2C8\uB2E4. \uADF8\uB7F0\uB370 \uB3D9\uB8CC\uB294 \uB2F9\uC2E0\uC774
+          \uC5F0\uCC28\uB97C \uC368\uC11C \uB098\uC624\uC9C0 \uC54A\uC558\uB2E4\uACE0
+          \uC9C4\uC220\uD588\uC2B5\uB2C8\uB2E4. \uC5B4\uB290 \uCABD\uC774 \uC0AC\uC2E4\uC785\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\u2026\uADF8\uB0A0\uC740, \uC0AC\uC2E4 \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.
+          \uC81C\uAC00 \uCC29\uAC01\uD588\uB358 \uBAA8\uC591\uC785\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds:
+      - T_A_ALIBI
+      requireAll: 1
+      requiredSelectedTestimonyId: T_B_LEAVE
+      grantTestimonyIds:
+      - T_A_RECANT_LEAVE
+      repeatable: 0
+    - id: A_C_ADMIN
+      label: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uB2F9\uC2E0\uC5D0\uAC8C \uAD00\uB9AC\uC790
+        \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0 \uD569\uB2C8\uB2E4."
+      kind: 1
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uAD8C\uD55C\uC774 \uC5C6\uB2E4\uACE0 \uD558\uC168\uC8E0. \uADF8\uB7F0\uB370
+          \uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uC9C0\uB09C\uB2EC\uBD80\uD130 \uB2F9\uC2E0\uC5D0\uAC8C
+          \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0
+          \uC9C4\uC220\uD588\uC2B5\uB2C8\uB2E4."
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\u2026\uC784\uC2DC \uAD8C\uD55C\uC774 \uC788\uAE34 \uD588\uC2B5\uB2C8\uB2E4.
+          \uB9D0\uD560 \uD544\uC694\uAC00 \uC5C6\uB2E4\uACE0 \uC0DD\uAC01\uD588\uC744
+          \uBFD0\uC785\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds:
+      - T_A_NOAUTH
+      requireAll: 1
+      requiredSelectedTestimonyId: T_C_ADMIN
+      grantTestimonyIds:
+      - T_A_RECANT_ADMIN
+      repeatable: 0
+    - id: A_KNOWLEDGE
+      label: "\uC0AD\uC81C\uB41C \uAE30\uB85D\uC744 \uC5B4\uB5BB\uAC8C \uC54C\uACE0
+        \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uD55C \uAC00\uC9C0 \uB354. \uB2F9\uC2E0\uC740 \uBC29\uAE08 '\uAE30\uB85D\uC774
+          \uC0AD\uC81C\uB410\uB2E4'\uACE0 \uD588\uC2B5\uB2C8\uB2E4. \uADF8 \uC0AC\uC2E4\uC740
+          \uC678\uBD80\uC5D0 \uACF5\uAC1C\uB41C \uC801\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uADF8\uAC74\u2026 \uADF8\uC800 \uC9D0\uC791\uC774\uC5C8\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds:
+      - A_C_ADMIN
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_A_KNOWLEDGE
+      repeatable: 0
+  - id: B
+    suspectName: "\uB9AC\uB098"
+    occupation: "\uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uB3D9\uB8CC"
+    questions:
+    - id: B_A_WHERE
+      label: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0
+        \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uB3D9\uB8CC\uC778 \uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C
+          \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB9AC\uB098"
+        text: "\uD074\uB85C\uBC84\uC694? \uADF8\uB0A0 \uC5F0\uCC28 \uC37C\uC5B4\uC694.
+          \uD68C\uC0AC\uC5D0 \uC548 \uB098\uC654\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_B_LEAVE
+      repeatable: 0
+    - id: B_RELATION
+      label: "\uD074\uB85C\uBC84\uC640\uC758 \uAD00\uACC4\uB294 \uC5B4\uB5BB\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC640\uC758 \uC0AC\uC774\uB294 \uC5B4\uB5BB\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB9AC\uB098"
+        text: "\uC694\uC998 \uC5C5\uBB34 \uB54C\uBB38\uC5D0 \uC880 \uBD80\uB52A\uD614\uC5B4\uC694.
+          \uC194\uC9C1\uD788 \uD3B8\uD55C \uC0AC\uC774\uB294 \uC544\uB2D9\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_B_CONFLICT
+      repeatable: 0
+  - id: C
+    suspectName: "\uAC00\uB81B"
+    occupation: "\uC815\uBD80\uAE30\uAD00 \uBCF4\uC548 \uB2F4\uB2F9\uC790"
+    questions:
+    - id: C_ADMIN
+      label: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740
+        \uC5B4\uB560\uC2B5\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740
+          \uC5B4\uB290 \uC815\uB3C4\uC600\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uAC00\uB81B"
+        text: "\uC9C0\uB09C\uB2EC\uBD80\uD130 \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774
+          \uBD80\uC5EC\uB3FC \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_C_ADMIN
+      repeatable: 0
+    - id: C_BREACH
+      label: "\uAD8C\uD55C\uC740 \uC5B4\uB5BB\uAC8C \uD0C8\uCDE8\uB410\uB2E4\uACE0
+        \uBD05\uB2C8\uAE4C?"
+      kind: 0
+      lines:
+      - speaker: "\uC6D4\uD130"
+        text: "\uADF8 \uAD8C\uD55C\uC774 \uC678\uBD80\uC5D0\uC11C \uD0C8\uCDE8\uB410\uB2E4\uACE0
+          \uBCF4\uC2ED\uB2C8\uAE4C?"
+      - speaker: "\uAC00\uB81B"
+        text: "\uCC98\uC74C\uC5D4 \uADF8\uB807\uAC8C \uBD24\uC2B5\uB2C8\uB2E4. \uADF8\uB7F0\uB370
+          \uB85C\uADF8\uB97C \uB2E4\uC2DC \uBCF4\uB2C8\u2026 \uC811\uC18D\uC740 \uB0B4\uBD80\uC5D0\uC11C
+          \uC774\uB904\uC84C\uC2B5\uB2C8\uB2E4."
+      requiredQuestionIds:
+      - C_ADMIN
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyId: 
+      grantTestimonyIds:
+      - T_C_INTERNAL
+      repeatable: 0
+  culpritSuspectId: A
+  verdictTypoThreshold: 0.8
+  minimumCorrectFields: 0
+  verdictTemplate: "{\uBC94\uC778}\uC740(\uB294) {\uB3D9\uAE30} \uB54C\uBB38\uC5D0\n{\uB300\uC0C1}\uC744(\uB97C)
+    \uB178\uB824 {\uC218\uB2E8}(\uC73C)\uB85C\n\uAD6D\uAC00 DB\uB97C \uCE68\uC785\uD574,
+    \uC804\uC0B0\uB9DD\uC744 {\uBAA9\uC801}\uC2DC\uD0A4\uB824 \uD588\uB2E4."
+  verdictFields:
+  - label: "\uB3D9\uAE30"
+    prompt: 
+    answer: "\uC99D\uC624"
+    options:
+    - value: "\uC99D\uC624"
+      synonyms:
+      - "\uBC18\uAC10"
+      - "\uC801\uB300"
+      - "\uD610\uC624"
+  - label: "\uB300\uC0C1"
+    prompt: 
+    answer: "\uB354 \uD0B9"
+    options:
+    - value: "\uB354 \uD0B9"
+      synonyms:
+      - "\uAD6D\uC655"
+      - "\uC9C0\uBC30\uC790"
+      - "\uCCB4\uC81C"
+      - "\uC815\uBD80"
+  - label: "\uC218\uB2E8"
+    prompt: 
+    answer: "\uD574\uD0B9"
+    options:
+    - value: "\uD574\uD0B9"
+      synonyms:
+      - "\uCE68\uC785"
+      - "\uC804\uC0B0 \uACF5\uACA9"
+      - "\uACF5\uACA9"
+  - label: "\uBAA9\uC801"
+    prompt: 
+    answer: "\uB9C8\uBE44"
+    options:
+    - value: "\uB9C8\uBE44"
+      synonyms:
+      - "\uC815\uC9C0"
+      - "\uC911\uB2E8"

@@ -1,18 +1,29 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 // 용의자 한 명의 취조 기록지를 표현하는 오브젝트.
 // InterrogationController가 취조를 중지/종료할 때마다 RecordBookController를 통해 생성/갱신된다.
-// 문장 하나하나가 버튼으로 되어 있어서, 이후 모순 제시 기능에서 이 클릭 이벤트를 그대로 사용하면 된다.
+// 문장 하나하나가 버튼으로 되어 있어, 플레이어가 이를 클릭해 모순 근거(증언)로 선택한다.
+// 선택된 문장은 시각적으로 강조되고, 클릭 이벤트는 상위(InterrogationController)로 전달되어
+// 방향 그래프의 모순 질문 해금 판정에 쓰인다.
 public class RecordSheetCard : MonoBehaviour
 {
+    static readonly Color LineNormalColor = new Color(1f, 1f, 1f, 0.05f);
+    static readonly Color LineSelectedColor = new Color(0.9f, 0.75f, 0.2f, 0.35f); // 선택 강조(호박색)
+
     Text titleText;
     RectTransform lineContainer;
-    readonly List<GameObject> lineObjects = new List<GameObject>();
+    Action<StatementRecord> onLineClicked;
 
-    public void Build()
+    readonly List<GameObject> lineObjects = new List<GameObject>();
+    readonly Dictionary<string, Image> lineImages = new Dictionary<string, Image>(); // recordId → 버튼 배경
+
+    public void Build(Action<StatementRecord> onLineClicked)
     {
+        this.onLineClicked = onLineClicked;
+
         var bg = gameObject.AddComponent<Image>();
         bg.color = new Color(1f, 1f, 1f, 0.06f);
 
@@ -41,10 +52,11 @@ public class RecordSheetCard : MonoBehaviour
 
         foreach (var go in lineObjects) Destroy(go);
         lineObjects.Clear();
+        lineImages.Clear();
 
         foreach (var record in session.statements)
         {
-            var btn = DialogueUIUtil.CreateButton(lineContainer, "Line_" + record.recordId, record.text, new Color(1f, 1f, 1f, 0.05f));
+            var btn = DialogueUIUtil.CreateButton(lineContainer, "Line_" + record.recordId, record.text, LineNormalColor);
             btn.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
 
             var label = btn.GetComponentInChildren<Text>();
@@ -52,15 +64,18 @@ public class RecordSheetCard : MonoBehaviour
             label.fontSize = 16;
 
             var captured = record;
-            btn.onClick.AddListener(() => OnLineClicked(captured));
+            btn.onClick.AddListener(() => onLineClicked?.Invoke(captured));
 
             lineObjects.Add(btn.gameObject);
+            var img = btn.GetComponent<Image>();
+            if (img != null && !string.IsNullOrEmpty(record.recordId)) lineImages[record.recordId] = img;
         }
     }
 
-    void OnLineClicked(StatementRecord record)
+    /// <summary>선택된 증언 문장만 강조한다. selectedRecordId가 null이면 전부 해제.</summary>
+    public void SetSelected(string selectedRecordId)
     {
-        Debug.Log("[기록 선택] (" + record.suspectName + ") " + record.text);
-        // TODO: 모순 판정 컨트롤러와 연결해서 다른 용의자 진술과 비교하는 로직을 붙이면 된다.
+        foreach (var kv in lineImages)
+            kv.Value.color = kv.Key == selectedRecordId ? LineSelectedColor : LineNormalColor;
     }
 }
