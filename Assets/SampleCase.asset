@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrectedGameObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3b867fe9f839d4dbf7437dfbeec911, type: 3}
+  m_Name: SampleCase
+  m_EditorClassIdentifier:
+  caseTitle: 저택 살인사건
+  typoThreshold: 0.8
+  template: '{범인}가 {장소}에서 {흉기}를 사용해서 죽였다'
+  fields:
+  - label: 범인
+    prompt: 범인은 누구인가?
+    answer: 집사
+    options:
+    - value: 집사
+      synonyms:
+      - 하인
+      - 버틀러
+    - value: 주인
+      synonyms:
+      - 백작
+    - value: 요리사
+      synonyms: []
+    - value: 정원사
+      synonyms: []
+  - label: 흉기
+    prompt: 범행에 쓰인 흉기는?
+    answer: 칼
+    options:
+    - value: 칼
+      synonyms:
+      - 나이프
+      - 단검
+      - 식칼
+    - value: 독
+      synonyms:
+      - 독약
+    - value: 총
+      synonyms:
+      - 권총
+    - value: 밧줄
+      synonyms:
+      - 끈
+  - label: 장소
+    prompt: 범행 장소는?
+    answer: 서재
+    options:
+    - value: 서재
+      synonyms:
+      - 책방
+      - 서고
+    - value: 정원
+      synonyms: []
+    - value: 부엌
+      synonyms:
+      - 주방
+    - value: 침실
+      synonyms: []
+  - label: 범행 동기
+    prompt: 범행 동기는?
+    answer: 유산
+    options:
+    - value: 유산
+      synonyms:
+      - 돈
+      - 재산
+      - 상속
+    - value: 복수
+      synonyms:
+      - 원한
+    - value: 치정
+      synonyms:
+      - 질투
+      - 사랑
+  - label: 범행 시각
+    prompt: 범행이 일어난 시각은?
+    answer: 자정
+    options:
+    - value: 자정
+      synonyms:
+      - 밤 12시
+      - 한밤중
+    - value: 새벽
+      synonyms: []
+    - value: 저녁
+      synonyms: []
+    - value: 오후
+      synonyms: []
+  - label: 결정적 증거
+    prompt: 결정적 증거는?
+    answer: 장갑
+    options:
+    - value: 장갑
+      synonyms:
+      - 가죽장갑
+    - value: 발자국
+      synonyms:
+      - 족적
+    - value: 편지
+      synonyms:
+      - 쪽지
+    - value: 지문
+      synonyms: []
