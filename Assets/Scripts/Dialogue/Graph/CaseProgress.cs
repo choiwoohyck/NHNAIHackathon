@@ -13,8 +13,32 @@ public class CaseProgress
     public readonly HashSet<string> obtainedTestimonyIds = new HashSet<string>();
     public readonly HashSet<string> completedSuspectIds = new HashSet<string>();
 
-    // 현재 기록지에서 모순 근거로 선택된 증언 id (없으면 null).
-    public string selectedTestimonyId;
+    // 현재 기록지에서 모순 근거로 선택된 증언 id들(모순 지목은 두 문장을 선택). 최대 2개.
+    public readonly List<string> selectedTestimonyIds = new List<string>();
+    public const int MaxSelected = 2;
+
+    public int SelectedCount => selectedTestimonyIds.Count;
+    public bool IsSelected(string testimonyId) =>
+        !string.IsNullOrEmpty(testimonyId) && selectedTestimonyIds.Contains(testimonyId);
+
+    /// <summary>선택 토글: 이미 선택돼 있으면 해제, 아니면 추가(가득 차 있으면 먼저 비운다).</summary>
+    public void ToggleSelected(string testimonyId)
+    {
+        if (string.IsNullOrEmpty(testimonyId)) return;
+        if (selectedTestimonyIds.Contains(testimonyId)) { selectedTestimonyIds.Remove(testimonyId); return; }
+        if (selectedTestimonyIds.Count >= MaxSelected) selectedTestimonyIds.Clear();
+        selectedTestimonyIds.Add(testimonyId);
+    }
+
+    public void ClearSelected() => selectedTestimonyIds.Clear();
+
+    /// <summary>주어진 id들이 모두 선택되어 있는가.</summary>
+    public bool AreAllSelected(IEnumerable<string> ids)
+    {
+        if (ids == null) return false;
+        foreach (var id in ids) if (!selectedTestimonyIds.Contains(id)) return false;
+        return true;
+    }
 
     public bool IsAsked(string questionId) =>
         !string.IsNullOrEmpty(questionId) && askedQuestionIds.Contains(questionId);

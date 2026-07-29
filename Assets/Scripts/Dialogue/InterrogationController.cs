@@ -5,9 +5,9 @@ using UnityEngine.UI;
 // 취조 흐름 전체를 진행시키는 컨트롤러.
 //
 // 질문 순서를 하드코딩하지 않고, 방향 그래프(CaseGraph) + 진행 상태(CaseProgress)로 굴린다.
-//   - 어떤 질문을 보여줄지 : graph.GetAvailableQuestions(용의자, 진행상태, 선택한 증언)
+//   - 어떤 질문을 보여줄지 : graph.GetAvailableQuestions(용의자, 진행상태)
 //   - 질문을 하면          : 대사를 출력하고 증언을 확보 → 진행 상태 갱신 → 새 질문 자동 해금
-//   - 모순 질문            : 기록지에서 올바른 증언 문장을 선택했을 때만 목록에 나타남
+//   - 모순 질문            : 기록지에서 서로 모순되는 증언 문장 2개를 선택했을 때만 목록에 나타남
 //
 // 사용법: 빈 GameObject 하나에 이 스크립트만 붙이면 DialogueManager / RecordBookController가
 // 자동으로 추가되고, 씬에 필요한 UI가 런타임에 전부 생성된다.
@@ -20,6 +20,9 @@ public class InterrogationController : MonoBehaviour
     DialogueManager dialogueManager;
     RecordBookController recordBook;
     VerdictController verdict;
+
+    Button bookBtn;    // 기록지 보기 버튼 (대화 중에는 비활성)
+    Text bookLabel;
 
     CaseGraph graph;
     CaseProgress progress;
@@ -41,6 +44,30 @@ public class InterrogationController : MonoBehaviour
         if (verdict == null) verdict = gameObject.AddComponent<VerdictController>();
 
         recordBook.OnStatementClicked = OnRecordSelected;
+    }
+
+    // 대화(대사 출력) 중에는 기록지 보기를 막는다: 버튼을 회색+클릭 불가로 만들고,
+    // 이미 열려 있던 기록지도 닫아 겹침/오작동을 방지한다.
+    void Update()
+    {
+        if (dialogueManager == null || bookBtn == null) return;
+
+        bool canView = dialogueManager.State != DialogueState.Speaking;
+        if (bookBtn.interactable != canView)
+        {
+            bookBtn.interactable = canView;
+            if (bookLabel != null)
+                bookLabel.color = new Color(1f, 1f, 1f, canView ? 1f : 0.35f);
+        }
+        if (!canView && recordBook != null && recordBook.IsVisible)
+            recordBook.Hide();
+    }
+
+    // 버튼 콜백(만약을 대비한 이중 방어: 대화 중이면 무시).
+    void ToggleRecordBook()
+    {
+        if (dialogueManager != null && dialogueManager.State == DialogueState.Speaking) return;
+        recordBook.ToggleVisible();
     }
 
     void Start()
@@ -103,9 +130,13 @@ public class InterrogationController : MonoBehaviour
         endBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         endBtn.onClick.AddListener(EndCurrentSuspect);
 
-        var bookBtn = DialogueUIUtil.CreateButton(bar, "BookBtn", "기록지 보기", new Color(0.1f, 0.1f, 0.4f, 0.8f));
+        bookBtn = DialogueUIUtil.CreateButton(bar, "BookBtn", "기록지 보기", new Color(0.1f, 0.1f, 0.4f, 0.8f));
         bookBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
-        bookBtn.onClick.AddListener(() => recordBook.ToggleVisible());
+        bookBtn.onClick.AddListener(ToggleRecordBook);
+        bookLabel = bookBtn.GetComponentInChildren<Text>();
+        var bookColors = bookBtn.colors;                       // 비활성 시 뚜렷하게 어둡게
+        bookColors.disabledColor = new Color(0.25f, 0.25f, 0.3f, 0.6f);
+        bookBtn.colors = bookColors;
 
         var verdictBtn = DialogueUIUtil.CreateButton(bar, "VerdictBtn", "사건 판결", new Color(0.45f, 0.1f, 0.35f, 0.9f));
         verdictBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
@@ -143,7 +174,7 @@ public class InterrogationController : MonoBehaviour
     void PresentChoices()
     {
         if (string.IsNullOrEmpty(currentSuspectId)) return;
-        var available = graph.GetAvailableQuestions(currentSuspectId, progress, progress.selectedTestimonyId);
+        var available = graph.GetAvailableQuestions(currentSuspectId, progress);
         dialogueManager.ShowChoices(available, OnQuestionSelected);
     }
 
@@ -151,8 +182,8 @@ public class InterrogationController : MonoBehaviour
     {
         progress.MarkAsked(node.id);
 
-        // 모순 질문은 사용되면 선택한 근거(증언)를 소비한다.
-        bool consumedSelection = !string.IsNullOrEmpty(node.requiredSelectedTestimonyId);
+        // 모순 질문은 사용되면 선택한 근거(증언들)를 소비한다.
+        bool consumedSelection = node.RequiredSelectedCount() > 0;
 
         dialogueManager.ShowLines(node.lines, () =>
         {
@@ -160,7 +191,7 @@ public class InterrogationController : MonoBehaviour
 
             if (consumedSelection)
             {
-                progress.selectedTestimonyId = null;
+                progress.ClearSelected();
                 recordBook.SetSelected(null);
             }
 
@@ -185,8 +216,8 @@ public class InterrogationController : MonoBehaviour
             if (owner == null) continue;
 
             owner.AddStatement(new StatementRecord(t.id, t.ownerSuspectId, t.ownerSuspectName, t.text));
-            // 이미 책상에 나와 있는 기록지라면 즉시 반영(없으면 중지/종료 때 생성).
-            recordBook.UpdateSheetIfExists(owner);
+            // 확보 즉시 기록지에 반영한다. (두 문장 모순 지목을 위해 취조 중에도 선택 가능해야 함)
+            recordBook.AddOrUpdateSheet(owner);
         }
     }
 
@@ -216,41 +247,40 @@ public class InterrogationController : MonoBehaviour
         if (rec == null) return;
         string sel = rec.recordId; // recordId == 증언 id
 
-        // 취조 중이 아니면 강조만 하고 판정하지 않는다(그냥 기록 열람).
-        if (CurrentSession == null)
+        // 이미 선택된 문장을 다시 누르면 해제.
+        if (progress.IsSelected(sel))
         {
-            progress.selectedTestimonyId = (progress.selectedTestimonyId == sel) ? null : sel;
-            recordBook.SetSelected(progress.selectedTestimonyId);
+            progress.selectedTestimonyIds.Remove(sel);
+            recordBook.SetSelected(progress.selectedTestimonyIds);
             return;
         }
 
-        // 같은 문장을 다시 누르면 선택 해제.
-        if (progress.selectedTestimonyId == sel)
+        // 새 문장 선택(최대 2개, 가득 차 있으면 새로 시작).
+        progress.ToggleSelected(sel);
+        recordBook.SetSelected(progress.selectedTestimonyIds);
+
+        // 아직 두 개가 안 모였으면 대기.
+        if (progress.SelectedCount < CaseProgress.MaxSelected) return;
+
+        // 두 문장이 모였다 → 취조 순서/현재 대상과 무관하게 모순 여부를 판정한다.
+        string owner;
+        var node = graph.FindContradictionNode(progress, out owner);
+        recordBook.Hide();
+
+        if (node != null)
         {
-            progress.selectedTestimonyId = null;
-            recordBook.SetSelected(null);
-            PresentChoices();
+            // 모순 성립 → 해당 용의자에게 곧바로 추궁(대상이 아니었다면 자동 전환).
+            currentSuspectId = owner;
+            OnQuestionSelected(node);   // 대사 출력 → 증언 확보 → 선택 소비 → 목록 갱신
             return;
         }
 
-        progress.selectedTestimonyId = sel;
-
-        if (graph.SelectionUnlocksContradiction(currentSuspectId, progress, sel))
-        {
-            // 올바른 근거 → 모순 질문이 목록에 나타난다.
-            recordBook.SetSelected(sel);
-            recordBook.Hide();
-            PresentChoices();
-        }
-        else
-        {
-            // 모순과 무관한 문장 → 월터가 지적하고 선택을 해제한다.
-            progress.selectedTestimonyId = null;
-            recordBook.SetSelected(null);
-            recordBook.Hide();
-            dialogueManager.ShowLines(
-                new List<DialogueLine> { new DialogueLine("월터", "이건 모순이 아니다.") },
-                PresentChoices);
-        }
+        // 모순 아님 → 지적하고 선택 해제.
+        Debug.Log("[모순] 성립 안 됨 — 선택=" + string.Join(",", progress.selectedTestimonyIds));
+        progress.ClearSelected();
+        recordBook.SetSelected(progress.selectedTestimonyIds);
+        dialogueManager.ShowLines(
+            new List<DialogueLine> { new DialogueLine("월터", "이 둘은 모순이 아니다.") },
+            PresentChoices);
     }
 }

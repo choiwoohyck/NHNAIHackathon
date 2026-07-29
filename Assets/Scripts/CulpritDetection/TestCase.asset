@@ -14,4 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CulpritDetection.CaseDefinition
   caseTitle: "\uC0AC\uAC74 \uD30C\uC77C"
   typoThreshold: 0.8
-  fields: []
+  template: 
+  fields:
+  - label: "\uBC94\uC778"
+    prompt: "\uBC94\uC778\uC740 \uB204\uAD6C\uC778\uAC00?"
+    answer: "\uC815\uC7AC\uD5CC"
+    options:
+    - value: 
+      synonyms: []

@@ -35,7 +35,7 @@ public class RecordBookController : MonoBehaviour
 
         var title = DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
         title.fontStyle = FontStyle.Bold;
-        title.text = "취조 기록지  —  문장을 눌러 모순의 근거로 선택하세요";
+        title.text = "취조 기록지  —  서로 모순되는 문장 2개를 선택하세요";
         DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
 
         var closeBtn = DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
@@ -55,6 +55,7 @@ public class RecordBookController : MonoBehaviour
         layout.childControlHeight = true;
     }
 
+    public bool IsVisible => bookPanel != null && bookPanel.gameObject.activeSelf;
     public void ToggleVisible() => bookPanel.gameObject.SetActive(!bookPanel.gameObject.activeSelf);
     public void Show() => bookPanel.gameObject.SetActive(true);
     public void Hide() => bookPanel.gameObject.SetActive(false);
@@ -87,9 +88,9 @@ public class RecordBookController : MonoBehaviour
         if (session != null && cards.TryGetValue(session.suspectId, out card)) card.Refresh(session);
     }
 
-    /// <summary>모든 기록지에서 선택 강조를 갱신한다. null이면 전부 해제.</summary>
-    public void SetSelected(string selectedRecordId)
+    /// <summary>모든 기록지에서 선택 강조를 갱신한다. null/빈 목록이면 전부 해제.</summary>
+    public void SetSelected(ICollection<string> selectedRecordIds)
     {
-        foreach (var card in cards.Values) card.SetSelected(selectedRecordId);
+        foreach (var card in cards.Values) card.SetSelected(selectedRecordIds);
     }
 }

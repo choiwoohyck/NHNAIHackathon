@@ -68,16 +68,15 @@ public class CaseGraph
     // ------------------------------------------------------------------
 
     /// <summary>지금 이 노드를 물어볼 수 있는가? (그래프 조건 + 런타임 상태로 판정)</summary>
-    public bool IsAvailable(QuestionNode node, CaseProgress p, string selectedTestimonyId)
+    public bool IsAvailable(QuestionNode node, CaseProgress p)
     {
         if (node == null || p == null) return false;
 
         // 이미 물어봤고 반복 불가면 목록에서 사라진다.
         if (p.IsAsked(node.id) && !node.repeatable) return false;
 
-        // 모순 질문: 지정된 증언이 기록지에서 '선택'돼 있어야 열린다(AND로 항상 적용).
-        if (!string.IsNullOrEmpty(node.requiredSelectedTestimonyId) &&
-            selectedTestimonyId != node.requiredSelectedTestimonyId)
+        // 모순 질문: 지정된 증언들이 '모두' 기록지에서 선택돼 있어야 열린다(1개 또는 2개).
+        if (node.RequiredSelectedCount() > 0 && !p.AreAllSelected(node.RequiredSelectedIds()))
             return false;
 
         bool hasQ = node.requiredQuestionIds != null && node.requiredQuestionIds.Count > 0;
@@ -101,30 +100,60 @@ public class CaseGraph
     }
 
     /// <summary>해당 용의자에게 지금 물어볼 수 있는 질문 목록(authored 순서 유지).</summary>
-    public List<QuestionNode> GetAvailableQuestions(string suspectId, CaseProgress p, string selectedTestimonyId)
+    public List<QuestionNode> GetAvailableQuestions(string suspectId, CaseProgress p)
     {
         var result = new List<QuestionNode>();
         var s = GetSuspect(suspectId);
         if (s == null) return result;
         foreach (var node in s.questions)
-            if (IsAvailable(node, p, selectedTestimonyId))
+            if (IsAvailable(node, p))
                 result.Add(node);
         return result;
     }
 
     /// <summary>
-    /// 방금 선택한 증언이 '이 용의자의' 모순 질문을 실제로 여는가?
-    /// 기록지에서 엉뚱한 문장을 골랐을 때 "이건 모순이 아니다"를 판정하는 데 쓴다.
+    /// 지금 기록지에서 선택한 증언들이 '이 용의자의' 모순 질문을 실제로 여는가?
+    /// 두 문장을 골랐을 때 그 조합이 모순을 성립시키는지("이건 모순이 아니다") 판정에 쓴다.
     /// </summary>
-    public bool SelectionUnlocksContradiction(string suspectId, CaseProgress p, string selectedTestimonyId)
+    public bool SelectionUnlocksContradiction(string suspectId, CaseProgress p)
     {
-        if (string.IsNullOrEmpty(selectedTestimonyId)) return false;
+        if (p == null || p.SelectedCount == 0) return false;
         var s = GetSuspect(suspectId);
         if (s == null) return false;
         foreach (var node in s.questions)
-            if (node.requiredSelectedTestimonyId == selectedTestimonyId && IsAvailable(node, p, selectedTestimonyId))
+            if (node.RequiredSelectedCount() > 0 && IsAvailable(node, p))
                 return true;
         return false;
+    }
+
+    /// <summary>
+    /// 지금 선택한 증언들이 '어느 용의자의' 모순을 성립시키는지 전체에서 찾는다(없으면 null).
+    /// 현재 취조 중이 아닌 용의자의 모순이면, 누구를 취조해야 하는지 안내하는 데 쓴다.
+    /// </summary>
+    public string FindContradictionOwner(CaseProgress p)
+    {
+        string owner; return FindContradictionNode(p, out owner) != null ? owner : null;
+    }
+
+    /// <summary>
+    /// 지금 선택한 증언들로 성립하는 모순 질문 노드와 그 소유 용의자를 전체에서 찾는다(없으면 null).
+    /// 취조 순서/현재 대상과 무관하게, 두 문장만 맞으면 어느 용의자의 모순인지 찾아준다.
+    /// </summary>
+    public QuestionNode FindContradictionNode(CaseProgress p, out string ownerSuspectId)
+    {
+        ownerSuspectId = null;
+        if (p == null || p.SelectedCount == 0) return null;
+        foreach (var s in suspects)
+        {
+            if (s == null || s.questions == null) continue;
+            foreach (var node in s.questions)
+                if (node.RequiredSelectedCount() > 0 && IsAvailable(node, p))
+                {
+                    ownerSuspectId = s.id;
+                    return node;
+                }
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------
@@ -142,6 +171,8 @@ public class CaseGraph
                 if (!testimoniesById.ContainsKey(id)) issues.Add("[" + node.id + "] 선행 증언 '" + id + "' 을(를) 찾을 수 없음");
             if (!string.IsNullOrEmpty(node.requiredSelectedTestimonyId) && !testimoniesById.ContainsKey(node.requiredSelectedTestimonyId))
                 issues.Add("[" + node.id + "] 선택 증언 '" + node.requiredSelectedTestimonyId + "' 을(를) 찾을 수 없음");
+            if (!string.IsNullOrEmpty(node.requiredSelectedTestimonyId2) && !testimoniesById.ContainsKey(node.requiredSelectedTestimonyId2))
+                issues.Add("[" + node.id + "] 선택 증언2 '" + node.requiredSelectedTestimonyId2 + "' 을(를) 찾을 수 없음");
             foreach (var id in node.grantTestimonyIds)
                 if (!testimoniesById.ContainsKey(id)) issues.Add("[" + node.id + "] 획득 증언 '" + id + "' 을(를) 찾을 수 없음");
         }

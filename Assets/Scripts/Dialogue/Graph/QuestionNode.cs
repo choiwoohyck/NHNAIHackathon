@@ -35,6 +35,8 @@ public class QuestionNode
 
     // 모순 질문 전용: 이 증언을 '기록지에서 선택'해야만 질문이 열린다. 비어 있으면 무시.
     [TestimonyId] public string requiredSelectedTestimonyId;
+    // 두 번째 선택 증언(선택 사항). 두 개를 지정하면 '두 문장 모두'를 기록지에서 골라야 모순 질문이 열린다.
+    [TestimonyId] public string requiredSelectedTestimonyId2;
 
     // ------------------------------------------------------------------
     // 결과
@@ -83,12 +85,38 @@ public class QuestionNode
         return this;
     }
 
-    /// <summary>기록지에서 선택해야 열리는 모순 질문으로 지정한다.</summary>
+    /// <summary>기록지에서 선택해야 열리는 모순 질문으로 지정한다(증언 1개).</summary>
     public QuestionNode NeedSelected(string testimonyId)
     {
         requiredSelectedTestimonyId = testimonyId;
         kind = NodeKind.Contradiction;
         return this;
+    }
+
+    /// <summary>서로 모순되는 '두 증언'을 모두 선택해야 열리는 모순 질문으로 지정한다.</summary>
+    public QuestionNode NeedSelected(string testimonyIdA, string testimonyIdB)
+    {
+        requiredSelectedTestimonyId = testimonyIdA;
+        requiredSelectedTestimonyId2 = testimonyIdB;
+        kind = NodeKind.Contradiction;
+        return this;
+    }
+
+    /// <summary>열리기 위해 기록지에서 선택되어야 하는 증언 id들(0~2개).</summary>
+    public List<string> RequiredSelectedIds()
+    {
+        var list = new List<string>(2);
+        if (!string.IsNullOrEmpty(requiredSelectedTestimonyId)) list.Add(requiredSelectedTestimonyId);
+        if (!string.IsNullOrEmpty(requiredSelectedTestimonyId2)) list.Add(requiredSelectedTestimonyId2);
+        return list;
+    }
+
+    public int RequiredSelectedCount()
+    {
+        int n = 0;
+        if (!string.IsNullOrEmpty(requiredSelectedTestimonyId)) n++;
+        if (!string.IsNullOrEmpty(requiredSelectedTestimonyId2)) n++;
+        return n;
     }
 
     public QuestionNode Grant(params string[] testimonyIds)

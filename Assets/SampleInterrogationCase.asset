@@ -121,6 +121,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_A_ALIBI
       repeatable: 0
@@ -138,6 +139,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_A_NOAUTH
       repeatable: 0
@@ -155,6 +157,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_A_RELATION
       repeatable: 0
@@ -173,6 +176,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds: []
       repeatable: 0
     - id: A_C_LEAVE
@@ -189,10 +193,10 @@ MonoBehaviour:
         text: "\u2026\uADF8\uB0A0\uC740, \uC0AC\uC2E4 \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.
           \uC81C\uAC00 \uCC29\uAC01\uD588\uB358 \uBAA8\uC591\uC785\uB2C8\uB2E4."
       requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_ALIBI
+      requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: T_B_LEAVE
+      requiredSelectedTestimonyId: T_A_ALIBI
+      requiredSelectedTestimonyId2: T_B_LEAVE
       grantTestimonyIds:
       - T_A_RECANT_LEAVE
       repeatable: 0
@@ -211,10 +215,10 @@ MonoBehaviour:
           \uB9D0\uD560 \uD544\uC694\uAC00 \uC5C6\uB2E4\uACE0 \uC0DD\uAC01\uD588\uC744
           \uBFD0\uC785\uB2C8\uB2E4."
       requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_NOAUTH
+      requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: T_C_ADMIN
+      requiredSelectedTestimonyId: T_A_NOAUTH
+      requiredSelectedTestimonyId2: T_C_ADMIN
       grantTestimonyIds:
       - T_A_RECANT_ADMIN
       repeatable: 0
@@ -234,6 +238,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_A_KNOWLEDGE
       repeatable: 0
@@ -256,6 +261,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_B_LEAVE
       repeatable: 0
@@ -272,6 +278,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_B_CONFLICT
       repeatable: 0
@@ -294,6 +301,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_C_ADMIN
       repeatable: 0
@@ -314,6 +322,7 @@ MonoBehaviour:
       requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyId2: 
       grantTestimonyIds:
       - T_C_INTERNAL
       repeatable: 0
@@ -333,6 +342,15 @@ MonoBehaviour:
       - "\uBC18\uAC10"
       - "\uC801\uB300"
       - "\uD610\uC624"
+  - label: "\uC218\uB2E8"
+    prompt: 
+    answer: "\uD574\uD0B9"
+    options:
+    - value: "\uD574\uD0B9"
+      synonyms:
+      - "\uCE68\uC785"
+      - "\uC804\uC0B0 \uACF5\uACA9"
+      - "\uACF5\uACA9"
   - label: "\uB300\uC0C1"
     prompt: 
     answer: "\uB354 \uD0B9"
@@ -343,15 +361,6 @@ MonoBehaviour:
       - "\uC9C0\uBC30\uC790"
       - "\uCCB4\uC81C"
       - "\uC815\uBD80"
-  - label: "\uC218\uB2E8"
-    prompt: 
-    answer: "\uD574\uD0B9"
-    options:
-    - value: "\uD574\uD0B9"
-      synonyms:
-      - "\uCE68\uC785"
-      - "\uC804\uC0B0 \uACF5\uACA9"
-      - "\uACF5\uACA9"
   - label: "\uBAA9\uC801"
     prompt: 
     answer: "\uB9C8\uBE44"
