@@ -26,6 +26,16 @@ public class DialogueManager : MonoBehaviour
     public Color choiceButtonColor = new Color(1f, 1f, 1f, 0.08f);
     public Color contradictionChoiceColor = new Color(0.5f, 0.12f, 0.12f, 0.55f); // 모순 질문은 붉게 강조
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.")]
+    [SerializeField] Canvas canvasOverride;
+    [SerializeField] RectTransform dialoguePanelOverride;
+    [SerializeField] Text speakerTextOverride;
+    [SerializeField] Text bodyTextOverride;
+    [SerializeField] Text continueHintTextOverride;
+    [SerializeField] RectTransform choicePanelOverride;
+    [SerializeField] RectTransform choiceListContainerOverride;
+
     public DialogueState State { get; private set; } = DialogueState.Idle;
 
     RectTransform dialoguePanel;
@@ -60,45 +70,72 @@ public class DialogueManager : MonoBehaviour
 
     void BuildUI()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("DialogueCanvas", 10);
+        var canvas = canvasOverride != null ? canvasOverride : DialogueUIUtil.CreateCanvas("DialogueCanvas", 10);
 
         // --- 대사창 ---
-        dialoguePanel = DialogueUIUtil.CreatePanel(canvas.transform, "DialoguePanel", dialoguePanelColor);
-        DialogueUIUtil.Stretch(dialoguePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.3f), Vector2.zero, Vector2.zero);
+        dialoguePanel = dialoguePanelOverride != null
+            ? dialoguePanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "DialoguePanel", dialoguePanelColor);
+        if (dialoguePanelOverride == null)
+            DialogueUIUtil.Stretch(dialoguePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.3f), Vector2.zero, Vector2.zero);
 
-        speakerText = DialogueUIUtil.CreateText(dialoguePanel, "SpeakerText", 28, TextAnchor.UpperLeft, Color.white);
-        speakerText.fontStyle = FontStyle.Bold;
-        DialogueUIUtil.Stretch(speakerText.rectTransform, new Vector2(0f, 0.72f), new Vector2(1f, 1f), new Vector2(30, 0), new Vector2(-30, -10));
+        speakerText = speakerTextOverride != null
+            ? speakerTextOverride
+            : DialogueUIUtil.CreateText(dialoguePanel, "SpeakerText", 28, TextAnchor.UpperLeft, Color.white);
+        if (speakerTextOverride == null)
+        {
+            speakerText.fontStyle = FontStyle.Bold;
+            DialogueUIUtil.Stretch(speakerText.rectTransform, new Vector2(0f, 0.72f), new Vector2(1f, 1f), new Vector2(30, 0), new Vector2(-30, -10));
+        }
 
-        bodyText = DialogueUIUtil.CreateText(dialoguePanel, "BodyText", 24, TextAnchor.UpperLeft, Color.white);
-        DialogueUIUtil.Stretch(bodyText.rectTransform, new Vector2(0f, 0.1f), new Vector2(1f, 0.72f), new Vector2(30, 0), new Vector2(-30, 0));
+        bodyText = bodyTextOverride != null
+            ? bodyTextOverride
+            : DialogueUIUtil.CreateText(dialoguePanel, "BodyText", 24, TextAnchor.UpperLeft, Color.white);
+        if (bodyTextOverride == null)
+            DialogueUIUtil.Stretch(bodyText.rectTransform, new Vector2(0f, 0.1f), new Vector2(1f, 0.72f), new Vector2(30, 0), new Vector2(-30, 0));
 
-        continueHintText = DialogueUIUtil.CreateText(dialoguePanel, "ContinueHint", 18, TextAnchor.LowerRight, new Color(1f, 1f, 1f, 0.6f));
-        continueHintText.text = "▼ 클릭하여 계속";
-        DialogueUIUtil.Stretch(continueHintText.rectTransform, new Vector2(0.6f, 0f), new Vector2(1f, 0.12f), new Vector2(0, 0), new Vector2(-20, 0));
+        continueHintText = continueHintTextOverride != null
+            ? continueHintTextOverride
+            : DialogueUIUtil.CreateText(dialoguePanel, "ContinueHint", 18, TextAnchor.LowerRight, new Color(1f, 1f, 1f, 0.6f));
+        if (continueHintTextOverride == null)
+        {
+            continueHintText.text = "▼ 클릭하여 계속";
+            DialogueUIUtil.Stretch(continueHintText.rectTransform, new Vector2(0.6f, 0f), new Vector2(1f, 0.12f), new Vector2(0, 0), new Vector2(-20, 0));
+        }
 
-        // 대사창 전체를 클릭하면 다음 대사로 진행되도록 패널 자체에 버튼을 붙인다.
-        var advanceButton = dialoguePanel.gameObject.AddComponent<Button>();
+        // 대사창 전체를 클릭하면 다음 대사로 진행되도록 패널 자체에 버튼을 붙인다(이미 있으면 재사용).
+        var advanceButton = dialoguePanel.GetComponent<Button>();
+        if (advanceButton == null) advanceButton = dialoguePanel.gameObject.AddComponent<Button>();
         advanceButton.transition = Selectable.Transition.None;
         advanceButton.onClick.AddListener(OnDialogueClicked);
 
         // --- 선택지창 ---
-        choicePanel = DialogueUIUtil.CreatePanel(canvas.transform, "ChoicePanel", choicePanelColor);
-        DialogueUIUtil.Stretch(choicePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.4f), Vector2.zero, Vector2.zero);
+        choicePanel = choicePanelOverride != null
+            ? choicePanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "ChoicePanel", choicePanelColor);
+        if (choicePanelOverride == null)
+            DialogueUIUtil.Stretch(choicePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.4f), Vector2.zero, Vector2.zero);
 
-        var listGO = new GameObject("ChoiceList", typeof(RectTransform));
-        listGO.transform.SetParent(choicePanel, false);
-        choiceListContainer = listGO.GetComponent<RectTransform>();
-        DialogueUIUtil.Stretch(choiceListContainer, Vector2.zero, Vector2.one, new Vector2(20, 20), new Vector2(-20, -20));
+        if (choiceListContainerOverride != null)
+        {
+            choiceListContainer = choiceListContainerOverride;
+        }
+        else
+        {
+            var listGO = new GameObject("ChoiceList", typeof(RectTransform));
+            listGO.transform.SetParent(choicePanel, false);
+            choiceListContainer = listGO.GetComponent<RectTransform>();
+            DialogueUIUtil.Stretch(choiceListContainer, Vector2.zero, Vector2.one, new Vector2(20, 20), new Vector2(-20, -20));
 
-        var layout = listGO.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 10;
-        layout.childForceExpandHeight = false;
-        layout.childControlHeight = true;
-        layout.childControlWidth = true;
+            var layout = listGO.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 10;
+            layout.childForceExpandHeight = false;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
 
-        var fitter = listGO.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var fitter = listGO.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        }
     }
 
     void SetDialoguePanelVisible(bool visible) => dialoguePanel.gameObject.SetActive(visible);

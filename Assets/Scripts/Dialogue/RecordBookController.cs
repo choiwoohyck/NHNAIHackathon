@@ -14,6 +14,14 @@ public class RecordBookController : MonoBehaviour
     // 기록 문장(증언)을 클릭했을 때 호출된다. InterrogationController가 구독한다.
     public Action<StatementRecord> OnStatementClicked;
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.")]
+    [SerializeField] Canvas canvasOverride;
+    [SerializeField] RectTransform bookPanelOverride;
+    [SerializeField] Text titleOverride;
+    [SerializeField] Button closeBtnOverride;
+    [SerializeField] RectTransform cardContainerOverride;
+
     RectTransform bookPanel;
     RectTransform cardContainer;
 
@@ -28,31 +36,49 @@ public class RecordBookController : MonoBehaviour
 
     void BuildUI()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("RecordBookCanvas", 20);
+        var canvas = canvasOverride != null ? canvasOverride : DialogueUIUtil.CreateCanvas("RecordBookCanvas", 20);
 
-        bookPanel = DialogueUIUtil.CreatePanel(canvas.transform, "RecordBookPanel", new Color(0.05f, 0.05f, 0.05f, 0.92f));
-        DialogueUIUtil.Stretch(bookPanel, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero);
+        bookPanel = bookPanelOverride != null
+            ? bookPanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "RecordBookPanel", new Color(0.05f, 0.05f, 0.05f, 0.92f));
+        if (bookPanelOverride == null)
+            DialogueUIUtil.Stretch(bookPanel, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero);
 
-        var title = DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
-        title.fontStyle = FontStyle.Bold;
-        title.text = "취조 기록지  —  문장을 눌러 모순의 근거로 선택하세요";
-        DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
+        var title = titleOverride != null
+            ? titleOverride
+            : DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
+        if (titleOverride == null)
+        {
+            title.fontStyle = FontStyle.Bold;
+            title.text = "취조 기록지  —  문장을 눌러 모순의 근거로 선택하세요";
+            DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
+        }
 
-        var closeBtn = DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
-        DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
+        var closeBtn = closeBtnOverride != null
+            ? closeBtnOverride
+            : DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
+        if (closeBtnOverride == null)
+            DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
         closeBtn.onClick.AddListener(Hide);
 
-        var containerGO = new GameObject("CardContainer", typeof(RectTransform));
-        containerGO.transform.SetParent(bookPanel, false);
-        cardContainer = containerGO.GetComponent<RectTransform>();
-        DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0f), new Vector2(1f, 0.9f), new Vector2(20, 20), new Vector2(-20, -10));
+        if (cardContainerOverride != null)
+        {
+            cardContainer = cardContainerOverride;
+        }
+        else
+        {
+            var containerGO = new GameObject("CardContainer", typeof(RectTransform));
+            containerGO.transform.SetParent(bookPanel, false);
+            cardContainer = containerGO.GetComponent<RectTransform>();
+            DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0f), new Vector2(1f, 0.9f), new Vector2(20, 20), new Vector2(-20, -10));
 
-        var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 15;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = true;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
+            var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 15;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+        }
     }
 
     public void ToggleVisible() => bookPanel.gameObject.SetActive(!bookPanel.gameObject.activeSelf);

@@ -17,9 +17,23 @@ public class InterrogationController : MonoBehaviour
     [Tooltip("인스펙터에서 만든 취조 사건(ScriptableObject). 비워두면 코드 샘플(SampleCaseGraph)로 자동 대체된다.")]
     [SerializeField] InterrogationCase caseAsset;
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.\n" +
+             "취조 중지/종료/기록지/판결 4개 버튼만 화면에 배치된다(배경 바 없음). 용의자 호출은 전화기 팝업으로 이동했다.")]
+    [SerializeField] Canvas actionButtonsCanvasOverride;
+    [Tooltip("4개 버튼이 배치될 컨테이너(배경 없이 레이아웃만). 비워두면 자동 생성된다.")]
+    [SerializeField] RectTransform actionButtonsContainerOverride;
+    [SerializeField] Button stopBtnOverride;
+    [SerializeField] Button endBtnOverride;
+    [SerializeField] Button bookBtnOverride;
+    [SerializeField] Button verdictBtnOverride;
+    [SerializeField] Button logBtnOverride;
+
     DialogueManager dialogueManager;
     RecordBookController recordBook;
     VerdictController verdict;
+    PhoneCallController phoneCall;
+    DialogueLogController dialogueLog;
 
     CaseGraph graph;
     CaseProgress progress;
@@ -40,6 +54,12 @@ public class InterrogationController : MonoBehaviour
         verdict = GetComponent<VerdictController>();
         if (verdict == null) verdict = gameObject.AddComponent<VerdictController>();
 
+        phoneCall = GetComponent<PhoneCallController>();
+        if (phoneCall == null) phoneCall = gameObject.AddComponent<PhoneCallController>();
+
+        dialogueLog = GetComponent<DialogueLogController>();
+        if (dialogueLog == null) dialogueLog = gameObject.AddComponent<DialogueLogController>();
+
         recordBook.OnStatementClicked = OnRecordSelected;
     }
 
@@ -55,7 +75,8 @@ public class InterrogationController : MonoBehaviour
         foreach (var s in graph.Suspects)
             sessions[s.id] = new SuspectSession(s.id, s.suspectName, s.occupation);
 
-        BuildSuspectBar();
+        BuildActionButtons();
+        phoneCall.SetSuspects(graph.Suspects, CallSuspect);
         ShowBriefing();
     }
 
@@ -71,45 +92,53 @@ public class InterrogationController : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
-    // 상단 컨트롤 바: 용의자 호출 / 취조 중지 / 취조 종료 / 기록지 보기
+    // 화면에 떠 있는 컨트롤 버튼: 취조 중지 / 취조 종료 / 기록지 보기 / 사건 판결
+    // (배경 바 없이 버튼만 배치한다. 용의자 호출은 PhoneCallController의 전화기 팝업으로 옮겨졌다.)
     // ------------------------------------------------------------------
-    void BuildSuspectBar()
+    void BuildActionButtons()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("SuspectBarCanvas", 5);
+        var canvas = actionButtonsCanvasOverride != null ? actionButtonsCanvasOverride : DialogueUIUtil.CreateCanvas("ActionButtonsCanvas", 5);
 
-        var bar = DialogueUIUtil.CreatePanel(canvas.transform, "SuspectBar", new Color(0f, 0f, 0f, 0.5f));
-        DialogueUIUtil.Stretch(bar, new Vector2(0f, 0.93f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
-
-        var layout = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 10;
-        layout.padding = new RectOffset(10, 10, 5, 5);
-        layout.childForceExpandWidth = false;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
-
-        foreach (var s in graph.Suspects)
+        RectTransform container;
+        if (actionButtonsContainerOverride != null)
         {
-            var id = s.id;
-            var btn = DialogueUIUtil.CreateButton(bar, "Call_" + id, s.suspectName + " 호출", new Color(0.2f, 0.2f, 0.2f, 0.8f));
-            btn.gameObject.AddComponent<LayoutElement>().preferredWidth = 160;
-            btn.onClick.AddListener(() => CallSuspect(id));
+            container = actionButtonsContainerOverride;
+        }
+        else
+        {
+            var go = new GameObject("ActionButtons", typeof(RectTransform));
+            go.transform.SetParent(canvas.transform, false);
+            container = go.GetComponent<RectTransform>();
+            DialogueUIUtil.Stretch(container, new Vector2(0f, 0.93f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+
+            var layout = go.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 10;
+            layout.padding = new RectOffset(10, 10, 5, 5);
+            layout.childAlignment = TextAnchor.MiddleRight;
+            layout.childForceExpandWidth = false;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
         }
 
-        var stopBtn = DialogueUIUtil.CreateButton(bar, "StopBtn", "취조 중지", new Color(0.4f, 0.2f, 0.1f, 0.8f));
-        stopBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
+        var stopBtn = stopBtnOverride != null ? stopBtnOverride : DialogueUIUtil.CreateButton(container, "StopBtn", "취조 중지", new Color(0.4f, 0.2f, 0.1f, 0.8f));
+        if (stopBtnOverride == null) stopBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         stopBtn.onClick.AddListener(PauseCurrentSuspect);
 
-        var endBtn = DialogueUIUtil.CreateButton(bar, "EndBtn", "취조 종료", new Color(0.1f, 0.3f, 0.1f, 0.8f));
-        endBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
+        var endBtn = endBtnOverride != null ? endBtnOverride : DialogueUIUtil.CreateButton(container, "EndBtn", "취조 종료", new Color(0.1f, 0.3f, 0.1f, 0.8f));
+        if (endBtnOverride == null) endBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         endBtn.onClick.AddListener(EndCurrentSuspect);
 
-        var bookBtn = DialogueUIUtil.CreateButton(bar, "BookBtn", "기록지 보기", new Color(0.1f, 0.1f, 0.4f, 0.8f));
-        bookBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
+        var bookBtn = bookBtnOverride != null ? bookBtnOverride : DialogueUIUtil.CreateButton(container, "BookBtn", "기록지 보기", new Color(0.1f, 0.1f, 0.4f, 0.8f));
+        if (bookBtnOverride == null) bookBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         bookBtn.onClick.AddListener(() => recordBook.ToggleVisible());
 
-        var verdictBtn = DialogueUIUtil.CreateButton(bar, "VerdictBtn", "사건 판결", new Color(0.45f, 0.1f, 0.35f, 0.9f));
-        verdictBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
+        var verdictBtn = verdictBtnOverride != null ? verdictBtnOverride : DialogueUIUtil.CreateButton(container, "VerdictBtn", "사건 판결", new Color(0.45f, 0.1f, 0.35f, 0.9f));
+        if (verdictBtnOverride == null) verdictBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         verdictBtn.onClick.AddListener(OpenVerdict);
+
+        var logBtn = logBtnOverride != null ? logBtnOverride : DialogueUIUtil.CreateButton(container, "LogBtn", "대사 로그 보기", new Color(0.15f, 0.25f, 0.25f, 0.85f));
+        if (logBtnOverride == null) logBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 150;
+        logBtn.onClick.AddListener(() => dialogueLog.ToggleVisible());
     }
 
     // 모든 취조를 마친 뒤 최종 판결 화면을 연다.
@@ -136,6 +165,12 @@ public class InterrogationController : MonoBehaviour
         if (!sessions.ContainsKey(suspectId)) return;
         dialogueManager.ResetToIdle();
         currentSuspectId = suspectId;
+
+        // 대사 로그: 이번이 처음 부르는 거면 "입장", 중지했다가 다시 부른 거면 "호출".
+        var session = sessions[suspectId];
+        dialogueLog.AddEvent(session.suspectName + (session.everCalled ? "를 호출했습니다." : "가 입장하였습니다."));
+        session.everCalled = true;
+
         PresentChoices();
     }
 
@@ -147,6 +182,14 @@ public class InterrogationController : MonoBehaviour
         dialogueManager.ShowChoices(available, OnQuestionSelected);
     }
 
+    // 세션(입장/호출 ~ 중지/종료)이 진행 중일 때만 대사를 로그에 남기고 실제로 대사창을 띄운다.
+    void ShowSessionLines(List<DialogueLine> lines, System.Action onComplete)
+    {
+        if (currentSuspectId != null)
+            foreach (var line in lines) dialogueLog.AddLine(line.speaker, line.text);
+        dialogueManager.ShowLines(lines, onComplete);
+    }
+
     void OnQuestionSelected(QuestionNode node)
     {
         progress.MarkAsked(node.id);
@@ -154,7 +197,7 @@ public class InterrogationController : MonoBehaviour
         // 모순 질문은 사용되면 선택한 근거(증언)를 소비한다.
         bool consumedSelection = !string.IsNullOrEmpty(node.requiredSelectedTestimonyId);
 
-        dialogueManager.ShowLines(node.lines, () =>
+        ShowSessionLines(node.lines, () =>
         {
             GrantTestimonies(node);
 
@@ -248,7 +291,7 @@ public class InterrogationController : MonoBehaviour
             progress.selectedTestimonyId = null;
             recordBook.SetSelected(null);
             recordBook.Hide();
-            dialogueManager.ShowLines(
+            ShowSessionLines(
                 new List<DialogueLine> { new DialogueLine("월터", "이건 모순이 아니다.") },
                 PresentChoices);
         }

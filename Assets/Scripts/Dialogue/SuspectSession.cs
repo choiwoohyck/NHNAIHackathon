@@ -12,6 +12,7 @@ public class SuspectSession
     public string occupation;
     public readonly List<StatementRecord> statements = new List<StatementRecord>();
     public bool completed;
+    public bool everCalled; // 대사 로그에 "입장" / "호출" 중 어떤 문구를 쓸지 구분하는 데 쓰인다.
 
     public SuspectSession(string suspectId, string suspectName, string occupation)
     {
