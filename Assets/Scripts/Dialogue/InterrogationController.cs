@@ -29,6 +29,10 @@ public class InterrogationController : MonoBehaviour
     [SerializeField] Button verdictBtnOverride;
     [SerializeField] Button logBtnOverride;
 
+    [Header("인물 호출 연출")]
+    [Tooltip("전화로 용의자를 호출했을 때 암전/등장 연출을 재생할 컨트롤러.")]
+    [SerializeField] InterrogationLightFlicker lightFlicker;
+
     DialogueManager dialogueManager;
     RecordBookController recordBook;
     VerdictController verdict;
@@ -171,7 +175,12 @@ public class InterrogationController : MonoBehaviour
         dialogueLog.AddEvent(session.suspectName + (session.everCalled ? "를 호출했습니다." : "가 입장하였습니다."));
         session.everCalled = true;
 
-        PresentChoices();
+        // 용의자마다 다른 인물 이미지로 암전 → 등장 연출을 재생하고, 화면이 다 밝아진 뒤에 대사창을 띄운다.
+        var suspect = graph.GetSuspect(suspectId);
+        if (lightFlicker != null && suspect != null)
+            lightFlicker.PlayCharacterCall(suspect.portrait, PresentChoices);
+        else
+            PresentChoices();
     }
 
     // 현재 진행 상태 + 선택한 증언을 그래프에 물어 '지금 가능한 질문'만 보여준다.
@@ -249,6 +258,8 @@ public class InterrogationController : MonoBehaviour
         dialogueManager.ResetToIdle();
         recordBook.AddOrUpdateSheet(CurrentSession);
         currentSuspectId = null;
+
+        if (lightFlicker != null) lightFlicker.PlayCharacterDismiss();
     }
 
     // ------------------------------------------------------------------
