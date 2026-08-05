@@ -13,11 +13,28 @@ public class CaseProgress
     public readonly HashSet<string> obtainedTestimonyIds = new HashSet<string>();
     public readonly HashSet<string> completedSuspectIds = new HashSet<string>();
 
-    // 현재 기록지에서 모순 근거로 선택된 증언 id (없으면 null).
-    public string selectedTestimonyId;
+    // 현재 기록지에서 모순 근거로 선택된 증언 id들(최대 2개, 가득 차면 오래된 것부터 밀려남).
+    public const int MaxSelected = 2;
+    public readonly List<string> selectedTestimonyIds = new List<string>();
 
     public bool IsAsked(string questionId) =>
         !string.IsNullOrEmpty(questionId) && askedQuestionIds.Contains(questionId);
+
+    public bool IsSelected(string testimonyId) =>
+        !string.IsNullOrEmpty(testimonyId) && selectedTestimonyIds.Contains(testimonyId);
+
+    public int SelectedCount => selectedTestimonyIds.Count;
+
+    // 이미 선택된 증언이면 아무것도 하지 않는다(해제는 호출부에서 IsSelected로 먼저 판단).
+    // 가득 찬 상태에서 새 증언을 선택하면 가장 오래된 선택을 밀어낸다.
+    public void ToggleSelected(string testimonyId)
+    {
+        if (string.IsNullOrEmpty(testimonyId) || selectedTestimonyIds.Contains(testimonyId)) return;
+        selectedTestimonyIds.Add(testimonyId);
+        if (selectedTestimonyIds.Count > MaxSelected) selectedTestimonyIds.RemoveAt(0);
+    }
+
+    public void ClearSelected() => selectedTestimonyIds.Clear();
 
     public bool HasTestimony(string testimonyId) =>
         !string.IsNullOrEmpty(testimonyId) && obtainedTestimonyIds.Contains(testimonyId);

@@ -72,10 +72,10 @@ public class RecordSheetCard : MonoBehaviour
         }
     }
 
-    /// <summary>선택된 증언 문장만 강조한다. selectedRecordId가 null이면 전부 해제.</summary>
-    public void SetSelected(string selectedRecordId)
+    /// <summary>선택된 증언 문장들만 강조한다. selectedRecordIds가 null/비어 있으면 전부 해제.</summary>
+    public void SetSelected(ICollection<string> selectedRecordIds)
     {
         foreach (var kv in lineImages)
-            kv.Value.color = kv.Key == selectedRecordId ? LineSelectedColor : LineNormalColor;
+            kv.Value.color = (selectedRecordIds != null && selectedRecordIds.Contains(kv.Key)) ? LineSelectedColor : LineNormalColor;
     }
 }

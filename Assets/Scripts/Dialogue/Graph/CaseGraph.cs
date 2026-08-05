@@ -68,22 +68,71 @@ public class CaseGraph
     // ------------------------------------------------------------------
 
     /// <summary>지금 이 노드를 물어볼 수 있는가? (그래프 조건 + 런타임 상태로 판정)</summary>
-    public bool IsAvailable(QuestionNode node, CaseProgress p, string selectedTestimonyId)
+    public bool IsAvailable(QuestionNode node, CaseProgress p)
     {
         if (node == null || p == null) return false;
 
         // 이미 물어봤고 반복 불가면 목록에서 사라진다.
         if (p.IsAsked(node.id) && !node.repeatable) return false;
 
-        // 모순 질문: 지정된 증언이 기록지에서 '선택'돼 있어야 열린다(AND로 항상 적용).
-        if (!string.IsNullOrEmpty(node.requiredSelectedTestimonyId) &&
-            selectedTestimonyId != node.requiredSelectedTestimonyId)
-            return false;
+        // 모순 질문은 일반 질문 목록에 나타나지 않는다 — 기록지에서 증언 2개를 선택해
+        // FindContradictionNode로 직접 판정하고 곧바로 추궁한다.
+        if (node.RequiredSelectedCount() > 0) return false;
 
+        return PrerequisitesMet(node, p);
+    }
+
+    /// <summary>해당 용의자에게 지금 물어볼 수 있는 질문 목록(authored 순서 유지).</summary>
+    public List<QuestionNode> GetAvailableQuestions(string suspectId, CaseProgress p)
+    {
+        var result = new List<QuestionNode>();
+        var s = GetSuspect(suspectId);
+        if (s == null) return result;
+        foreach (var node in s.questions)
+            if (IsAvailable(node, p))
+                result.Add(node);
+        return result;
+    }
+
+    /// <summary>
+    /// 지금 선택된 증언 조합(최대 2개)이 어느 용의자의 모순 질문과 정확히 일치하는지 찾는다(순서 무관).
+    /// 일치하면 그 질문 노드를 돌려주고 owner에 소속 용의자 id를 담는다. 없으면 null.
+    /// </summary>
+    public QuestionNode FindContradictionNode(CaseProgress p, out string ownerSuspectId)
+    {
+        ownerSuspectId = null;
+        if (p == null || p.SelectedCount == 0) return null;
+
+        foreach (var s in suspects)
+        {
+            foreach (var node in s.questions)
+            {
+                if (node.RequiredSelectedCount() != p.SelectedCount) continue;
+                if (p.IsAsked(node.id) && !node.repeatable) continue;
+                if (!SameIds(node.requiredSelectedTestimonyIds, p.selectedTestimonyIds)) continue;
+                if (!PrerequisitesMet(node, p)) continue;
+
+                ownerSuspectId = s.id;
+                return node;
+            }
+        }
+        return null;
+    }
+
+    static bool SameIds(List<string> a, List<string> b)
+    {
+        if (a.Count != b.Count) return false;
+        foreach (var id in a) if (!b.Contains(id)) return false;
+        return true;
+    }
+
+    /// <summary>선행 '질문'/'증언' 조건(모순 여부와 무관)만 판정한다.</summary>
+    bool PrerequisitesMet(QuestionNode node, CaseProgress p)
+    {
         bool hasQ = node.requiredQuestionIds != null && node.requiredQuestionIds.Count > 0;
         bool hasT = node.requiredTestimonyIds != null && node.requiredTestimonyIds.Count > 0;
 
-        // 선행 조건이 아예 없으면 (선택 게이트를 통과했다는 전제 하에) 바로 사용 가능.
+        // 선행 조건이 아예 없으면 바로 사용 가능.
         if (!hasQ && !hasT) return true;
 
         if (node.requireAll)
@@ -100,33 +149,6 @@ public class CaseGraph
         return false;
     }
 
-    /// <summary>해당 용의자에게 지금 물어볼 수 있는 질문 목록(authored 순서 유지).</summary>
-    public List<QuestionNode> GetAvailableQuestions(string suspectId, CaseProgress p, string selectedTestimonyId)
-    {
-        var result = new List<QuestionNode>();
-        var s = GetSuspect(suspectId);
-        if (s == null) return result;
-        foreach (var node in s.questions)
-            if (IsAvailable(node, p, selectedTestimonyId))
-                result.Add(node);
-        return result;
-    }
-
-    /// <summary>
-    /// 방금 선택한 증언이 '이 용의자의' 모순 질문을 실제로 여는가?
-    /// 기록지에서 엉뚱한 문장을 골랐을 때 "이건 모순이 아니다"를 판정하는 데 쓴다.
-    /// </summary>
-    public bool SelectionUnlocksContradiction(string suspectId, CaseProgress p, string selectedTestimonyId)
-    {
-        if (string.IsNullOrEmpty(selectedTestimonyId)) return false;
-        var s = GetSuspect(suspectId);
-        if (s == null) return false;
-        foreach (var node in s.questions)
-            if (node.requiredSelectedTestimonyId == selectedTestimonyId && IsAvailable(node, p, selectedTestimonyId))
-                return true;
-        return false;
-    }
-
     // ------------------------------------------------------------------
     // 데이터 검증 (authored 실수 잡기용) — 없는 id 참조 / 순환(DAG 위반) 경고
     // ------------------------------------------------------------------
@@ -140,8 +162,8 @@ public class CaseGraph
                 if (!nodesById.ContainsKey(id)) issues.Add("[" + node.id + "] 선행 질문 '" + id + "' 을(를) 찾을 수 없음");
             foreach (var id in node.requiredTestimonyIds)
                 if (!testimoniesById.ContainsKey(id)) issues.Add("[" + node.id + "] 선행 증언 '" + id + "' 을(를) 찾을 수 없음");
-            if (!string.IsNullOrEmpty(node.requiredSelectedTestimonyId) && !testimoniesById.ContainsKey(node.requiredSelectedTestimonyId))
-                issues.Add("[" + node.id + "] 선택 증언 '" + node.requiredSelectedTestimonyId + "' 을(를) 찾을 수 없음");
+            foreach (var id in node.requiredSelectedTestimonyIds)
+                if (!testimoniesById.ContainsKey(id)) issues.Add("[" + node.id + "] 선택 증언 '" + id + "' 을(를) 찾을 수 없음");
             foreach (var id in node.grantTestimonyIds)
                 if (!testimoniesById.ContainsKey(id)) issues.Add("[" + node.id + "] 획득 증언 '" + id + "' 을(를) 찾을 수 없음");
         }
