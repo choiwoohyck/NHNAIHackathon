@@ -19,15 +19,18 @@ public class InterrogationController : MonoBehaviour
 
     [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
     [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.\n" +
-             "취조 중지/종료/기록지/판결 4개 버튼만 화면에 배치된다(배경 바 없음). 용의자 호출은 전화기 팝업으로 이동했다.")]
+             "취조 종료/판결 버튼이 화면에 배치된다(배경 바 없음). 기록지 보기는 용의자별 아이콘 버튼으로 옮겨갔고, 용의자 호출은 전화기 팝업으로 이동했다.")]
     [SerializeField] Canvas actionButtonsCanvasOverride;
-    [Tooltip("4개 버튼이 배치될 컨테이너(배경 없이 레이아웃만). 비워두면 자동 생성된다.")]
+    [Tooltip("버튼들이 배치될 컨테이너(배경 없이 레이아웃만). 비워두면 자동 생성된다.")]
     [SerializeField] RectTransform actionButtonsContainerOverride;
-    [SerializeField] Button stopBtnOverride;
     [SerializeField] Button endBtnOverride;
-    [SerializeField] Button bookBtnOverride;
     [SerializeField] Button verdictBtnOverride;
     [SerializeField] Button logBtnOverride;
+
+    [Header("기록지 아이콘 버튼 (최대 3명, 진술 완료 시 활성화)")]
+    [Tooltip("용의자별 기록지 아이콘 버튼. 인덱스 0/1/2가 사건의 용의자 순서(graph.Suspects)와 대응한다.\n" +
+             "씬에 미리 배치해두고 비활성 상태로 시작, 해당 용의자의 취조가 끝나면 활성화한다. 클릭하면 기록지 보기가 열린다.")]
+    [SerializeField] Button[] recordSheetButtonOverrides = new Button[3];
 
     [Header("인물 호출 연출")]
     [Tooltip("전화로 용의자를 호출했을 때 암전/등장 연출을 재생할 컨트롤러.")]
@@ -80,6 +83,7 @@ public class InterrogationController : MonoBehaviour
             sessions[s.id] = new SuspectSession(s.id, s.suspectName, s.occupation);
 
         BuildActionButtons();
+        WireRecordSheetButtons();
         phoneCall.SetSuspects(graph.Suspects, CallSuspect);
         ShowBriefing();
     }
@@ -96,7 +100,7 @@ public class InterrogationController : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
-    // 화면에 떠 있는 컨트롤 버튼: 취조 중지 / 취조 종료 / 기록지 보기 / 사건 판결
+    // 화면에 떠 있는 컨트롤 버튼: 취조 종료 / 사건 판결
     // (배경 바 없이 버튼만 배치한다. 용의자 호출은 PhoneCallController의 전화기 팝업으로 옮겨졌다.)
     // ------------------------------------------------------------------
     void BuildActionButtons()
@@ -124,17 +128,9 @@ public class InterrogationController : MonoBehaviour
             layout.childControlHeight = true;
         }
 
-        var stopBtn = stopBtnOverride != null ? stopBtnOverride : DialogueUIUtil.CreateButton(container, "StopBtn", "취조 중지", new Color(0.4f, 0.2f, 0.1f, 0.8f));
-        if (stopBtnOverride == null) stopBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
-        stopBtn.onClick.AddListener(PauseCurrentSuspect);
-
         var endBtn = endBtnOverride != null ? endBtnOverride : DialogueUIUtil.CreateButton(container, "EndBtn", "취조 종료", new Color(0.1f, 0.3f, 0.1f, 0.8f));
         if (endBtnOverride == null) endBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
         endBtn.onClick.AddListener(EndCurrentSuspect);
-
-        var bookBtn = bookBtnOverride != null ? bookBtnOverride : DialogueUIUtil.CreateButton(container, "BookBtn", "기록지 보기", new Color(0.1f, 0.1f, 0.4f, 0.8f));
-        if (bookBtnOverride == null) bookBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
-        bookBtn.onClick.AddListener(() => recordBook.ToggleVisible());
 
         var verdictBtn = verdictBtnOverride != null ? verdictBtnOverride : DialogueUIUtil.CreateButton(container, "VerdictBtn", "사건 판결", new Color(0.45f, 0.1f, 0.35f, 0.9f));
         if (verdictBtnOverride == null) verdictBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 130;
@@ -143,6 +139,15 @@ public class InterrogationController : MonoBehaviour
         var logBtn = logBtnOverride != null ? logBtnOverride : DialogueUIUtil.CreateButton(container, "LogBtn", "대사 로그 보기", new Color(0.15f, 0.25f, 0.25f, 0.85f));
         if (logBtnOverride == null) logBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 150;
         logBtn.onClick.AddListener(() => dialogueLog.ToggleVisible());
+    }
+
+    // 용의자별 기록지 아이콘 버튼 클릭 시 기록지 보기를 연다(기존 "기록지 보기" 버튼과 동일한 동작).
+    void WireRecordSheetButtons()
+    {
+        foreach (var btn in recordSheetButtonOverrides)
+        {
+            if (btn != null) btn.onClick.AddListener(() => recordBook.ToggleVisible());
+        }
     }
 
     // 모든 취조를 마친 뒤 최종 판결 화면을 연다.
@@ -178,7 +183,10 @@ public class InterrogationController : MonoBehaviour
         // 용의자마다 다른 인물 이미지로 암전 → 등장 연출을 재생하고, 화면이 다 밝아진 뒤에 대사창을 띄운다.
         var suspect = graph.GetSuspect(suspectId);
         if (lightFlicker != null && suspect != null)
-            lightFlicker.PlayCharacterCall(suspect.portrait, PresentChoices);
+            lightFlicker.PlayCharacterCall(
+                suspect.portrait,
+                PresentChoices,
+                suspect.useCustomPortraitSize ? suspect.portraitSize : (Vector2?)null);
         else
             PresentChoices();
     }
@@ -189,6 +197,28 @@ public class InterrogationController : MonoBehaviour
         if (string.IsNullOrEmpty(currentSuspectId)) return;
         var available = graph.GetAvailableQuestions(currentSuspectId, progress, progress.selectedTestimonyId);
         dialogueManager.ShowChoices(available, OnQuestionSelected);
+
+        // 더 물어볼 질문이 없으면(기록지에서 근거를 골라야 풀리는 모순 질문이 남아있을 수도 있으니
+        // '완료 처리'는 아니고) 지금까지 확보한 진술로 기록지를 만들고 아이콘 버튼을 켠다.
+        if (available == null || available.Count == 0)
+            RevealRecordSheetForCurrentSuspect();
+    }
+
+    // 용의자별 기록지 아이콘 버튼을 활성화한다. 인덱스는 graph.Suspects 순서를 따른다.
+    void RevealRecordSheetForCurrentSuspect()
+    {
+        var session = CurrentSession;
+        if (session == null) return;
+
+        recordBook.AddOrUpdateSheet(session);
+
+        for (int i = 0; i < graph.Suspects.Count; i++)
+        {
+            if (graph.Suspects[i].id != currentSuspectId) continue;
+            if (i < recordSheetButtonOverrides.Length && recordSheetButtonOverrides[i] != null)
+                recordSheetButtonOverrides[i].gameObject.SetActive(true);
+            break;
+        }
     }
 
     // 세션(입장/호출 ~ 중지/종료)이 진행 중일 때만 대사를 로그에 남기고 실제로 대사창을 띄운다.
@@ -237,17 +267,9 @@ public class InterrogationController : MonoBehaviour
             if (owner == null) continue;
 
             owner.AddStatement(new StatementRecord(t.id, t.ownerSuspectId, t.ownerSuspectName, t.text));
-            // 이미 책상에 나와 있는 기록지라면 즉시 반영(없으면 중지/종료 때 생성).
+            // 이미 책상에 나와 있는 기록지라면 즉시 반영(없으면 종료 때 생성).
             recordBook.UpdateSheetIfExists(owner);
         }
-    }
-
-    void PauseCurrentSuspect()
-    {
-        if (CurrentSession == null) return;
-        dialogueManager.ResetToIdle();
-        recordBook.AddOrUpdateSheet(CurrentSession);   // 확보한 진술을 기록지로 생성
-        currentSuspectId = null;
     }
 
     void EndCurrentSuspect()

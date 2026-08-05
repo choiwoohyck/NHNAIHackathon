@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -105,6 +106,56 @@ public static class DialogueUIUtil
         var button = go.AddComponent<Button>();
 
         var text = CreateText(go.transform, "Label", 24, TextAnchor.MiddleCenter, Color.white);
+        var textRt = text.rectTransform;
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.offsetMin = Vector2.zero;
+        textRt.offsetMax = Vector2.zero;
+        text.text = label;
+
+        return button;
+    }
+
+    public static TMP_Text CreateTMPText(Transform parent, string name, int fontSize, TextAnchor anchor, Color color)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var text = go.AddComponent<TextMeshProUGUI>();
+        text.fontSize = fontSize;
+        text.alignment = ToTMPAlignment(anchor);
+        text.color = color;
+        text.textWrappingMode = TextWrappingModes.Normal;
+        text.overflowMode = TextOverflowModes.Overflow;
+        return text;
+    }
+
+    static TextAlignmentOptions ToTMPAlignment(TextAnchor anchor)
+    {
+        switch (anchor)
+        {
+            case TextAnchor.UpperLeft: return TextAlignmentOptions.TopLeft;
+            case TextAnchor.UpperCenter: return TextAlignmentOptions.Top;
+            case TextAnchor.UpperRight: return TextAlignmentOptions.TopRight;
+            case TextAnchor.MiddleLeft: return TextAlignmentOptions.Left;
+            case TextAnchor.MiddleCenter: return TextAlignmentOptions.Center;
+            case TextAnchor.MiddleRight: return TextAlignmentOptions.Right;
+            case TextAnchor.LowerLeft: return TextAlignmentOptions.BottomLeft;
+            case TextAnchor.LowerCenter: return TextAlignmentOptions.Bottom;
+            case TextAnchor.LowerRight: return TextAlignmentOptions.BottomRight;
+            default: return TextAlignmentOptions.TopLeft;
+        }
+    }
+
+    public static Button CreateTMPButton(Transform parent, string name, string label, Color bgColor, Sprite bgSprite = null)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var image = go.AddComponent<Image>();
+        image.color = bgColor;
+        if (bgSprite != null) image.sprite = bgSprite;
+        var button = go.AddComponent<Button>();
+
+        var text = CreateTMPText(go.transform, "Label", 18, TextAnchor.MiddleCenter, Color.white);
         var textRt = text.rectTransform;
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;

@@ -206,7 +206,7 @@ public class InterrogationLightFlicker : MonoBehaviour
     /// 암전 중 characterImage의 Sprite를 교체하고, 화면이 완전히 다시 밝아진 뒤 onComplete를 호출한다
     /// (대사창을 연출이 끝난 다음에 띄우고 싶을 때 사용).
     /// </summary>
-    public void PlayCharacterCall(Sprite newCharacterSprite, System.Action onComplete = null)
+    public void PlayCharacterCall(Sprite newCharacterSprite, System.Action onComplete = null, Vector2? customSize = null)
     {
         if (!isActiveAndEnabled)
         {
@@ -255,6 +255,11 @@ public class InterrogationLightFlicker : MonoBehaviour
                     characterImage.sprite = newCharacterSprite;
                     characterImage.gameObject.SetActive(true);
                     characterImage.enabled = true;
+
+                    if (customSize.HasValue)
+                    {
+                        characterImage.rectTransform.sizeDelta = customSize.Value;
+                    }
                 },
                 characterAppearSound,
                 onComplete
