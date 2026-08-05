@@ -154,7 +154,7 @@ MonoBehaviour:
   successText: "\uC720\uC8C4 \u2014 \uC0AC\uAC74 \uD574\uACB0"
   wrongText: "\uBB34\uC8C4 \u2014 \uC624\uC778 \uC9C0\uBAA9"
   insufficientText: "\uC99D\uAC70 \uBD88\uCDA9\uBD84"
-  successSfx: {fileID: 0}
+  successSfx: {fileID: 8300000, guid: c6fce0602d6a8304087357dcaed5ee5f, type: 3}
   failSfx: {fileID: 8300000, guid: 0ef9b4356036a4247b7dbaf962b96839, type: 3}
   caseSelectSceneName: CaseSelect
   fadeInSeconds: 0.6
