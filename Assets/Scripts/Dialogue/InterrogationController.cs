@@ -14,8 +14,12 @@ using UnityEngine.UI;
 public class InterrogationController : MonoBehaviour
 {
     [Header("사건 데이터")]
-    [Tooltip("인스펙터에서 만든 취조 사건(ScriptableObject). 비워두면 코드 샘플(SampleCaseGraph)로 자동 대체된다.")]
+    [Tooltip("인스펙터에서 만든 취조 사건(ScriptableObject). 비워두면 코드 샘플(SampleCaseGraph)로 자동 대체된다. 사건 선택 화면에서 진입하면 그쪽 선택이 우선한다.")]
     [SerializeField] InterrogationCase caseAsset;
+
+    [Header("씬 전환")]
+    [Tooltip("판결 제출 시 이동할 엔딩 씬 이름(Build Settings에 등록돼 있어야 이동, 아니면 패널 내 텍스트로 표시).")]
+    [SerializeField] string endingSceneName = "Ending";
 
     DialogueManager dialogueManager;
     RecordBookController recordBook;
@@ -39,15 +43,18 @@ public class InterrogationController : MonoBehaviour
 
         verdict = GetComponent<VerdictController>();
         if (verdict == null) verdict = gameObject.AddComponent<VerdictController>();
+        verdict.endingSceneName = endingSceneName;
 
         recordBook.OnStatementClicked = OnRecordSelected;
     }
 
     void Start()
     {
-        // 그래프 데이터 로드: 인스펙터에 사건 에셋이 지정돼 있으면 그것을, 없으면 코드 샘플을 사용.
-        graph = caseAsset != null ? caseAsset.BuildGraph() : SampleCaseGraph.Build();
+        // 그래프 데이터 로드: 사건 선택 화면에서 고른 사건 > 인스펙터 지정 사건 > 코드 샘플 순.
+        var chosen = GameSession.SelectedCase != null ? GameSession.SelectedCase : caseAsset;
+        graph = chosen != null ? chosen.BuildGraph() : SampleCaseGraph.Build();
         progress = new CaseProgress();
+        GameSession.ClearVerdict();   // 새 취조 시작 시 이전 판결 상태 초기화
 
         // authored 데이터에 잘못된 참조/순환이 없는지 점검.
         foreach (var issue in graph.Validate()) Debug.LogWarning("[CaseGraph] " + issue);
@@ -136,6 +143,8 @@ public class InterrogationController : MonoBehaviour
         if (!sessions.ContainsKey(suspectId)) return;
         dialogueManager.ResetToIdle();
         currentSuspectId = suspectId;
+        progress.ClearSelection();                        // 용의자 전환 시 기록지 선택 초기화
+        recordBook.SetSelected(progress.selectedTestimonyIds);
         PresentChoices();
     }
 
@@ -143,7 +152,7 @@ public class InterrogationController : MonoBehaviour
     void PresentChoices()
     {
         if (string.IsNullOrEmpty(currentSuspectId)) return;
-        var available = graph.GetAvailableQuestions(currentSuspectId, progress, progress.selectedTestimonyId);
+        var available = graph.GetAvailableQuestions(currentSuspectId, progress);
         dialogueManager.ShowChoices(available, OnQuestionSelected);
     }
 
@@ -152,7 +161,7 @@ public class InterrogationController : MonoBehaviour
         progress.MarkAsked(node.id);
 
         // 모순 질문은 사용되면 선택한 근거(증언)를 소비한다.
-        bool consumedSelection = !string.IsNullOrEmpty(node.requiredSelectedTestimonyId);
+        bool consumedSelection = node.requiredSelectedTestimonyIds != null && node.requiredSelectedTestimonyIds.Count > 0;
 
         dialogueManager.ShowLines(node.lines, () =>
         {
@@ -160,8 +169,8 @@ public class InterrogationController : MonoBehaviour
 
             if (consumedSelection)
             {
-                progress.selectedTestimonyId = null;
-                recordBook.SetSelected(null);
+                progress.ClearSelection();
+                recordBook.SetSelected(progress.selectedTestimonyIds);
             }
 
             PresentChoices();
@@ -208,49 +217,54 @@ public class InterrogationController : MonoBehaviour
         currentSuspectId = null;
     }
 
+    static readonly Color StatusHint = new Color(0.82f, 0.82f, 0.88f, 1f);
+    static readonly Color StatusOk = new Color(0.5f, 0.9f, 0.55f, 1f);
+    static readonly Color StatusBad = new Color(0.95f, 0.55f, 0.55f, 1f);
+
     // ------------------------------------------------------------------
-    // 기록지 문장 선택 → 모순 질문 해금 / "이건 모순이 아니다" 판정
+    // 기록지 문장 선택 → '서로 모순되는 두 진술'을 고르면 모순 질문 해금.
+    // 한쪽만 누른 상태에서는 아직 판정하지 않고, 두 번째 진술까지 골라야 판정한다.
     // ------------------------------------------------------------------
     void OnRecordSelected(StatementRecord rec)
     {
         if (rec == null) return;
-        string sel = rec.recordId; // recordId == 증언 id
 
-        // 취조 중이 아니면 강조만 하고 판정하지 않는다(그냥 기록 열람).
+        // 선택 토글(최대 2개) + 강조 갱신
+        progress.ToggleSelection(rec.recordId, 2);
+        recordBook.SetSelected(progress.selectedTestimonyIds);
+
+        int count = progress.selectedTestimonyIds.Count;
+
+        // 취조 중이 아니면 판정하지 않고 강조만(그냥 기록 열람).
         if (CurrentSession == null)
         {
-            progress.selectedTestimonyId = (progress.selectedTestimonyId == sel) ? null : sel;
-            recordBook.SetSelected(progress.selectedTestimonyId);
+            recordBook.SetStatus("용의자를 호출한 뒤 모순되는 두 진술을 제시하세요.", StatusHint);
             return;
         }
 
-        // 같은 문장을 다시 누르면 선택 해제.
-        if (progress.selectedTestimonyId == sel)
+        // 두 진술이 모이기 전에는 안내만.
+        if (count < 2)
         {
-            progress.selectedTestimonyId = null;
-            recordBook.SetSelected(null);
-            PresentChoices();
+            recordBook.SetStatus(count == 1
+                ? "서로 모순되는 진술을 하나 더 선택하세요.  (1/2)"
+                : "모순되는 두 진술을 선택하세요.  (0/2)", StatusHint);
             return;
         }
 
-        progress.selectedTestimonyId = sel;
-
-        if (graph.SelectionUnlocksContradiction(currentSuspectId, progress, sel))
+        // 두 진술 선택 완료 → 모순 판정
+        if (graph.SelectionUnlocksContradiction(currentSuspectId, progress))
         {
-            // 올바른 근거 → 모순 질문이 목록에 나타난다.
-            recordBook.SetSelected(sel);
+            // 올바른 모순 → 모순 질문이 목록에 나타난다(선택 상태 유지).
+            recordBook.SetStatus("모순 발견 — 추궁할 수 있습니다.", StatusOk);
             recordBook.Hide();
             PresentChoices();
         }
         else
         {
-            // 모순과 무관한 문장 → 월터가 지적하고 선택을 해제한다.
-            progress.selectedTestimonyId = null;
-            recordBook.SetSelected(null);
-            recordBook.Hide();
-            dialogueManager.ShowLines(
-                new List<DialogueLine> { new DialogueLine("월터", "이건 모순이 아니다.") },
-                PresentChoices);
+            // 서로 모순되지 않는 두 진술 → 월터가 지적하고 선택을 해제한다(기록지는 열어 둠).
+            progress.ClearSelection();
+            recordBook.SetSelected(progress.selectedTestimonyIds);
+            recordBook.SetStatus("월터: 이건 모순이 아니다.", StatusBad);
         }
     }
 }

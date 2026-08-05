@@ -13,8 +13,8 @@ public class CaseProgress
     public readonly HashSet<string> obtainedTestimonyIds = new HashSet<string>();
     public readonly HashSet<string> completedSuspectIds = new HashSet<string>();
 
-    // 현재 기록지에서 모순 근거로 선택된 증언 id (없으면 null).
-    public string selectedTestimonyId;
+    // 현재 기록지에서 모순 근거로 선택된 증언 id들 (최대 2개 — 서로 모순되는 두 진술).
+    public readonly List<string> selectedTestimonyIds = new List<string>();
 
     public bool IsAsked(string questionId) =>
         !string.IsNullOrEmpty(questionId) && askedQuestionIds.Contains(questionId);
@@ -38,5 +38,20 @@ public class CaseProgress
     public void MarkSuspectCompleted(string suspectId)
     {
         if (!string.IsNullOrEmpty(suspectId)) completedSuspectIds.Add(suspectId);
+    }
+
+    // ----- 기록지 선택(모순 근거) -----
+    public bool IsSelected(string testimonyId) =>
+        !string.IsNullOrEmpty(testimonyId) && selectedTestimonyIds.Contains(testimonyId);
+
+    public void ClearSelection() => selectedTestimonyIds.Clear();
+
+    // 선택 토글: 이미 있으면 해제, 없으면 추가. max개를 넘으면 가장 오래된 선택을 밀어낸다.
+    public void ToggleSelection(string testimonyId, int max)
+    {
+        if (string.IsNullOrEmpty(testimonyId)) return;
+        if (selectedTestimonyIds.Contains(testimonyId)) { selectedTestimonyIds.Remove(testimonyId); return; }
+        if (max > 0 && selectedTestimonyIds.Count >= max) selectedTestimonyIds.RemoveAt(0);
+        selectedTestimonyIds.Add(testimonyId);
     }
 }

@@ -20,6 +20,10 @@ public class InterrogationCase : ScriptableObject
     public string caseTitle = "사건 제목";
     [TextArea(2, 5)] public string briefing;
 
+    [Header("사건 선택 화면 표시")]
+    public string caseNumber = "CASE-000";     // 사건파일에 표시할 번호
+    public Sprite caseImage;                   // 사건파일 종이 위에 얹을 이미지(없으면 색 박스)
+
     [Header("증언  (id를 질문의 Grant / 해금 조건에서 참조)")]
     public List<Testimony> testimonies = new List<Testimony>();
 

@@ -16,6 +16,7 @@ public class RecordBookController : MonoBehaviour
 
     RectTransform bookPanel;
     RectTransform cardContainer;
+    Text statusText;
 
     readonly Dictionary<string, RecordSheetCard> cards = new Dictionary<string, RecordSheetCard>();
 
@@ -42,10 +43,15 @@ public class RecordBookController : MonoBehaviour
         DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
         closeBtn.onClick.AddListener(Hide);
 
+        // 하단 상태 표시줄(모순 판정 피드백: "이건 모순이 아니다" 등)
+        statusText = DialogueUIUtil.CreateText(bookPanel, "Status", 18, TextAnchor.MiddleCenter, new Color(0.82f, 0.82f, 0.88f, 1f));
+        statusText.fontStyle = FontStyle.Bold;
+        DialogueUIUtil.Stretch(statusText.rectTransform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.07f), new Vector2(0, 6), new Vector2(0, 0));
+
         var containerGO = new GameObject("CardContainer", typeof(RectTransform));
         containerGO.transform.SetParent(bookPanel, false);
         cardContainer = containerGO.GetComponent<RectTransform>();
-        DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0f), new Vector2(1f, 0.9f), new Vector2(20, 20), new Vector2(-20, -10));
+        DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0.075f), new Vector2(1f, 0.9f), new Vector2(20, 10), new Vector2(-20, -10));
 
         var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
         layout.spacing = 15;
@@ -87,9 +93,17 @@ public class RecordBookController : MonoBehaviour
         if (session != null && cards.TryGetValue(session.suspectId, out card)) card.Refresh(session);
     }
 
-    /// <summary>모든 기록지에서 선택 강조를 갱신한다. null이면 전부 해제.</summary>
-    public void SetSelected(string selectedRecordId)
+    /// <summary>모든 기록지에서 선택 강조를 갱신한다. 목록이 비면 전부 해제.</summary>
+    public void SetSelected(ICollection<string> selectedRecordIds)
     {
-        foreach (var card in cards.Values) card.SetSelected(selectedRecordId);
+        foreach (var card in cards.Values) card.SetSelected(selectedRecordIds);
+    }
+
+    /// <summary>하단 상태 표시줄 문구/색을 갱신한다.</summary>
+    public void SetStatus(string text, Color color)
+    {
+        if (statusText == null) return;
+        statusText.text = text;
+        statusText.color = color;
     }
 }

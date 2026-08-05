@@ -33,8 +33,8 @@ public class QuestionNode
     [TestimonyId] public List<string> requiredTestimonyIds = new List<string>();  // 선행 증언(이 증언들을 이미 확보했어야 함)
     public bool requireAll = true;                                  // true=모든 조건(AND), false=하나라도(OR)
 
-    // 모순 질문 전용: 이 증언을 '기록지에서 선택'해야만 질문이 열린다. 비어 있으면 무시.
-    [TestimonyId] public string requiredSelectedTestimonyId;
+    // 모순 질문 전용: 이 증언들을 '모두' 기록지에서 선택해야 열린다(서로 모순되는 두 진술). 비어 있으면 무시.
+    [TestimonyId] public List<string> requiredSelectedTestimonyIds = new List<string>();
 
     // ------------------------------------------------------------------
     // 결과
@@ -83,10 +83,10 @@ public class QuestionNode
         return this;
     }
 
-    /// <summary>기록지에서 선택해야 열리는 모순 질문으로 지정한다.</summary>
-    public QuestionNode NeedSelected(string testimonyId)
+    /// <summary>기록지에서 '모두' 선택해야 열리는 모순 질문으로 지정한다(서로 모순되는 두 진술 등).</summary>
+    public QuestionNode NeedSelected(params string[] testimonyIds)
     {
-        requiredSelectedTestimonyId = testimonyId;
+        if (testimonyIds != null) requiredSelectedTestimonyIds.AddRange(testimonyIds);
         kind = NodeKind.Contradiction;
         return this;
     }

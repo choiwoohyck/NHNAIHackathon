@@ -78,16 +78,14 @@ public static class SampleCaseGraph
 
             // 3) 모순 질문 1 — 출근 여부: 동료 증언(T_B_LEAVE) 선택 + 클로버 알리바이(T_A_ALIBI) 필요
             new QuestionNode("A_C_LEAVE", "동료는 당신이 그날 연차였다고 합니다. 어느 쪽이 사실입니까?")
-                .NeedSelected("T_B_LEAVE")
-                .NeedTestimony("T_A_ALIBI")
+                .NeedSelected("T_A_ALIBI", "T_B_LEAVE")   // 클로버 '근무' 주장 ↔ 동료 '연차' 증언 — 둘 다 선택해야 열림
                 .Say(W, "당신은 그날 회사에서 근무했다고 했습니다. 그런데 동료는 당신이 연차를 써서 나오지 않았다고 진술했습니다. 어느 쪽이 사실입니까?")
                 .Say(nameA, "…그날은, 사실 출근하지 않았습니다. 제가 착각했던 모양입니다.")
                 .Grant("T_A_RECANT_LEAVE"),
 
             // 3) 모순 질문 2 — 관리자 권한: 보안 증언(T_C_ADMIN) 선택 + 클로버 권한없음(T_A_NOAUTH) 필요
             new QuestionNode("A_C_ADMIN", "보안 담당자는 당신에게 관리자 권한이 있었다고 합니다.")
-                .NeedSelected("T_C_ADMIN")
-                .NeedTestimony("T_A_NOAUTH")
+                .NeedSelected("T_A_NOAUTH", "T_C_ADMIN")   // 클로버 '권한 없음' 주장 ↔ 보안 '권한 있음' 증언 — 둘 다 선택
                 .Say(W, "권한이 없다고 하셨죠. 그런데 보안 담당자는 지난달부터 당신에게 임시 관리자 권한이 있었다고 진술했습니다.")
                 .Say(nameA, "…임시 권한이 있긴 했습니다. 말할 필요가 없다고 생각했을 뿐입니다.")
                 .Grant("T_A_RECANT_ADMIN"),

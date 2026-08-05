@@ -79,7 +79,7 @@ public class InterrogationGraphWindow : EditorWindow
                     string qk = "Q:" + q.id;
                     if (q.requiredQuestionIds != null) foreach (var pre in q.requiredQuestionIds) AddEdge("Q:" + pre, qk, 0);
                     if (q.requiredTestimonyIds != null) foreach (var pre in q.requiredTestimonyIds) AddEdge("T:" + pre, qk, 1);
-                    if (!string.IsNullOrEmpty(q.requiredSelectedTestimonyId)) AddEdge("T:" + q.requiredSelectedTestimonyId, qk, 3);
+                    if (q.requiredSelectedTestimonyIds != null) foreach (var sid in q.requiredSelectedTestimonyIds) AddEdge("T:" + sid, qk, 3);
                     if (q.grantTestimonyIds != null) foreach (var tid in q.grantTestimonyIds) AddEdge(qk, "T:" + tid, 2);
                 }
 
@@ -106,7 +106,7 @@ public class InterrogationGraphWindow : EditorWindow
         sb.Append("id: ").Append(q.id).Append('\n').Append("label: ").Append(q.label);
         if (q.requiredQuestionIds != null && q.requiredQuestionIds.Count > 0) sb.Append("\n선행질문: ").Append(string.Join(", ", q.requiredQuestionIds));
         if (q.requiredTestimonyIds != null && q.requiredTestimonyIds.Count > 0) sb.Append("\n선행증언: ").Append(string.Join(", ", q.requiredTestimonyIds));
-        if (!string.IsNullOrEmpty(q.requiredSelectedTestimonyId)) sb.Append("\n선택증언: ").Append(q.requiredSelectedTestimonyId);
+        if (q.requiredSelectedTestimonyIds != null && q.requiredSelectedTestimonyIds.Count > 0) sb.Append("\n선택증언: ").Append(string.Join(", ", q.requiredSelectedTestimonyIds));
         if (q.grantTestimonyIds != null && q.grantTestimonyIds.Count > 0) sb.Append("\n획득증언: ").Append(string.Join(", ", q.grantTestimonyIds));
         sb.Append("\n조건: ").Append(q.requireAll ? "AND(모두)" : "OR(하나라도)");
         return sb.ToString();

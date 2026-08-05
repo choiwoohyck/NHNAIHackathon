@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using CulpritDetection;
 
 // 최종 판결 화면. 모든 취조가 끝난 뒤 "사건 판결" 버튼으로 열린다.
@@ -24,6 +25,8 @@ public class VerdictController : MonoBehaviour
     string selectedSuspectId;
     Text resultText;
     Text culpritSlotLabel;   // 문장 속 {범인} 자리(선택한 용의자 이름 표시)
+
+    public string endingSceneName = "Ending";   // InterrogationController가 세팅. 제출 시 이 씬으로 결과 전달.
 
     readonly List<(CaseField field, InputField input)> pairs = new List<(CaseField, InputField)>();
     readonly Dictionary<string, Button> suspectButtons = new Dictionary<string, Button>();
@@ -189,6 +192,21 @@ public class VerdictController : MonoBehaviour
         int correct, total;
         var result = VerdictEvaluator.Evaluate(graph, selectedSuspectId, inputs, out correct, out total);
 
+        // 결과를 엔딩 씬으로 넘긴다. 엔딩 씬이 Build Settings에 있으면 이동, 아니면 패널 내 텍스트로 폴백.
+        GameSession.SetVerdict(result, correct, total, graph != null ? graph.culpritSuspectId : null);
+
+        if (!string.IsNullOrEmpty(endingSceneName) && Application.CanStreamedLevelBeLoaded(endingSceneName))
+        {
+            SceneManager.LoadScene(endingSceneName);
+            return;
+        }
+
+        ShowInlineResult(result, correct, total);
+    }
+
+    // 엔딩 씬이 아직 없을 때의 폴백: 판결 패널 안에 결과 텍스트만 표시.
+    void ShowInlineResult(VerdictResult result, int correct, int total)
+    {
         switch (result)
         {
             case VerdictResult.Success:
