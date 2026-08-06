@@ -17,6 +17,13 @@ public class VerdictController : MonoBehaviour
 
     const string CulpritToken = "범인";  // 템플릿의 {범인} 자리 = 지목한 용의자 이름이 채워짐
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.\n" +
+             "패널 내부(용의자 버튼/입력칸 등)는 사건 데이터에 맞춰 매번 다시 그려지므로 항상 코드로 생성된다.")]
+    [SerializeField] Canvas canvasOverride;
+    [SerializeField] RectTransform dimOverride;
+    [SerializeField] RectTransform panelOverride;
+
     RectTransform dim;      // 전체화면 배경(모달). 닫힘 상태에서는 통째로 꺼서 클릭을 가로채지 않게 한다.
     RectTransform panel;
     Font font;
@@ -43,25 +50,31 @@ public class VerdictController : MonoBehaviour
 
     void BuildShell()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("VerdictCanvas", 30);
+        var canvas = canvasOverride != null ? canvasOverride : DialogueUIUtil.CreateCanvas("VerdictCanvas", 30);
 
         // 어두운 전체 배경(열렸을 때만 뒤 클릭 차단)
-        dim = DialogueUIUtil.CreatePanel(canvas.transform, "VerdictDim", new Color(0f, 0f, 0f, 0.6f));
-        DialogueUIUtil.Stretch(dim, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        dim = dimOverride != null ? dimOverride : DialogueUIUtil.CreatePanel(canvas.transform, "VerdictDim", new Color(0f, 0f, 0f, 0.6f));
+        if (dimOverride == null)
+            DialogueUIUtil.Stretch(dim, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
         // 가운데 보고서 패널 (세로 레이아웃 + 내용에 맞춰 높이 자동)
-        panel = DialogueUIUtil.CreatePanel(dim, "VerdictPanel", new Color(0.1f, 0.1f, 0.13f, 0.98f));
-        panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
-        panel.pivot = new Vector2(0.5f, 0.5f);
-        panel.sizeDelta = new Vector2(780, 200);
+        panel = panelOverride != null ? panelOverride : DialogueUIUtil.CreatePanel(dim, "VerdictPanel", new Color(0.1f, 0.1f, 0.13f, 0.98f));
+        if (panelOverride == null)
+        {
+            panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
+            panel.pivot = new Vector2(0.5f, 0.5f);
+            panel.sizeDelta = new Vector2(780, 200);
+        }
 
-        var vlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
+        var vlg = panel.gameObject.GetComponent<VerticalLayoutGroup>();
+        if (vlg == null) vlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
         vlg.padding = new RectOffset(28, 28, 22, 22);
         vlg.spacing = 8;
         vlg.childControlWidth = vlg.childControlHeight = true;
         vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
-        var csf = panel.gameObject.AddComponent<ContentSizeFitter>();
+        var csf = panel.gameObject.GetComponent<ContentSizeFitter>();
+        if (csf == null) csf = panel.gameObject.AddComponent<ContentSizeFitter>();
         csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 

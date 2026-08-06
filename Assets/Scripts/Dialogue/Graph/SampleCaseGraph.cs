@@ -11,7 +11,7 @@
 // 그래프가 보여주는 4가지 해금 방식:
 //   1) 취조 시작부터        : 선행 조건 없는 노드            (A_WHERE, B_A_WHERE, C_ADMIN ...)
 //   2) 특정 질문 이후        : NeedQuestion(...)             (A_WHO_WITH, C_BREACH)
-//   3) 특정 증언 + 문장 선택 : NeedTestimony + NeedSelected  (A_C_LEAVE, A_C_ADMIN)
+//   3) 기록지 증언 2개 선택   : NeedSelected(a, b)            (A_C_LEAVE, A_C_ADMIN)
 //   4) 모순 질문 성공 이후   : 모순 질문 id를 NeedQuestion   (A_KNOWLEDGE)
 public static class SampleCaseGraph
 {
@@ -76,16 +76,16 @@ public static class SampleCaseGraph
                 .Say(W, "근무 중이었다면, 그 시간 곁에 누가 있었습니까?")
                 .Say(nameA, "다들 각자 자리에 있어서… 딱히 저를 본 사람은 없을 겁니다."),
 
-            // 3) 모순 질문 1 — 출근 여부: 동료 증언(T_B_LEAVE) 선택 + 클로버 알리바이(T_A_ALIBI) 필요
+            // 3) 모순 질문 1 — 출근 여부: 클로버 알리바이(T_A_ALIBI) ↔ 동료 증언(T_B_LEAVE)을 기록지에서 함께 선택
             new QuestionNode("A_C_LEAVE", "동료는 당신이 그날 연차였다고 합니다. 어느 쪽이 사실입니까?")
-                .NeedSelected("T_A_ALIBI", "T_B_LEAVE")   // 클로버 '근무' 주장 ↔ 동료 '연차' 증언 — 둘 다 선택해야 열림
+                .NeedSelected("T_A_ALIBI", "T_B_LEAVE")
                 .Say(W, "당신은 그날 회사에서 근무했다고 했습니다. 그런데 동료는 당신이 연차를 써서 나오지 않았다고 진술했습니다. 어느 쪽이 사실입니까?")
                 .Say(nameA, "…그날은, 사실 출근하지 않았습니다. 제가 착각했던 모양입니다.")
                 .Grant("T_A_RECANT_LEAVE"),
 
-            // 3) 모순 질문 2 — 관리자 권한: 보안 증언(T_C_ADMIN) 선택 + 클로버 권한없음(T_A_NOAUTH) 필요
+            // 3) 모순 질문 2 — 관리자 권한: 클로버 권한없음(T_A_NOAUTH) ↔ 보안 증언(T_C_ADMIN)을 기록지에서 함께 선택
             new QuestionNode("A_C_ADMIN", "보안 담당자는 당신에게 관리자 권한이 있었다고 합니다.")
-                .NeedSelected("T_A_NOAUTH", "T_C_ADMIN")   // 클로버 '권한 없음' 주장 ↔ 보안 '권한 있음' 증언 — 둘 다 선택
+                .NeedSelected("T_A_NOAUTH", "T_C_ADMIN")
                 .Say(W, "권한이 없다고 하셨죠. 그런데 보안 담당자는 지난달부터 당신에게 임시 관리자 권한이 있었다고 진술했습니다.")
                 .Say(nameA, "…임시 권한이 있긴 했습니다. 말할 필요가 없다고 생각했을 뿐입니다.")
                 .Grant("T_A_RECANT_ADMIN"),

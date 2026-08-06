@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,12 +27,29 @@ public class DialogueManager : MonoBehaviour
     public Color choiceButtonColor = new Color(1f, 1f, 1f, 0.08f);
     public Color contradictionChoiceColor = new Color(0.5f, 0.12f, 0.12f, 0.55f); // 모순 질문은 붉게 강조
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.")]
+    [SerializeField] Canvas canvasOverride;
+    [SerializeField] RectTransform dialoguePanelOverride;
+    [SerializeField] TMP_Text speakerTextOverride;
+    [SerializeField] TMP_Text bodyTextOverride;
+    [SerializeField] TMP_Text continueHintTextOverride;
+    [SerializeField] RectTransform choicePanelOverride;
+    [SerializeField] RectTransform choiceListContainerOverride;
+    [Tooltip("지정하면 선택지 버튼 배경 이미지로 사용한다. 비우면 기존처럼 단색 사각형.")]
+    [SerializeField] Sprite choiceButtonSprite;
+
+    [Header("취조 종료 버튼 그룹 (선택)")]
+    [Tooltip("취조 종료 버튼을 담은 오브젝트. 사건 개요(브리핑) 대사 중과 선택지를 고르는 중에는 숨기고, " +
+             "일반 대사 출력 중이거나 더 물어볼 질문이 없을 때(선택지 없음)만 보여준다. 비워두면 아무 동작도 하지 않는다.")]
+    [SerializeField] GameObject stopEndButtonsGroup;
+
     public DialogueState State { get; private set; } = DialogueState.Idle;
 
     RectTransform dialoguePanel;
-    Text speakerText;
-    Text bodyText;
-    Text continueHintText;
+    TMP_Text speakerText;
+    TMP_Text bodyText;
+    TMP_Text continueHintText;
 
     RectTransform choicePanel;
     RectTransform choiceListContainer;
@@ -56,53 +74,85 @@ public class DialogueManager : MonoBehaviour
         BuildUI();
         SetDialoguePanelVisible(false);
         SetChoicePanelVisible(false);
+        SetStopEndButtonsVisible(false);
     }
 
     void BuildUI()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("DialogueCanvas", 10);
+        var canvas = canvasOverride != null ? canvasOverride : DialogueUIUtil.CreateCanvas("DialogueCanvas", 10);
 
         // --- 대사창 ---
-        dialoguePanel = DialogueUIUtil.CreatePanel(canvas.transform, "DialoguePanel", dialoguePanelColor);
-        DialogueUIUtil.Stretch(dialoguePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.3f), Vector2.zero, Vector2.zero);
+        dialoguePanel = dialoguePanelOverride != null
+            ? dialoguePanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "DialoguePanel", dialoguePanelColor);
+        if (dialoguePanelOverride == null)
+            DialogueUIUtil.Stretch(dialoguePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.3f), Vector2.zero, Vector2.zero);
 
-        speakerText = DialogueUIUtil.CreateText(dialoguePanel, "SpeakerText", 28, TextAnchor.UpperLeft, Color.white);
-        speakerText.fontStyle = FontStyle.Bold;
-        DialogueUIUtil.Stretch(speakerText.rectTransform, new Vector2(0f, 0.72f), new Vector2(1f, 1f), new Vector2(30, 0), new Vector2(-30, -10));
+        speakerText = speakerTextOverride != null
+            ? speakerTextOverride
+            : DialogueUIUtil.CreateTMPText(dialoguePanel, "SpeakerText", 28, TextAnchor.UpperLeft, Color.white);
+        if (speakerTextOverride == null)
+        {
+            speakerText.fontStyle = FontStyles.Bold;
+            DialogueUIUtil.Stretch(speakerText.rectTransform, new Vector2(0f, 0.72f), new Vector2(1f, 1f), new Vector2(30, 0), new Vector2(-30, -10));
+        }
 
-        bodyText = DialogueUIUtil.CreateText(dialoguePanel, "BodyText", 24, TextAnchor.UpperLeft, Color.white);
-        DialogueUIUtil.Stretch(bodyText.rectTransform, new Vector2(0f, 0.1f), new Vector2(1f, 0.72f), new Vector2(30, 0), new Vector2(-30, 0));
+        bodyText = bodyTextOverride != null
+            ? bodyTextOverride
+            : DialogueUIUtil.CreateTMPText(dialoguePanel, "BodyText", 24, TextAnchor.UpperLeft, Color.white);
+        if (bodyTextOverride == null)
+            DialogueUIUtil.Stretch(bodyText.rectTransform, new Vector2(0f, 0.1f), new Vector2(1f, 0.72f), new Vector2(30, 0), new Vector2(-30, 0));
 
-        continueHintText = DialogueUIUtil.CreateText(dialoguePanel, "ContinueHint", 18, TextAnchor.LowerRight, new Color(1f, 1f, 1f, 0.6f));
-        continueHintText.text = "▼ 클릭하여 계속";
-        DialogueUIUtil.Stretch(continueHintText.rectTransform, new Vector2(0.6f, 0f), new Vector2(1f, 0.12f), new Vector2(0, 0), new Vector2(-20, 0));
+        continueHintText = continueHintTextOverride != null
+            ? continueHintTextOverride
+            : DialogueUIUtil.CreateTMPText(dialoguePanel, "ContinueHint", 18, TextAnchor.LowerRight, new Color(1f, 1f, 1f, 0.6f));
+        if (continueHintTextOverride == null)
+        {
+            continueHintText.text = "▼ 클릭하여 계속";
+            DialogueUIUtil.Stretch(continueHintText.rectTransform, new Vector2(0.6f, 0f), new Vector2(1f, 0.12f), new Vector2(0, 0), new Vector2(-20, 0));
+        }
 
-        // 대사창 전체를 클릭하면 다음 대사로 진행되도록 패널 자체에 버튼을 붙인다.
-        var advanceButton = dialoguePanel.gameObject.AddComponent<Button>();
+        // 대사창 전체를 클릭하면 다음 대사로 진행되도록 패널 자체에 버튼을 붙인다(이미 있으면 재사용).
+        var advanceButton = dialoguePanel.GetComponent<Button>();
+        if (advanceButton == null) advanceButton = dialoguePanel.gameObject.AddComponent<Button>();
         advanceButton.transition = Selectable.Transition.None;
         advanceButton.onClick.AddListener(OnDialogueClicked);
 
         // --- 선택지창 ---
-        choicePanel = DialogueUIUtil.CreatePanel(canvas.transform, "ChoicePanel", choicePanelColor);
-        DialogueUIUtil.Stretch(choicePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.4f), Vector2.zero, Vector2.zero);
+        choicePanel = choicePanelOverride != null
+            ? choicePanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "ChoicePanel", choicePanelColor);
+        if (choicePanelOverride == null)
+            DialogueUIUtil.Stretch(choicePanel, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.4f), Vector2.zero, Vector2.zero);
 
-        var listGO = new GameObject("ChoiceList", typeof(RectTransform));
-        listGO.transform.SetParent(choicePanel, false);
-        choiceListContainer = listGO.GetComponent<RectTransform>();
-        DialogueUIUtil.Stretch(choiceListContainer, Vector2.zero, Vector2.one, new Vector2(20, 20), new Vector2(-20, -20));
+        if (choiceListContainerOverride != null)
+        {
+            choiceListContainer = choiceListContainerOverride;
+        }
+        else
+        {
+            var listGO = new GameObject("ChoiceList", typeof(RectTransform));
+            listGO.transform.SetParent(choicePanel, false);
+            choiceListContainer = listGO.GetComponent<RectTransform>();
+            DialogueUIUtil.Stretch(choiceListContainer, Vector2.zero, Vector2.one, new Vector2(200, 200), new Vector2(-200, -200));
 
-        var layout = listGO.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 10;
-        layout.childForceExpandHeight = false;
-        layout.childControlHeight = true;
-        layout.childControlWidth = true;
+            var layout = listGO.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 10;
+            layout.childForceExpandHeight = false;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
 
-        var fitter = listGO.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var fitter = listGO.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        }
     }
 
     void SetDialoguePanelVisible(bool visible) => dialoguePanel.gameObject.SetActive(visible);
     void SetChoicePanelVisible(bool visible) => choicePanel.gameObject.SetActive(visible);
+    void SetStopEndButtonsVisible(bool visible)
+    {
+        if (stopEndButtonsGroup != null) stopEndButtonsGroup.SetActive(visible);
+    }
 
     /// <summary>
     /// 대사 여러 줄을 순서대로 출력한다. 다 출력되면 onComplete가 호출된다.
@@ -112,6 +162,7 @@ public class DialogueManager : MonoBehaviour
     {
         SetChoicePanelVisible(false);
         SetDialoguePanelVisible(true);
+        SetStopEndButtonsVisible(false);
 
         lineQueue = new Queue<DialogueLine>(lines);
         onLinesDone = onComplete;
@@ -197,7 +248,9 @@ public class DialogueManager : MonoBehaviour
 
         if (questions == null || questions.Count == 0)
         {
-            var hint = DialogueUIUtil.CreateText(choiceListContainer, "NoQuestionHint", 20, TextAnchor.MiddleCenter, Color.gray);
+            SetStopEndButtonsVisible(true);
+
+            var hint = DialogueUIUtil.CreateTMPText(choiceListContainer, "NoQuestionHint", 20, TextAnchor.MiddleCenter, Color.gray);
             hint.text = "(더 물어볼 질문이 없습니다)";
             var hintLe = hint.gameObject.AddComponent<LayoutElement>();
             hintLe.preferredHeight = 50;
@@ -205,12 +258,14 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        SetStopEndButtonsVisible(false);
+
         foreach (var q in questions)
         {
             var color = q.kind == NodeKind.Contradiction ? contradictionChoiceColor : choiceButtonColor;
-            var button = DialogueUIUtil.CreateButton(choiceListContainer, "Choice_" + q.id, q.label, color);
+            var button = DialogueUIUtil.CreateTMPButton(choiceListContainer, "Choice_" + q.id, q.label, color, choiceButtonSprite);
             var le = button.gameObject.AddComponent<LayoutElement>();
-            le.preferredHeight = 50;
+            le.preferredHeight = 20;
 
             var captured = q;
             button.onClick.AddListener(() =>
@@ -224,7 +279,7 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 대사창/선택지창을 모두 끄고 대기 상태로 되돌린다. 취조 중지/종료, 용의자 전환 시 사용.
+    /// 대사창/선택지창을 모두 끄고 대기 상태로 되돌린다. 취조 종료, 용의자 전환 시 사용.
     /// </summary>
     public void ResetToIdle()
     {
@@ -238,6 +293,7 @@ public class DialogueManager : MonoBehaviour
 
         SetDialoguePanelVisible(false);
         SetChoicePanelVisible(false);
+        SetStopEndButtonsVisible(false);
         State = DialogueState.Idle;
     }
 }

@@ -79,7 +79,7 @@ public class InterrogationGraphWindow : EditorWindow
                     string qk = "Q:" + q.id;
                     if (q.requiredQuestionIds != null) foreach (var pre in q.requiredQuestionIds) AddEdge("Q:" + pre, qk, 0);
                     if (q.requiredTestimonyIds != null) foreach (var pre in q.requiredTestimonyIds) AddEdge("T:" + pre, qk, 1);
-                    if (q.requiredSelectedTestimonyIds != null) foreach (var sid in q.requiredSelectedTestimonyIds) AddEdge("T:" + sid, qk, 3);
+                    if (q.requiredSelectedTestimonyIds != null) foreach (var sel in q.requiredSelectedTestimonyIds) AddEdge("T:" + sel, qk, 3);
                     if (q.grantTestimonyIds != null) foreach (var tid in q.grantTestimonyIds) AddEdge(qk, "T:" + tid, 2);
                 }
 

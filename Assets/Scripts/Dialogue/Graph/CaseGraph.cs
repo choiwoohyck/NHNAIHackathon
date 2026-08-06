@@ -75,29 +75,11 @@ public class CaseGraph
         // 이미 물어봤고 반복 불가면 목록에서 사라진다.
         if (p.IsAsked(node.id) && !node.repeatable) return false;
 
-        // 모순 질문: 지정된 증언들이 '모두' 기록지에서 선택돼 있어야 열린다(서로 모순되는 두 진술).
-        if (node.requiredSelectedTestimonyIds != null)
-            foreach (var id in node.requiredSelectedTestimonyIds)
-                if (!p.IsSelected(id)) return false;
+        // 모순 질문은 일반 질문 목록에 나타나지 않는다 — 기록지에서 증언 2개를 선택해
+        // FindContradictionNode로 직접 판정하고 곧바로 추궁한다.
+        if (node.RequiredSelectedCount() > 0) return false;
 
-        bool hasQ = node.requiredQuestionIds != null && node.requiredQuestionIds.Count > 0;
-        bool hasT = node.requiredTestimonyIds != null && node.requiredTestimonyIds.Count > 0;
-
-        // 선행 조건이 아예 없으면 (선택 게이트를 통과했다는 전제 하에) 바로 사용 가능.
-        if (!hasQ && !hasT) return true;
-
-        if (node.requireAll)
-        {
-            // AND: 모든 선행 질문 + 모든 선행 증언 충족
-            if (hasQ) foreach (var id in node.requiredQuestionIds) if (!p.IsAsked(id)) return false;
-            if (hasT) foreach (var id in node.requiredTestimonyIds) if (!p.HasTestimony(id)) return false;
-            return true;
-        }
-
-        // OR: 선행 질문/증언 중 하나라도 충족되면 열림
-        if (hasQ) foreach (var id in node.requiredQuestionIds) if (p.IsAsked(id)) return true;
-        if (hasT) foreach (var id in node.requiredTestimonyIds) if (p.HasTestimony(id)) return true;
-        return false;
+        return PrerequisitesMet(node, p);
     }
 
     /// <summary>해당 용의자에게 지금 물어볼 수 있는 질문 목록(authored 순서 유지).</summary>
@@ -113,16 +95,57 @@ public class CaseGraph
     }
 
     /// <summary>
-    /// 방금 선택한 증언이 '이 용의자의' 모순 질문을 실제로 여는가?
-    /// 기록지에서 엉뚱한 문장을 골랐을 때 "이건 모순이 아니다"를 판정하는 데 쓴다.
+    /// 지금 선택된 증언 조합(최대 2개)이 어느 용의자의 모순 질문과 정확히 일치하는지 찾는다(순서 무관).
+    /// 일치하면 그 질문 노드를 돌려주고 owner에 소속 용의자 id를 담는다. 없으면 null.
     /// </summary>
-    public bool SelectionUnlocksContradiction(string suspectId, CaseProgress p)
+    public QuestionNode FindContradictionNode(CaseProgress p, out string ownerSuspectId)
     {
-        var s = GetSuspect(suspectId);
-        if (s == null) return false;
-        foreach (var node in s.questions)
-            if (node.requiredSelectedTestimonyIds != null && node.requiredSelectedTestimonyIds.Count > 0 && IsAvailable(node, p))
-                return true;
+        ownerSuspectId = null;
+        if (p == null || p.SelectedCount == 0) return null;
+
+        foreach (var s in suspects)
+        {
+            foreach (var node in s.questions)
+            {
+                if (node.RequiredSelectedCount() != p.SelectedCount) continue;
+                if (p.IsAsked(node.id) && !node.repeatable) continue;
+                if (!SameIds(node.requiredSelectedTestimonyIds, p.selectedTestimonyIds)) continue;
+                if (!PrerequisitesMet(node, p)) continue;
+
+                ownerSuspectId = s.id;
+                return node;
+            }
+        }
+        return null;
+    }
+
+    static bool SameIds(List<string> a, List<string> b)
+    {
+        if (a.Count != b.Count) return false;
+        foreach (var id in a) if (!b.Contains(id)) return false;
+        return true;
+    }
+
+    /// <summary>선행 '질문'/'증언' 조건(모순 여부와 무관)만 판정한다.</summary>
+    bool PrerequisitesMet(QuestionNode node, CaseProgress p)
+    {
+        bool hasQ = node.requiredQuestionIds != null && node.requiredQuestionIds.Count > 0;
+        bool hasT = node.requiredTestimonyIds != null && node.requiredTestimonyIds.Count > 0;
+
+        // 선행 조건이 아예 없으면 바로 사용 가능.
+        if (!hasQ && !hasT) return true;
+
+        if (node.requireAll)
+        {
+            // AND: 모든 선행 질문 + 모든 선행 증언 충족
+            if (hasQ) foreach (var id in node.requiredQuestionIds) if (!p.IsAsked(id)) return false;
+            if (hasT) foreach (var id in node.requiredTestimonyIds) if (!p.HasTestimony(id)) return false;
+            return true;
+        }
+
+        // OR: 선행 질문/증언 중 하나라도 충족되면 열림
+        if (hasQ) foreach (var id in node.requiredQuestionIds) if (p.IsAsked(id)) return true;
+        if (hasT) foreach (var id in node.requiredTestimonyIds) if (p.HasTestimony(id)) return true;
         return false;
     }
 

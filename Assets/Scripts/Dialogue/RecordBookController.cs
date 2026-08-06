@@ -14,9 +14,16 @@ public class RecordBookController : MonoBehaviour
     // 기록 문장(증언)을 클릭했을 때 호출된다. InterrogationController가 구독한다.
     public Action<StatementRecord> OnStatementClicked;
 
+    [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
+    [Tooltip("비워두면 런타임에 자동 생성된다. 지정하면 해당 오브젝트를 그대로 사용한다.")]
+    [SerializeField] Canvas canvasOverride;
+    [SerializeField] RectTransform bookPanelOverride;
+    [SerializeField] Text titleOverride;
+    [SerializeField] Button closeBtnOverride;
+    [SerializeField] RectTransform cardContainerOverride;
+
     RectTransform bookPanel;
     RectTransform cardContainer;
-    Text statusText;
 
     readonly Dictionary<string, RecordSheetCard> cards = new Dictionary<string, RecordSheetCard>();
 
@@ -29,38 +36,52 @@ public class RecordBookController : MonoBehaviour
 
     void BuildUI()
     {
-        var canvas = DialogueUIUtil.CreateCanvas("RecordBookCanvas", 20);
+        var canvas = canvasOverride != null ? canvasOverride : DialogueUIUtil.CreateCanvas("RecordBookCanvas", 20);
 
-        bookPanel = DialogueUIUtil.CreatePanel(canvas.transform, "RecordBookPanel", new Color(0.05f, 0.05f, 0.05f, 0.92f));
-        DialogueUIUtil.Stretch(bookPanel, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero);
+        bookPanel = bookPanelOverride != null
+            ? bookPanelOverride
+            : DialogueUIUtil.CreatePanel(canvas.transform, "RecordBookPanel", new Color(0.05f, 0.05f, 0.05f, 0.92f));
+        if (bookPanelOverride == null)
+            DialogueUIUtil.Stretch(bookPanel, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero);
 
-        var title = DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
-        title.fontStyle = FontStyle.Bold;
-        title.text = "취조 기록지  —  문장을 눌러 모순의 근거로 선택하세요";
-        DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
+        var title = titleOverride != null
+            ? titleOverride
+            : DialogueUIUtil.CreateText(bookPanel, "Title", 26, TextAnchor.MiddleLeft, Color.white);
+        if (titleOverride == null)
+        {
+            title.fontStyle = FontStyle.Bold;
+            title.text = "취조 기록지  —  서로 모순되는 문장 2개를 선택하세요";
+            DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0f, 0.92f), new Vector2(0.85f, 1f), new Vector2(20, 0), new Vector2(0, 0));
+        }
 
-        var closeBtn = DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
-        DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
+        var closeBtn = closeBtnOverride != null
+            ? closeBtnOverride
+            : DialogueUIUtil.CreateButton(bookPanel, "CloseBtn", "닫기", new Color(0.3f, 0.1f, 0.1f, 0.9f));
+        if (closeBtnOverride == null)
+            DialogueUIUtil.Stretch(closeBtn.GetComponent<RectTransform>(), new Vector2(0.87f, 0.92f), new Vector2(1f, 1f), new Vector2(0, 5), new Vector2(-15, -5));
         closeBtn.onClick.AddListener(Hide);
 
-        // 하단 상태 표시줄(모순 판정 피드백: "이건 모순이 아니다" 등)
-        statusText = DialogueUIUtil.CreateText(bookPanel, "Status", 18, TextAnchor.MiddleCenter, new Color(0.82f, 0.82f, 0.88f, 1f));
-        statusText.fontStyle = FontStyle.Bold;
-        DialogueUIUtil.Stretch(statusText.rectTransform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.07f), new Vector2(0, 6), new Vector2(0, 0));
+        if (cardContainerOverride != null)
+        {
+            cardContainer = cardContainerOverride;
+        }
+        else
+        {
+            var containerGO = new GameObject("CardContainer", typeof(RectTransform));
+            containerGO.transform.SetParent(bookPanel, false);
+            cardContainer = containerGO.GetComponent<RectTransform>();
+            DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0f), new Vector2(1f, 0.9f), new Vector2(20, 20), new Vector2(-20, -10));
 
-        var containerGO = new GameObject("CardContainer", typeof(RectTransform));
-        containerGO.transform.SetParent(bookPanel, false);
-        cardContainer = containerGO.GetComponent<RectTransform>();
-        DialogueUIUtil.Stretch(cardContainer, new Vector2(0f, 0.075f), new Vector2(1f, 0.9f), new Vector2(20, 10), new Vector2(-20, -10));
-
-        var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 15;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = true;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
+            var layout = containerGO.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 15;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+        }
     }
 
+    public bool IsVisible => bookPanel != null && bookPanel.gameObject.activeSelf;
     public void ToggleVisible() => bookPanel.gameObject.SetActive(!bookPanel.gameObject.activeSelf);
     public void Show() => bookPanel.gameObject.SetActive(true);
     public void Hide() => bookPanel.gameObject.SetActive(false);
@@ -86,24 +107,9 @@ public class RecordBookController : MonoBehaviour
         card.Refresh(session);
     }
 
-    /// <summary>이미 책상에 나와 있는 기록지만 갱신한다(없으면 새로 만들지 않음).</summary>
-    public void UpdateSheetIfExists(SuspectSession session)
-    {
-        RecordSheetCard card;
-        if (session != null && cards.TryGetValue(session.suspectId, out card)) card.Refresh(session);
-    }
-
-    /// <summary>모든 기록지에서 선택 강조를 갱신한다. 목록이 비면 전부 해제.</summary>
+    /// <summary>모든 기록지에서 선택 강조를 갱신한다. null/비어 있으면 전부 해제.</summary>
     public void SetSelected(ICollection<string> selectedRecordIds)
     {
         foreach (var card in cards.Values) card.SetSelected(selectedRecordIds);
-    }
-
-    /// <summary>하단 상태 표시줄 문구/색을 갱신한다.</summary>
-    public void SetStatus(string text, Color color)
-    {
-        if (statusText == null) return;
-        statusText.text = text;
-        statusText.color = color;
     }
 }

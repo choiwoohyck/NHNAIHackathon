@@ -107,6 +107,7 @@ MonoBehaviour:
   - id: A
     suspectName: "\uD074\uB85C\uBC84"
     occupation: "\uC815\uBD80\uAE30\uAD00 \uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uC9C1\uC6D0"
+    portrait: {fileID: -2232829338279070883, guid: 10f87886577451245a0bcb85429ae4bc, type: 3}
     questions:
     - id: A_WHERE
       label: "\uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
@@ -120,7 +121,7 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_A_ALIBI
       repeatable: 0
@@ -137,7 +138,7 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_A_NOAUTH
       repeatable: 0
@@ -154,7 +155,7 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_A_RELATION
       repeatable: 0
@@ -172,7 +173,7 @@ MonoBehaviour:
       - A_WHERE
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds: []
       repeatable: 0
     - id: A_C_LEAVE
@@ -189,8 +190,7 @@ MonoBehaviour:
         text: "\u2026\uADF8\uB0A0\uC740, \uC0AC\uC2E4 \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.
           \uC81C\uAC00 \uCC29\uAC01\uD588\uB358 \uBAA8\uC591\uC785\uB2C8\uB2E4."
       requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_ALIBI
+      requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyIds:
       - T_A_ALIBI
@@ -213,8 +213,7 @@ MonoBehaviour:
           \uB9D0\uD560 \uD544\uC694\uAC00 \uC5C6\uB2E4\uACE0 \uC0DD\uAC01\uD588\uC744
           \uBFD0\uC785\uB2C8\uB2E4."
       requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_NOAUTH
+      requiredTestimonyIds: []
       requireAll: 1
       requiredSelectedTestimonyIds:
       - T_A_NOAUTH
@@ -237,13 +236,14 @@ MonoBehaviour:
       - A_C_ADMIN
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_A_KNOWLEDGE
       repeatable: 0
   - id: B
-    suspectName: "\uB9AC\uB098"
+    suspectName: "\uB809\uC2A4"
     occupation: "\uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uB3D9\uB8CC"
+    portrait: {fileID: 8210437390359269097, guid: f6a818e865164cd4999ae72fa0989170, type: 3}
     questions:
     - id: B_A_WHERE
       label: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0
@@ -259,7 +259,7 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_B_LEAVE
       repeatable: 0
@@ -275,13 +275,14 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_B_CONFLICT
       repeatable: 0
   - id: C
-    suspectName: "\uAC00\uB81B"
+    suspectName: "\uD578\uB354\uC2A8"
     occupation: "\uC815\uBD80\uAE30\uAD00 \uBCF4\uC548 \uB2F4\uB2F9\uC790"
+    portrait: {fileID: 7848557645660954504, guid: f1c3f8ba2ea564f4885b9f7868d768f3, type: 3}
     questions:
     - id: C_ADMIN
       label: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740
@@ -297,7 +298,7 @@ MonoBehaviour:
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_C_ADMIN
       repeatable: 0
@@ -317,7 +318,7 @@ MonoBehaviour:
       - C_ADMIN
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_C_INTERNAL
       repeatable: 0

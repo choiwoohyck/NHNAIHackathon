@@ -33,8 +33,10 @@ public class QuestionNode
     [TestimonyId] public List<string> requiredTestimonyIds = new List<string>();  // 선행 증언(이 증언들을 이미 확보했어야 함)
     public bool requireAll = true;                                  // true=모든 조건(AND), false=하나라도(OR)
 
-    // 모순 질문 전용: 이 증언들을 '모두' 기록지에서 선택해야 열린다(서로 모순되는 두 진술). 비어 있으면 무시.
+    // 모순 질문 전용: 기록지에서 이 증언들을 '함께 선택'해야만 모순이 성립한다(순서 무관). 비어 있으면 일반 질문.
     [TestimonyId] public List<string> requiredSelectedTestimonyIds = new List<string>();
+
+    public int RequiredSelectedCount() => requiredSelectedTestimonyIds.Count;
 
     // ------------------------------------------------------------------
     // 결과
@@ -54,7 +56,7 @@ public class QuestionNode
     // ------------------------------------------------------------------
     // 코드로 데이터를 짤 때 읽기 쉽도록 하는 체이닝 빌더.
     // 예)  new QuestionNode("A_C_LEAVE", "그날 연차였다던데요?")
-    //          .NeedSelected("T_B_LEAVE").NeedTestimony("T_A_ALIBI")
+    //          .NeedSelected("T_B_LEAVE", "T_A_ALIBI")
     //          .Say("월터", "...").Say("클로버", "...")
     //          .Grant("T_A_RECANT_LEAVE");
     // ------------------------------------------------------------------
@@ -83,7 +85,7 @@ public class QuestionNode
         return this;
     }
 
-    /// <summary>기록지에서 '모두' 선택해야 열리는 모순 질문으로 지정한다(서로 모순되는 두 진술 등).</summary>
+    /// <summary>기록지에서 함께 선택해야 모순이 성립하는 증언 조합을 지정한다(모순 질문으로 지정).</summary>
     public QuestionNode NeedSelected(params string[] testimonyIds)
     {
         if (testimonyIds != null) requiredSelectedTestimonyIds.AddRange(testimonyIds);

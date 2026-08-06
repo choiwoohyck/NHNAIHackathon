@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 4d238b58a2b65564b8d63a3eab04342b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6878845063993676710
+    second: Recorder 1_0
+  - first:
+      213: 6919752341775427233
+    second: Recorder 1_1
+  - first:
+      213: -4443682613621067078
+    second: Recorder 1_2
+  - first:
+      213: 2149219381337343366
+    second: Recorder 1_3
+  - first:
+      213: -7644601192612100521
+    second: Recorder 1_4
+  - first:
+      213: 3394290448491355738
+    second: Recorder 1_5
+  - first:
+      213: 123541270490268815
+    second: Recorder 1_6
+  - first:
+      213: -2046941843641644307
+    second: Recorder 1_7
+  - first:
+      213: 154016600480674242
+    second: Recorder 1_8
+  - first:
+      213: 6475802924162553312
+    second: Recorder 1_9
+  - first:
+      213: 6684947546351136558
+    second: Recorder 1_10
+  - first:
+      213: -4463375668209714476
+    second: Recorder 1_11
+  - first:
+      213: 5505533327589894109
+    second: Recorder 1_12
+  - first:
+      213: 4054171050056236043
+    second: Recorder 1_13
+  - first:
+      213: 812260557145848098
+    second: Recorder 1_14
+  - first:
+      213: -7546783840662452655
+    second: Recorder 1_15
+  - first:
+      213: -4542017807118019783
+    second: Recorder 1_16
+  - first:
+      213: 4028622405953483155
+    second: Recorder 1_17
+  - first:
+      213: 4619949877129923782
+    second: Recorder 1_18
+  - first:
+      213: 909366177465037676
+    second: Recorder 1_19
+  - first:
+      213: 8431752846147272218
+    second: Recorder 1_20
+  - first:
+      213: -1746663369574308807
+    second: Recorder 1_21
+  - first:
+      213: 7539164449825672504
+    second: Recorder 1_22
+  - first:
+      213: 4610761613184041462
+    second: Recorder 1_23
+  - first:
+      213: 4665486864847245482
+    second: Recorder 1_24
+  - first:
+      213: -4464674851555128712
+    second: Recorder 1_25
+  - first:
+      213: -4236402603387037887
+    second: Recorder 1_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Recorder 1_0
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 3143
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5c25b72cde6980a0800000000000000
+      internalID: -6878845063993676710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_1
+      rect:
+        serializedVersion: 2
+        x: 4323
+        y: 3131
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a6a339a716e70060800000000000000
+      internalID: 6919752341775427233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_2
+      rect:
+        serializedVersion: 2
+        x: 4715
+        y: 3103
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab27980e43ed452c0800000000000000
+      internalID: -4443682613621067078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_3
+      rect:
+        serializedVersion: 2
+        x: 4523
+        y: 3087
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6854ff8e3af83dd10800000000000000
+      internalID: 2149219381337343366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_4
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 3079
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75604d8d7bbe8e590800000000000000
+      internalID: -7644601192612100521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_5
+      rect:
+        serializedVersion: 2
+        x: 3759
+        y: 3071
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5e14dedd21fa1f20800000000000000
+      internalID: 3394290448491355738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_6
+      rect:
+        serializedVersion: 2
+        x: 3759
+        y: 3055
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f844ca68128e6b100800000000000000
+      internalID: 123541270490268815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_7
+      rect:
+        serializedVersion: 2
+        x: 3955
+        y: 3055
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dea4bd50d3dc793e0800000000000000
+      internalID: -2046941843641644307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_8
+      rect:
+        serializedVersion: 2
+        x: 3759
+        y: 3039
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c1f929384d232200800000000000000
+      internalID: 154016600480674242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_9
+      rect:
+        serializedVersion: 2
+        x: 4323
+        y: 3039
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e51522037caed950800000000000000
+      internalID: 6475802924162553312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_10
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 3015
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2fe0620064b5cc50800000000000000
+      internalID: 6684947546351136558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_11
+      rect:
+        serializedVersion: 2
+        x: 4139
+        y: 3019
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4dafc3d4a77ee02c0800000000000000
+      internalID: -4463375668209714476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_12
+      rect:
+        serializedVersion: 2
+        x: 3759
+        y: 3007
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd7e1125465976c40800000000000000
+      internalID: 5505533327589894109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_13
+      rect:
+        serializedVersion: 2
+        x: 4323
+        y: 3007
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0c3641171f434830800000000000000
+      internalID: 4054171050056236043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_14
+      rect:
+        serializedVersion: 2
+        x: 1903
+        y: 2995
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2293db55caab54b00800000000000000
+      internalID: 812260557145848098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_15
+      rect:
+        serializedVersion: 2
+        x: 4323
+        y: 2947
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15608acd410744790800000000000000
+      internalID: -7546783840662452655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_16
+      rect:
+        serializedVersion: 2
+        x: 4143
+        y: 2927
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9335b3b7ed287f0c0800000000000000
+      internalID: -4542017807118019783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_17
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 2851
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3917901dbba88e730800000000000000
+      internalID: 4028622405953483155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_18
+      rect:
+        serializedVersion: 2
+        x: 3763
+        y: 2851
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cc407a8feb5d1040800000000000000
+      internalID: 4619949877129923782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_19
+      rect:
+        serializedVersion: 2
+        x: 4527
+        y: 2839
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c63fe8a68b7be9c00800000000000000
+      internalID: 909366177465037676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_20
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 2819
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1e3f7c4a8a930570800000000000000
+      internalID: 8431752846147272218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_21
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 2787
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 934265a6bea92c7e0800000000000000
+      internalID: -1746663369574308807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_22
+      rect:
+        serializedVersion: 2
+        x: 4327
+        y: 2791
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83dcc177f1e70a860800000000000000
+      internalID: 7539164449825672504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_23
+      rect:
+        serializedVersion: 2
+        x: 1979
+        y: 2783
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f187d12247bcff30800000000000000
+      internalID: 4610761613184041462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 155
+        width: 6020
+        height: 2622
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa09873b5932fb040800000000000000
+      internalID: 4665486864847245482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_25
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 127
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87acf6b90e94a02c0800000000000000
+      internalID: -4464674851555128712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Recorder 1_26
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 95
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 147539317464535c0800000000000000
+      internalID: -4236402603387037887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Recorder 1_0: -6878845063993676710
+      Recorder 1_1: 6919752341775427233
+      Recorder 1_10: 6684947546351136558
+      Recorder 1_11: -4463375668209714476
+      Recorder 1_12: 5505533327589894109
+      Recorder 1_13: 4054171050056236043
+      Recorder 1_14: 812260557145848098
+      Recorder 1_15: -7546783840662452655
+      Recorder 1_16: -4542017807118019783
+      Recorder 1_17: 4028622405953483155
+      Recorder 1_18: 4619949877129923782
+      Recorder 1_19: 909366177465037676
+      Recorder 1_2: -4443682613621067078
+      Recorder 1_20: 8431752846147272218
+      Recorder 1_21: -1746663369574308807
+      Recorder 1_22: 7539164449825672504
+      Recorder 1_23: 4610761613184041462
+      Recorder 1_24: 4665486864847245482
+      Recorder 1_25: -4464674851555128712
+      Recorder 1_26: -4236402603387037887
+      Recorder 1_3: 2149219381337343366
+      Recorder 1_4: -7644601192612100521
+      Recorder 1_5: 3394290448491355738
+      Recorder 1_6: 123541270490268815
+      Recorder 1_7: -2046941843641644307
+      Recorder 1_8: 154016600480674242
+      Recorder 1_9: 6475802924162553312
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
