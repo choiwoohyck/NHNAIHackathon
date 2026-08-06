@@ -10,29 +10,46 @@ using UnityEngine.InputSystem.UI;
 // 프로토타입 단계라 프리팹/에디터 UI 세팅 없이 스크립트만 씬에 올리면 바로 테스트할 수 있도록 하기 위함.
 public static class DialogueUIUtil
 {
+    static Font _defaultFont;
+    // 본문(일반) 폰트. 한글 게임이므로 NotoSans를 쓴다(WebGL 포함 모든 플랫폼에서 한글 렌더).
+    //  1) Resources의 NotoSansKR-Regular(본문용, 가벼운 웨이트) → 파일을 넣으면 자동 적용.
+    //  2) 없으면 NotoSansKR-Black(제목용, 굵음)으로 대체(그래도 한글은 나옴, 조금 두꺼울 뿐).
+    //  3) 그래도 없으면 내장 폰트(한글 없음 — 최후의 폴백).
     public static Font DefaultFont
     {
         get
         {
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            if (font == null) font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            return font;
+            if (_defaultFont != null) return _defaultFont;
+            _defaultFont = Resources.Load<Font>("NotoSansKR-Regular");
+            if (_defaultFont == null) _defaultFont = Resources.Load<Font>("NotoSansKR-Black");
+            if (_defaultFont == null) _defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (_defaultFont == null) _defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            return _defaultFont;
         }
     }
 
     static Font _koreanFont;
-    // 한글 표시/입력(InputField)용 동적 폰트. OS의 맑은 고딕 등을 사용하고, 실패 시 기본 폰트로 대체.
+    // 한글 표시/입력(InputField)용 폰트.
+    //  1) Resources의 NotoSansKR(.ttf 임베드) — WebGL 포함 모든 플랫폼에서 동작(웹 한글 표시의 핵심).
+    //  2) 폴백: OS 동적 폰트(맑은 고딕 등) — 에디터/PC 전용, WebGL엔 OS 폰트가 없어 안 됨.
+    //  3) 그래도 없으면 기본 폰트.
     public static Font KoreanFont
     {
         get
         {
             if (_koreanFont != null) return _koreanFont;
-            try
+
+            _koreanFont = Resources.Load<Font>("NotoSansKR-Black");
+
+            if (_koreanFont == null)
             {
-                _koreanFont = Font.CreateDynamicFontFromOSFont(
-                    new[] { "Malgun Gothic", "맑은 고딕", "Gulim", "Dotum", "Batang", "Arial" }, 16);
+                try
+                {
+                    _koreanFont = Font.CreateDynamicFontFromOSFont(
+                        new[] { "Malgun Gothic", "맑은 고딕", "Gulim", "Dotum", "Batang", "Arial" }, 16);
+                }
+                catch { }
             }
-            catch { }
             if (_koreanFont == null) _koreanFont = DefaultFont;
             return _koreanFont;
         }

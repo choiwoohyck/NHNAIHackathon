@@ -151,17 +151,23 @@ MonoBehaviour:
   cases:
   - {fileID: 11400000, guid: 2a448eb2a677a0d45b9279686b133118, type: 2}
   - {fileID: 11400000, guid: f8a850ec5ded325458971bce953d20ce, type: 2}
-  backgroundSprite: {fileID: 5760202260919997367, guid: 5137fbdd7536ef744908ce9954c56cd5, type: 3}
-  fileSprite: {fileID: 6081049836902206418, guid: f7a464b3128b3a6459a8f6d8367b20a3, type: 3}
-  slideSfx: {fileID: 8300000, guid: ea662da2cb9ceb944945c29d2767b67c, type: 3}
-  hoverSfx: {fileID: 8300000, guid: 80982e907867e0e42ac82d3d385a5b86, type: 3}
-  selectSfx: {fileID: 8300000, guid: 8f794b8f3396bab459015ec3a5c0bc05, type: 3}
-  interrogationSceneName: Chat
-  bgFade: 0.4
-  filesIn: 0.5
-  selectMove: 0.35
-  zoom: 0.5
-  transition: 0.3
+  closedFileSprite: {fileID: 4300338663085148452, guid: 1e637f4dea39d5542803afc53b4f8241, type: 3}
+  openFileSprite: {fileID: -5181418155262817236, guid: 1ebc69b6c9eb68149bb49f401889e9f2, type: 3}
+  openVideo: {fileID: 32900000, guid: 7f86bc77bebc2bc4d976eb187127ae4b, type: 3}
+  openVideoFileName: CaseSelectStartVideo.mp4
+  openSfx: {fileID: 8300000, guid: c50495f7e8199eb4fba5526d68e58251, type: 3}
+  startSfx: {fileID: 8300000, guid: 52a641401709d4d4a833e5959b4dc3e2, type: 3}
+  interrogationSceneName: Main
+  openInfoAnchorMin: {x: 0.54, y: 0.16}
+  openInfoAnchorMax: {x: 0.74, y: 0.66}
+  stampSprite: {fileID: 21300000, guid: c9ac111a737d1dc4bbcbcf8036bbae6d, type: 3}
+  stampAnchorMin: {x: 0.6, y: 0.57}
+  stampAnchorMax: {x: 0.8, y: 0.71}
+  vignette: 1
+  startFlicker: 1
+  lightBreathe: 1
+  openFade: 0.35
+  endFade: 0.4
 --- !u!4 &553611655
 Transform:
   m_ObjectHideFlags: 0

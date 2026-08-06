@@ -1,61 +1,115 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
+using UnityEngine.Video;
 
-// 사건 선택 화면. 어두운 책상 위 사건파일들을 보여주고, 하나를 고르면 그 사건(InterrogationCase)을
-// GameSession에 담아 취조 씬으로 넘어간다.
-// 사용법: 빈 CaseSelect 씬을 만들고 아무 GameObject에 이 스크립트를 붙인 뒤,
-//         Cases에 InterrogationCase들을 넣고(같은 사건을 두 번 넣어 파일 2개로 보여줘도 됨),
-//         배경/파일 스프라이트·효과음을 Inspector에서 지정하면 된다(없으면 색 박스로 대체).
+// 사건 선택 화면 (책상 위 사건파일 사진/영상 기반).
+//   흐름: [닫힌 파일] → '사건 열기' → (여는 영상 재생) → [열린 파일 + 사건 정보] → '수사 시작' → (페이드) → 취조 씬
+//
+// 리소스는 모든 사건이 공용으로 쓴다(닫힌 사진 1 / 열린 사진 1 / 여는 영상 1). 사건별 정보(번호·제목·브리핑)는
+// 사진 위에 UI 텍스트로 얹으므로, 사건이 늘어도 새 이미지를 만들 필요가 없다.
+//
+// 사용법: 빈 CaseSelect 씬 → 아무 GameObject에 이 스크립트 → Cases와 Closed/Open Sprite, Open Video를 지정.
+// 리소스를 비워두면 색 박스/즉시 전환으로 대체되어 흐름은 그대로 돈다.
 public class CaseSelectController : MonoBehaviour
 {
     [Header("표시할 사건들")]
-    [SerializeField] InterrogationCase[] cases;
+    [SerializeField]
+    InterrogationCase[] cases;
 
-    [Header("아트 (없으면 색 박스로 대체)")]
-    [SerializeField] Sprite backgroundSprite;
-    [SerializeField] Sprite fileSprite;
+    [Header("사건파일 리소스 (모든 사건 공용)")]
+    [SerializeField]
+    Sprite closedFileSprite; // 닫힌 사건파일 사진
+
+    [SerializeField]
+    Sprite openFileSprite; // 열린 사건파일 사진 (여는 영상의 마지막 프레임과 같게)
+
+    [FormerlySerializedAs("closeVideo")]
+    [SerializeField]
+    VideoClip openVideo; // 파일 '여는' 영상 (없으면 크로스페이드로 대체)
+
+    [Tooltip(
+        "WebGL 대응: StreamingAssets 폴더에 넣은 영상 파일명. 지정 시 이 URL로 재생(웹·에디터 모두 동작). 비우면 위 VideoClip 사용."
+    )]
+    [SerializeField]
+    string openVideoFileName = "CaseSelectStartVideo.mp4";
 
     [Header("사운드 (선택)")]
-    [SerializeField] AudioClip slideSfx;
-    [SerializeField] AudioClip hoverSfx;
-    [SerializeField] AudioClip selectSfx;
+    [SerializeField]
+    AudioClip openSfx;
+
+    [SerializeField]
+    AudioClip startSfx;
 
     [Header("전환")]
-    [SerializeField] string interrogationSceneName = "Chat";
+    [SerializeField]
+    string interrogationSceneName = "Main";
+
+    [Header("열린 상태 정보 위치 (0~1 화면 비율, 인스펙터에서 조정)")]
+    [Tooltip(
+        "열린 파일 위에 표시되는 번호·제목·브리핑 블록의 위치. 왼쪽으로 옮기려면 X값을 낮추면 된다."
+    )]
+    [SerializeField]
+    Vector2 openInfoAnchorMin = new Vector2(0.52f, 0.16f);
+
+    [SerializeField]
+    Vector2 openInfoAnchorMax = new Vector2(0.84f, 0.66f);
+
+    [Header("도장 (Stamp Sprite 지정 시 그 이미지, 비우면 텍스트로 대체)")]
+    [SerializeField]
+    Sprite stampSprite;
+
+    [SerializeField]
+    Vector2 stampAnchorMin = new Vector2(0.38f, 0.64f);
+
+    [SerializeField]
+    Vector2 stampAnchorMax = new Vector2(0.64f, 0.80f);
+
+    [Header("연출 (리소스 불필요)")]
+    [SerializeField]
+    bool vignette = true;
+
+    [SerializeField]
+    bool startFlicker = true;
+
+    [SerializeField]
+    bool lightBreathe = true;
 
     [Header("타이밍(초)")]
-    [SerializeField] float lightOn = 0.5f;   // 조명이 켜지는(배경이 어둠→정상으로 밝아지는) 시간
-    [SerializeField] float filesIn = 0.5f;
-    [SerializeField] float selectMove = 0.35f;
-    [SerializeField] float zoom = 0.5f;
-    [SerializeField] float transition = 0.3f;
+    [SerializeField]
+    float openFade = 0.35f;
 
-    static readonly Color IdleTint = new Color(0.72f, 0.72f, 0.72f, 1f); // 밝기 ~65-72%
-    static readonly Color HoverTint = Color.white;
-    static readonly Color GlowColor = new Color(0.3f, 0.85f, 0.9f, 1f);  // 청록 외곽광
+    [SerializeField]
+    float endFade = 0.4f;
 
-    class FileView
-    {
-        public RectTransform rt;
-        public InterrogationCase data;
-        public Vector2 homePos;
-        public Image fileImg;
-        public Image caseImg;
-        public Image glow;
-        public CanvasGroup cg;
-    }
+    static readonly Color DeskColor = new Color(0.08f, 0.11f, 0.12f, 1f);
 
-    RectTransform boardArea;
-    Image fadeOverlay;
-    readonly List<FileView> files = new List<FileView>();
-    FileView hovered;
-    bool ready;
-    bool selecting;
+    Image bgClosed,
+        bgOpen,
+        flicker;
+    RawImage vignetteImg,
+        videoImg;
+    RectTransform closedGroup,
+        openGroup,
+        openInfo;
+    Text closedNumber,
+        closedTitle,
+        openNumber,
+        openTitle,
+        briefingText,
+        navText;
+    RectTransform stamp;
+
+    int current;
+    bool busy; // 열기/전환 중 입력 잠금
+    bool loaded;
     AudioSource audioSrc;
+
+    InterrogationCase Current =>
+        (cases != null && current >= 0 && current < cases.Length) ? cases[current] : null;
 
     void Start()
     {
@@ -63,274 +117,708 @@ public class CaseSelectController : MonoBehaviour
         audioSrc = gameObject.AddComponent<AudioSource>();
         audioSrc.playOnAwake = false;
         Build();
+        ShowClosed(instant: true);
         StartCoroutine(Intro());
     }
 
+    // ------------------------------------------------------------------
+    // UI 구성
+    // ------------------------------------------------------------------
     void Build()
     {
         var canvas = DialogueUIUtil.CreateCanvas("CaseSelectCanvas", 40);
 
-        // 배경(어두운 취조실)
-        var bg = DialogueUIUtil.CreatePanel(canvas.transform, "Board", new Color(0.05f, 0.05f, 0.06f, 1f));
-        DialogueUIUtil.Stretch(bg, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        if (backgroundSprite != null) { bg.GetComponent<Image>().sprite = backgroundSprite; bg.GetComponent<Image>().color = Color.white; }
-        boardArea = bg;
+        bgClosed = FullImage(canvas.transform, "BG_Closed", closedFileSprite, DeskColor);
+        bgOpen = FullImage(canvas.transform, "BG_Open", openFileSprite, DeskColor);
+        SetAlpha(bgOpen, 0f);
 
-        var title = DialogueUIUtil.CreateText(bg, "Title", 26, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.85f));
-        title.font = DialogueUIUtil.KoreanFont; title.fontStyle = FontStyle.Bold;
-        title.text = "사건 파일을 선택하세요";
-        DialogueUIUtil.Stretch(title.rectTransform, new Vector2(0.1f, 0.88f), new Vector2(0.9f, 0.96f), Vector2.zero, Vector2.zero);
-
-        int n = cases != null ? cases.Length : 0;
-        const float spacing = 380f, fileW = 300f, fileH = 420f;
-
-        for (int i = 0; i < n; i++)
+        if (vignette)
         {
-            var data = cases[i];
-            float x = (i - (n - 1) / 2f) * spacing;
-            float rot = n <= 1 ? 0f : Mathf.Lerp(-2f, 2f, (float)i / (n - 1));
-            files.Add(CreateFile(bg, data, new Vector2(x, 0f), rot, fileW, fileH));
+            var vGO = new GameObject("Vignette", typeof(RectTransform), typeof(RawImage));
+            vGO.transform.SetParent(canvas.transform, false);
+            vignetteImg = vGO.GetComponent<RawImage>();
+            vignetteImg.texture = MakeVignette(256);
+            vignetteImg.raycastTarget = false;
+            DialogueUIUtil.Stretch(
+                (RectTransform)vGO.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                Vector2.zero
+            );
         }
 
-        if (n == 0)
+        // 닫힌 상태 UI (파일 중앙 위에 제목/번호)
+        closedGroup = Group(canvas.transform, "ClosedGroup");
+        closedNumber = Label(
+            closedGroup,
+            "ClosedNumber",
+            20,
+            new Vector2(0.30f, 0.55f),
+            new Vector2(0.70f, 0.61f),
+            new Color(0.85f, 0.9f, 0.85f, 0.9f),
+            FontStyle.Normal
+        );
+        closedTitle = Label(
+            closedGroup,
+            "ClosedTitle",
+            22,
+            new Vector2(0.28f, 0.45f),
+            new Vector2(0.72f, 0.55f),
+            Color.white,
+            FontStyle.Bold
+        );
+        var hint = Label(
+            closedGroup,
+            "Hint",
+            16,
+            new Vector2(0.3f, 0.4f),
+            new Vector2(0.7f, 0.45f),
+            new Color(1f, 1f, 1f, 0.5f),
+            FontStyle.Italic
+        );
+        hint.text = "사건 파일을 열어 확인하세요";
+        var openBtn = MakeButton(
+            closedGroup,
+            "OpenBtn",
+            "사건 열기",
+            new Vector2(0.42f, 0.12f),
+            new Vector2(0.58f, 0.19f),
+            new Color(0.15f, 0.28f, 0.3f, 0.95f),
+            OnOpen
+        );
+
+        // 사건이 여러 개면 좌우 네비게이션
+        navText = Label(
+            closedGroup,
+            "Nav",
+            18,
+            new Vector2(0.42f, 0.04f),
+            new Vector2(0.58f, 0.1f),
+            new Color(1f, 1f, 1f, 0.8f),
+            FontStyle.Normal
+        );
+        var prev = MakeButton(
+            closedGroup,
+            "Prev",
+            "◀",
+            new Vector2(0.34f, 0.04f),
+            new Vector2(0.4f, 0.1f),
+            new Color(0.2f, 0.2f, 0.26f, 0.9f),
+            () => Move(-1)
+        );
+        var next = MakeButton(
+            closedGroup,
+            "Next",
+            "▶",
+            new Vector2(0.6f, 0.04f),
+            new Vector2(0.66f, 0.1f),
+            new Color(0.2f, 0.2f, 0.26f, 0.9f),
+            () => Move(1)
+        );
+        bool multi = cases != null && cases.Length > 1;
+        navText.gameObject.SetActive(multi);
+        prev.gameObject.SetActive(multi);
+        next.gameObject.SetActive(multi);
+
+        // 열린 상태 UI — 정보(번호/제목/브리핑/도장)를 한 컨테이너에 담아 통째로 위치 조정 가능
+        openGroup = Group(canvas.transform, "OpenGroup");
+
+        openInfo = new GameObject("OpenInfo", typeof(RectTransform)).GetComponent<RectTransform>();
+        openInfo.SetParent(openGroup, false);
+        DialogueUIUtil.Stretch(
+            openInfo,
+            openInfoAnchorMin,
+            openInfoAnchorMax,
+            Vector2.zero,
+            Vector2.zero
+        );
+
+        openNumber = Label(
+            openInfo,
+            "OpenNumber",
+            20,
+            new Vector2(0f, 0.88f),
+            new Vector2(1f, 1f),
+            new Color(0.2f, 0.22f, 0.2f),
+            FontStyle.Normal
+        );
+        openTitle = Label(
+            openInfo,
+            "OpenTitle",
+            24,
+            new Vector2(0f, 0.72f),
+            new Vector2(1f, 0.88f),
+            new Color(0.1f, 0.12f, 0.12f),
+            FontStyle.Bold
+        );
+        briefingText = Label(
+            openInfo,
+            "Briefing",
+            13,
+            new Vector2(0f, 0f),
+            new Vector2(1f, 0.70f),
+            new Color(0.18f, 0.2f, 0.2f),
+            FontStyle.Normal
+        );
+
+        briefingText.alignment = TextAnchor.UpperLeft;
+        briefingText.resizeTextForBestFit = true;
+        briefingText.resizeTextMaxSize = 17;
+        briefingText.resizeTextMinSize = 11;
+        briefingText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        briefingText.verticalOverflow = VerticalWrapMode.Truncate;
+
+        stamp = BuildStamp(openGroup); // 도장은 화면 기준 위치(Stamp Anchor)로 배치
+
+        MakeButton(
+            openGroup,
+            "StartBtn",
+            "수사 시작",
+            new Vector2(0.56f, 0.06f),
+            new Vector2(0.74f, 0.14f),
+            new Color(0.45f, 0.12f, 0.14f, 0.95f),
+            OnStart
+        );
+        MakeButton(
+            openGroup,
+            "BackBtn",
+            "← 뒤로",
+            new Vector2(0.05f, 0.9f),
+            new Vector2(0.16f, 0.96f),
+            new Color(0.18f, 0.18f, 0.22f, 0.9f),
+            OnBack
+        );
+
+        if (cases == null || cases.Length == 0)
         {
-            var hint = DialogueUIUtil.CreateText(bg, "Empty", 20, TextAnchor.MiddleCenter, new Color(1f, 0.6f, 0.6f));
-            hint.font = DialogueUIUtil.KoreanFont;
-            hint.text = "표시할 사건이 없습니다.\nInspector의 Cases에 InterrogationCase를 추가하세요.";
-            DialogueUIUtil.Stretch(hint.rectTransform, new Vector2(0.2f, 0.4f), new Vector2(0.8f, 0.6f), Vector2.zero, Vector2.zero);
+            var empty = Label(
+                closedGroup,
+                "Empty",
+                20,
+                new Vector2(0.2f, 0.42f),
+                new Vector2(0.8f, 0.6f),
+                new Color(1f, 0.6f, 0.6f),
+                FontStyle.Bold
+            );
+            empty.text =
+                "표시할 사건이 없습니다.\nInspector의 Cases에 InterrogationCase를 추가하세요.";
+            hint.gameObject.SetActive(false);
+            openBtn.gameObject.SetActive(false);
         }
 
-        // 전환용 종이색 오버레이(처음엔 투명)
-        var ov = DialogueUIUtil.CreatePanel(canvas.transform, "FadeOverlay", new Color(0.93f, 0.9f, 0.82f, 0f));
-        DialogueUIUtil.Stretch(ov, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        fadeOverlay = ov.GetComponent<Image>();
-        fadeOverlay.raycastTarget = false;
+        // 형광등 깜빡임 오버레이
+        flicker = FullImage(canvas.transform, "Flicker", null, new Color(0f, 0f, 0f, 0f));
+        flicker.raycastTarget = false;
+
+        // 영상 재생용(처음엔 숨김) — 항상 맨 위에서 재생
+        var vidGO = new GameObject("Video", typeof(RectTransform), typeof(RawImage));
+        vidGO.transform.SetParent(canvas.transform, false);
+        videoImg = vidGO.GetComponent<RawImage>();
+        videoImg.raycastTarget = false;
+        DialogueUIUtil.Stretch(
+            (RectTransform)vidGO.transform,
+            Vector2.zero,
+            Vector2.one,
+            Vector2.zero,
+            Vector2.zero
+        );
+        vidGO.SetActive(false);
+
+        RefreshCaseText();
     }
 
-    FileView CreateFile(RectTransform parent, InterrogationCase data, Vector2 home, float rot, float w, float h)
+    void RefreshCaseText()
     {
-        var go = new GameObject("File_" + (data != null ? data.caseId : "?"), typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        var rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.45f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(w, h);
-        rt.anchoredPosition = home;
-        rt.localRotation = Quaternion.Euler(0, 0, rot);
-
-        var cg = go.AddComponent<CanvasGroup>();
-
-        // 외곽광(맨 뒤)
-        var glow = ChildImage(rt, "Glow", GlowColor);
-        glow.raycastTarget = false;
-        DialogueUIUtil.Stretch(glow.rectTransform, Vector2.zero, Vector2.one, new Vector2(-16, -16), new Vector2(16, 16));
-        var gc = glow.color; gc.a = 0f; glow.color = gc;
-
-        // 파일(폴더) 이미지 — 전체 채움, 클릭 대상
-        var fileImg = ChildImage(rt, "Paper", IdleTint);
-        DialogueUIUtil.Stretch(fileImg.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        if (fileSprite != null) fileImg.sprite = fileSprite;
-        fileImg.raycastTarget = true;
-
-        // 사건 이미지(종이 위)
-        var caseImg = ChildImage(rt, "CaseImage", IdleTint);
-        caseImg.raycastTarget = false;
-        DialogueUIUtil.Stretch(caseImg.rectTransform, new Vector2(0.12f, 0.34f), new Vector2(0.88f, 0.86f), Vector2.zero, Vector2.zero);
-        if (data != null && data.caseImage != null) caseImg.sprite = data.caseImage;
-        else caseImg.color = new Color(0.5f, 0.52f, 0.58f, 1f); // 이미지 없으면 회색 판
-
-        // 사건 번호 / 이름
-        var num = DialogueUIUtil.CreateText(rt, "Number", 18, TextAnchor.MiddleCenter, new Color(0.2f, 0.2f, 0.25f));
-        num.font = DialogueUIUtil.KoreanFont; num.raycastTarget = false;
-        num.text = data != null ? data.caseNumber : "";
-        DialogueUIUtil.Stretch(num.rectTransform, new Vector2(0.1f, 0.22f), new Vector2(0.9f, 0.3f), Vector2.zero, Vector2.zero);
-
-        var nameText = DialogueUIUtil.CreateText(rt, "Name", 20, TextAnchor.MiddleCenter, new Color(0.12f, 0.12f, 0.15f));
-        nameText.font = DialogueUIUtil.KoreanFont; nameText.fontStyle = FontStyle.Bold; nameText.raycastTarget = false;
-        nameText.text = data != null ? data.caseTitle : "";
-        DialogueUIUtil.Stretch(nameText.rectTransform, new Vector2(0.08f, 0.1f), new Vector2(0.92f, 0.22f), Vector2.zero, Vector2.zero);
-
-        var fv = new FileView { rt = rt, data = data, homePos = home, fileImg = fileImg, caseImg = caseImg, glow = glow, cg = cg };
-
-        var pointer = go.AddComponent<CaseFilePointer>();
-        pointer.onEnter = () => OnHover(fv, true);
-        pointer.onExit = () => OnHover(fv, false);
-        pointer.onClick = () => OnClick(fv);
-
-        return fv;
-    }
-
-    static Image ChildImage(Transform parent, string name, Color color)
-    {
-        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
-        go.transform.SetParent(parent, false);
-        var img = go.GetComponent<Image>();
-        img.color = color;
-        return img;
+        var c = Current;
+        closedNumber.text = c != null ? c.caseNumber : "";
+        closedTitle.text = c != null ? c.caseTitle : "";
+        openNumber.text = c != null ? c.caseNumber : "";
+        openTitle.text = c != null ? c.caseTitle : "";
+        briefingText.text = c != null ? c.briefing : "";
+        if (navText != null && cases != null && cases.Length > 0)
+            navText.text = (current + 1) + " / " + cases.Length;
     }
 
     // ------------------------------------------------------------------
-    // 인트로 / 호버 / 선택
+    // 상태 전환
+    // ------------------------------------------------------------------
+    void ShowClosed(bool instant)
+    {
+        closedGroup.gameObject.SetActive(true);
+        openGroup.gameObject.SetActive(false);
+        if (instant)
+            SetAlpha(bgOpen, 0f);
+    }
+
+    void OnOpen()
+    {
+        if (busy || Current == null)
+            return;
+        busy = true;
+        Play(openSfx);
+        closedGroup.gameObject.SetActive(false);
+
+        bool hasVideo = !string.IsNullOrEmpty(openVideoFileName) || openVideo != null;
+        if (hasVideo)
+            PlayOpenVideo();
+        else
+            StartCoroutine(OpenCrossfade());
+    }
+
+    // 여는 영상 재생 → 끝나면 열린 사진 + 정보 표시
+    // WebGL 호환: StreamingAssets 파일을 URL로 재생하고, RenderTexture를 원본 해상도로 만들어 화질 손실을 막는다.
+    void PlayOpenVideo()
+    {
+        // videoImg는 아직 켜지 않는다 — 텍스처가 없으면 RawImage가 '흰색'으로 보인다.
+        // Prepare 끝나고 첫 프레임이 RenderTexture에 들어온 뒤에 켠다(그동안 뒤의 닫힌 파일이 보임).
+        var vp = gameObject.AddComponent<VideoPlayer>();
+        vp.playOnAwake = false;
+        vp.isLooping = false;
+        vp.waitForFirstFrame = true;
+        vp.renderMode = VideoRenderMode.RenderTexture;
+        vp.audioOutputMode = VideoAudioOutputMode.Direct;
+
+        if (!string.IsNullOrEmpty(openVideoFileName))
+        {
+            // WebGL은 VideoClip 재생이 안 되므로 StreamingAssets URL로 재생(에디터에서도 동작)
+            vp.source = VideoSource.Url;
+            vp.url = Application.streamingAssetsPath + "/" + openVideoFileName;
+        }
+        else
+        {
+            vp.source = VideoSource.VideoClip;
+            vp.clip = openVideo;
+        }
+
+        bool done = false;
+        System.Action finish = () =>
+        {
+            if (done)
+                return;
+            done = true;
+            OnOpenVideoDone(vp);
+        };
+
+        vp.prepareCompleted += src =>
+        {
+            // 원본 해상도로 RenderTexture 생성 → 다운스케일 없이 선명하게
+            int w = (int)src.width,
+                h = (int)src.height;
+            if (w <= 0 || h <= 0)
+            {
+                w = 1920;
+                h = 1080;
+            }
+            var rt = new RenderTexture(w, h, 0);
+            src.targetTexture = rt;
+            videoImg.texture = rt;
+            src.Play();
+            StartCoroutine(RevealVideoNextFrame()); // 첫 프레임 그려진 뒤 켜기(흰/검 깜빡임 방지)
+            StartCoroutine(DelayAction((float)src.length + 1.5f, finish)); // 끝 이벤트 누락 대비
+        };
+        vp.loopPointReached += _ => finish();
+        vp.errorReceived += (_, __) => finish();
+        vp.Prepare();
+
+        // 준비 자체가 안 끝나는 경우(웹 로딩 실패 등) 백업 타임아웃
+        StartCoroutine(
+            DelayAction(
+                8f,
+                () =>
+                {
+                    if (!done && (vp == null || !vp.isPrepared))
+                        finish();
+                }
+            )
+        );
+    }
+
+    // 첫 프레임이 RenderTexture에 렌더된 다음 프레임에 videoImg를 켠다(흰/검 깜빡임 방지).
+    IEnumerator RevealVideoNextFrame()
+    {
+        yield return null;
+        if (videoImg != null)
+            videoImg.gameObject.SetActive(true);
+    }
+
+    void OnOpenVideoDone(VideoPlayer vp)
+    {
+        SetAlpha(bgOpen, 1f); // 열린 사진 고정
+        videoImg.gameObject.SetActive(false);
+        if (vp != null)
+        {
+            vp.Stop();
+            Destroy(vp);
+        }
+        if (videoImg.texture is RenderTexture rt) // RenderTexture 정리(메모리)
+        {
+            videoImg.texture = null;
+            rt.Release();
+            Destroy(rt);
+        }
+        StartCoroutine(ShowOpenInfo());
+    }
+
+    IEnumerator ShowOpenInfo()
+    {
+        openGroup.gameObject.SetActive(true);
+        SetGroupAlpha(openGroup, 0f);
+        yield return Lerp(openFade, k => SetGroupAlpha(openGroup, k));
+        SetGroupAlpha(openGroup, 1f);
+        yield return StampThud();
+        busy = false;
+    }
+
+    // 영상이 없을 때: 닫힌 → 열린 사진 크로스페이드
+    IEnumerator OpenCrossfade()
+    {
+        openGroup.gameObject.SetActive(true);
+        SetGroupAlpha(openGroup, 0f);
+        yield return Lerp(
+            openFade,
+            k =>
+            {
+                SetAlpha(bgOpen, k);
+                SetGroupAlpha(openGroup, k);
+            }
+        );
+        SetAlpha(bgOpen, 1f);
+        SetGroupAlpha(openGroup, 1f);
+        yield return StampThud();
+        busy = false;
+    }
+
+    void OnBack()
+    {
+        if (busy)
+            return;
+        busy = true;
+        StartCoroutine(BackSequence());
+    }
+
+    IEnumerator BackSequence()
+    {
+        yield return Lerp(
+            openFade,
+            k =>
+            {
+                SetAlpha(bgOpen, 1f - k);
+                SetGroupAlpha(openGroup, 1f - k);
+            }
+        );
+        ShowClosed(instant: true);
+        busy = false;
+    }
+
+    void Move(int dir)
+    {
+        if (busy || cases == null || cases.Length == 0)
+            return;
+        current = (current + dir + cases.Length) % cases.Length;
+        RefreshCaseText();
+    }
+
+    // 수사 시작 → (여는 영상은 이미 열 때 썼으므로) 검은 페이드 후 취조 씬으로
+    void OnStart()
+    {
+        if (busy || Current == null)
+            return;
+        busy = true;
+        Play(startSfx);
+        GameSession.SelectedCase = Current;
+        StartCoroutine(FadeAndLoad());
+    }
+
+    IEnumerator FadeAndLoad()
+    {
+        yield return Lerp(endFade, k => SetAlpha(flicker, k)); // 검게 페이드
+        LoadInterrogation();
+    }
+
+    void LoadInterrogation()
+    {
+        if (loaded)
+            return;
+        loaded = true;
+        GameSession.SelectedCase = Current;
+        if (
+            !string.IsNullOrEmpty(interrogationSceneName)
+            && Application.CanStreamedLevelBeLoaded(interrogationSceneName)
+        )
+            SceneManager.LoadScene(interrogationSceneName);
+    }
+
+    // ------------------------------------------------------------------
+    // 연출
     // ------------------------------------------------------------------
     IEnumerator Intro()
     {
-        // 배경은 항상 '불투명'으로 둔다. 조명 켜짐 = alpha가 아니라 '밝기(색)'를 어둠→정상으로 올림.
-        var bgImg = boardArea.GetComponent<Image>();
-        Color lit = bgImg.color;                 // Build에서 정한 정상 배경색(또는 스프라이트 흰색)
-        Color dark = lit * 0.22f; dark.a = 1f;   // 조명 꺼진 상태(불투명 유지)
-        bgImg.color = dark;
-
-        // 파일은 아래에 숨겨 두고(각자 CanvasGroup으로 투명 처리 → 배경엔 영향 없음)
-        var starts = new Vector2[files.Count];
-        for (int i = 0; i < files.Count; i++)
+        if (startFlicker)
         {
-            starts[i] = files[i].homePos + new Vector2(0, -140f);
-            files[i].rt.anchoredPosition = starts[i];
-            files[i].cg.alpha = 0f;
-        }
-
-        // 1) 조명 켜짐: 배경을 어둠 → 정상 밝기로 (알파는 계속 1)
-        float t = 0f;
-        while (t < lightOn)
-        {
-            t += Time.deltaTime;
-            bgImg.color = Color.Lerp(dark, lit, Ease(Mathf.Clamp01(t / lightOn)));
-            yield return null;
-        }
-        bgImg.color = lit;
-
-        // 2) 파일이 아래에서 미끄러져 올라오며 페이드인
-        if (files.Count > 0) Play(slideSfx);
-        t = 0f;
-        while (t < filesIn)
-        {
-            t += Time.deltaTime;
-            float k = Ease(Mathf.Clamp01(t / filesIn));
-            for (int i = 0; i < files.Count; i++)
+            // 형광등이 몇 번 깜빡이며 들어오는 느낌
+            float[] seq = { 0.85f, 0f, 0.6f, 0f, 0.9f, 0.1f, 0f };
+            foreach (var a in seq)
             {
-                files[i].rt.anchoredPosition = Vector2.Lerp(starts[i], files[i].homePos, k);
-                files[i].cg.alpha = k;
+                SetAlpha(flicker, a);
+                yield return new WaitForSeconds(0.05f);
             }
-            yield return null;
+            SetAlpha(flicker, 0f);
         }
-        for (int i = 0; i < files.Count; i++) { files[i].rt.anchoredPosition = files[i].homePos; files[i].cg.alpha = 1f; }
-
-        ready = true;
-    }
-
-    void OnHover(FileView fv, bool entering)
-    {
-        if (!ready || selecting) return;
-        if (entering) { hovered = fv; Play(hoverSfx); }
-        else if (hovered == fv) hovered = null;
     }
 
     void Update()
     {
-        if (!ready || selecting) return;
-        foreach (var fv in files)
+        // 블라인드 사이로 드는 빛이 아주 미세하게 호흡하는 느낌(배경 밝기 ±4%)
+        if (lightBreathe && closedFileSprite != null)
         {
-            bool hov = fv == hovered;
-            float s = Mathf.Lerp(fv.rt.localScale.x, hov ? 1.04f : 1f, Time.deltaTime * 12f);
-            fv.rt.localScale = new Vector3(s, s, 1f);
+            float b = 0.96f + 0.04f * Mathf.Sin(Time.time * 0.8f);
+            Tint(bgClosed, b);
+            if (openFileSprite != null)
+                Tint(bgOpen, b);
+        }
+    }
 
-            Vector2 target = fv.homePos + (hov ? new Vector2(0, 12f) : Vector2.zero);
-            fv.rt.anchoredPosition = Vector2.Lerp(fv.rt.anchoredPosition, target, Time.deltaTime * 12f);
-
-            var tint = Color.Lerp(fv.fileImg.color, hov ? HoverTint : IdleTint, Time.deltaTime * 12f);
-            fv.fileImg.color = tint;
-            if (fv.data != null && fv.data.caseImage != null) fv.caseImg.color = tint;
-
-            if (fv.glow != null)
+    IEnumerator StampThud()
+    {
+        if (stamp == null)
+            yield break;
+        stamp.gameObject.SetActive(true);
+        var cg = stamp.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = 0f;
+        yield return Lerp(
+            0.22f,
+            k =>
             {
-                var c = fv.glow.color;
-                c.a = Mathf.Lerp(c.a, hov ? 0.5f : 0f, Time.deltaTime * 12f);
-                fv.glow.color = c;
+                float s = Mathf.Lerp(1.5f, 1f, Ease(k));
+                stamp.localScale = new Vector3(s, s, 1f);
+                if (cg != null)
+                    cg.alpha = k;
             }
-        }
+        );
+        stamp.localScale = Vector3.one;
+        if (cg != null)
+            cg.alpha = 1f;
     }
 
-    void OnClick(FileView fv)
+    RectTransform BuildStamp(RectTransform parent)
     {
-        if (!ready || selecting) return;
-        selecting = true;
-        hovered = null;
-        Play(selectSfx);
-        StartCoroutine(SelectSequence(fv));
-    }
+        var go = new GameObject("Stamp", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
 
-    IEnumerator SelectSequence(FileView chosen)
-    {
-        // 선택하지 않은 파일은 옆으로 밀리며 암전
-        foreach (var fv in files)
+        go.transform.SetParent(parent, false);
+
+        var rt = (RectTransform)go.transform;
+
+        DialogueUIUtil.Stretch(rt, stampAnchorMin, stampAnchorMax, Vector2.zero, Vector2.zero);
+
+        rt.localRotation = Quaternion.Euler(0, 0, -8f);
+
+        // 도장 뒤의 빨간 배경
+        var background = go.GetComponent<Image>();
+        background.sprite = null;
+        background.color = new Color(0.55f, 0.06f, 0.06f, 0.55f);
+        background.raycastTarget = false;
+
+        if (stampSprite != null)
         {
-            if (fv == chosen) continue;
-            StartCoroutine(SlideAway(fv));
+            // 빨간 배경 위에 도장 이미지 배치
+            var imageGO = new GameObject("StampImage", typeof(RectTransform), typeof(Image));
+
+            imageGO.transform.SetParent(rt, false);
+
+            var imageRT = imageGO.GetComponent<RectTransform>();
+
+            // 배경 가장자리가 조금 보이도록 여백 설정
+            DialogueUIUtil.Stretch(
+                imageRT,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(8f, 8f),
+                new Vector2(-8f, -8f)
+            );
+
+            var stampImage = imageGO.GetComponent<Image>();
+            stampImage.sprite = stampSprite;
+            stampImage.preserveAspect = true;
+            stampImage.color = Color.white;
+            stampImage.raycastTarget = false;
+
+            background.color = new Color(0.55f, 0.06f, 0.06f, 0f);
+        }
+        else
+        {
+            // 사진이 없을 때 텍스트 도장
+            var t = Label(
+                rt,
+                "StampText",
+                24,
+                Vector2.zero,
+                Vector2.one,
+                new Color(1f, 0.82f, 0.75f, 1f),
+                FontStyle.Bold
+            );
+
+            t.text = "사건 배정";
+
+            var outline = t.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.3f, 0.02f, 0.02f, 0.9f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
         }
 
-        // 선택한 파일: 중앙으로 이동 + 1.0 → 1.25 확대
-        Vector2 from = chosen.rt.anchoredPosition;
-        Vector3 fromScale = chosen.rt.localScale;
-        chosen.rt.SetAsLastSibling();
-        float t = 0f;
-        float dur = selectMove + zoom;
-        while (t < dur)
-        {
-            t += Time.deltaTime;
-            float k = Ease(Mathf.Clamp01(t / dur));
-            chosen.rt.anchoredPosition = Vector2.Lerp(from, Vector2.zero, k);
-            float sc = Mathf.Lerp(fromScale.x, 1.25f, k);
-            chosen.rt.localScale = new Vector3(sc, sc, 1f);
-            chosen.fileImg.color = Color.Lerp(chosen.fileImg.color, HoverTint, Time.deltaTime * 10f);
-            yield return null;
-        }
-
-        // 종이색으로 화면 전환
-        yield return FadeImageAlpha(fadeOverlay, 0f, 1f, transition);
-
-        // 사건 넘기고 취조 씬으로
-        GameSession.SelectedCase = chosen.data;
-        if (!string.IsNullOrEmpty(interrogationSceneName) && Application.CanStreamedLevelBeLoaded(interrogationSceneName))
-            SceneManager.LoadScene(interrogationSceneName);
-    }
-
-    IEnumerator SlideAway(FileView fv)
-    {
-        Vector2 from = fv.rt.anchoredPosition;
-        Vector2 to = from + new Vector2(Mathf.Sign(from.x == 0 ? -1 : from.x) * 500f, -60f);
-        float t = 0f;
-        while (t < selectMove)
-        {
-            t += Time.deltaTime;
-            float k = Mathf.Clamp01(t / selectMove);
-            fv.rt.anchoredPosition = Vector2.Lerp(from, to, k);
-            fv.cg.alpha = 1f - k;
-            yield return null;
-        }
-        fv.cg.alpha = 0f;
+        go.SetActive(false);
+        return rt;
     }
 
     // ------------------------------------------------------------------
     // 유틸
     // ------------------------------------------------------------------
-    void Play(AudioClip clip) { if (clip != null && audioSrc != null) audioSrc.PlayOneShot(clip); }
+    static Image FullImage(Transform parent, string name, Sprite sprite, Color fallback)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var img = go.GetComponent<Image>();
+        if (sprite != null)
+        {
+            img.sprite = sprite;
+            img.color = Color.white;
+        }
+        else
+            img.color = fallback;
+        DialogueUIUtil.Stretch(
+            (RectTransform)go.transform,
+            Vector2.zero,
+            Vector2.one,
+            Vector2.zero,
+            Vector2.zero
+        );
+        return img;
+    }
 
-    static float Ease(float x) => 1f - (1f - x) * (1f - x); // easeOutQuad
+    RectTransform Group(Transform parent, string name)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasGroup));
+        go.transform.SetParent(parent, false);
+        DialogueUIUtil.Stretch(
+            (RectTransform)go.transform,
+            Vector2.zero,
+            Vector2.one,
+            Vector2.zero,
+            Vector2.zero
+        );
+        return (RectTransform)go.transform;
+    }
 
-    static IEnumerator FadeImageAlpha(Image img, float a, float b, float dur)
+    Text Label(
+        RectTransform parent,
+        string name,
+        int size,
+        Vector2 aMin,
+        Vector2 aMax,
+        Color color,
+        FontStyle style
+    )
+    {
+        var t = DialogueUIUtil.CreateText(parent, name, size, TextAnchor.MiddleCenter, color);
+        t.font = DialogueUIUtil.KoreanFont;
+        t.fontStyle = style;
+        t.raycastTarget = false;
+        DialogueUIUtil.Stretch(t.rectTransform, aMin, aMax, Vector2.zero, Vector2.zero);
+        return t;
+    }
+
+    Button MakeButton(
+        RectTransform parent,
+        string name,
+        string label,
+        Vector2 aMin,
+        Vector2 aMax,
+        Color color,
+        UnityEngine.Events.UnityAction onClick
+    )
+    {
+        var btn = DialogueUIUtil.CreateButton(parent, name, label, color);
+        var lbl = btn.GetComponentInChildren<Text>();
+        if (lbl != null)
+        {
+            lbl.font = DialogueUIUtil.KoreanFont;
+            lbl.fontSize = 22;
+        }
+        DialogueUIUtil.Stretch(
+            btn.GetComponent<RectTransform>(),
+            aMin,
+            aMax,
+            Vector2.zero,
+            Vector2.zero
+        );
+        btn.onClick.AddListener(onClick);
+        return btn;
+    }
+
+    void Play(AudioClip clip)
+    {
+        if (clip != null && audioSrc != null)
+            audioSrc.PlayOneShot(clip);
+    }
+
+    static void SetAlpha(Graphic g, float a)
+    {
+        if (g == null)
+            return;
+        var c = g.color;
+        c.a = a;
+        g.color = c;
+    }
+
+    static void SetGroupAlpha(RectTransform group, float a)
+    {
+        var cg = group.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = a;
+    }
+
+    static void Tint(Image img, float b)
+    {
+        if (img == null)
+            return;
+        var c = img.color;
+        img.color = new Color(b, b, b, c.a);
+    }
+
+    static float Ease(float x) => 1f - (1f - x) * (1f - x);
+
+    IEnumerator Lerp(float dur, System.Action<float> step)
     {
         float t = 0f;
-        var c = img.color;
-        while (t < dur) { t += Time.deltaTime; c.a = Mathf.Lerp(a, b, dur <= 0 ? 1f : t / dur); img.color = c; yield return null; }
-        c.a = b; img.color = c;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            step(Mathf.Clamp01(dur <= 0 ? 1f : t / dur));
+            yield return null;
+        }
+        step(1f);
     }
-}
 
-// 파일 위 포인터 이벤트(호버/클릭)를 콜백으로 넘기는 작은 헬퍼.
-public class CaseFilePointer : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
-{
-    public System.Action onEnter, onExit, onClick;
-    public void OnPointerEnter(PointerEventData e) { onEnter?.Invoke(); }
-    public void OnPointerExit(PointerEventData e) { onExit?.Invoke(); }
-    public void OnPointerClick(PointerEventData e) { onClick?.Invoke(); }
+    IEnumerator DelayAction(float seconds, System.Action action)
+    {
+        yield return new WaitForSeconds(seconds);
+        action();
+    }
+
+    Texture2D MakeVignette(int size)
+    {
+        var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
+        float c = size / 2f;
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x, y), new Vector2(c, c)) / c; // 0(중앙)~1.41(모서리)
+            float a = Mathf.Clamp01((d - 0.55f) / 0.75f);
+            a = a * a * 0.8f;
+            tex.SetPixel(x, y, new Color(0f, 0f, 0f, a));
+        }
+        tex.Apply();
+        tex.wrapMode = TextureWrapMode.Clamp;
+        return tex;
+    }
 }

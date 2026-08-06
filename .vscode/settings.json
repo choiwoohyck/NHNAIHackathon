@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "NHNAIHackathon-2026-07-20_23-43-43.slnx"
+    "dotnet.defaultSolution": "NHNAIHackathon.slnx"
 }

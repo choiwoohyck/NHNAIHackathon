@@ -33,7 +33,7 @@ public class VerdictController : MonoBehaviour
     Text resultText;
     Text culpritSlotLabel;   // 문장 속 {범인} 자리(선택한 용의자 이름 표시)
 
-    public string endingSceneName = "Ending";   // InterrogationController가 세팅. 제출 시 이 씬으로 결과 전달.
+    public string endingSceneName = "EndingScene";   // 제출 시 이 씬으로 결과 전달(Build Settings에 등록돼 있어야 이동).
 
     readonly List<(CaseField field, InputField input)> pairs = new List<(CaseField, InputField)>();
     readonly Dictionary<string, Button> suspectButtons = new Dictionary<string, Button>();
