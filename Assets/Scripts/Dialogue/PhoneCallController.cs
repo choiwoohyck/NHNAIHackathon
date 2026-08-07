@@ -132,6 +132,19 @@ public class PhoneCallController : MonoBehaviour
         }
     }
 
+    /// <summary>호출 팝업이 열렸을 때 알린다(튜토리얼 안내용).</summary>
+    public event Action PopupOpened;
+
+    /// <summary>전화기 아이콘(튜토리얼이 하이라이트할 대상).</summary>
+    public RectTransform PhoneButtonRect =>
+        phoneButton != null ? phoneButton.GetComponent<RectTransform>() : null;
+
     void TogglePopup() => SetPopupVisible(!popupPanel.gameObject.activeSelf);
-    void SetPopupVisible(bool visible) => popupPanel.gameObject.SetActive(visible);
+
+    void SetPopupVisible(bool visible)
+    {
+        bool wasOpen = popupPanel.gameObject.activeSelf;
+        popupPanel.gameObject.SetActive(visible);
+        if (visible && !wasOpen) PopupOpened?.Invoke();
+    }
 }

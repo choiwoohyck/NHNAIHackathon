@@ -199,11 +199,14 @@ public class VerdictController : MonoBehaviour
             return;
         }
 
-        var inputs = new List<string>();
-        foreach (var p in pairs) inputs.Add(p.input != null ? p.input.text : "");
+        // 빈칸은 문장(verdictTemplate) 순서로 놓여 있고 채점은 verdictFields 순서로 하므로,
+        // 값만 넘기면 엉뚱한 필드와 대조된다. 어느 필드의 답인지 붙여서 넘긴다.
+        var answers = new List<KeyValuePair<CaseField, string>>();
+        foreach (var p in pairs)
+            answers.Add(new KeyValuePair<CaseField, string>(p.field, p.input != null ? p.input.text : ""));
 
         int correct, total;
-        var result = VerdictEvaluator.Evaluate(graph, selectedSuspectId, inputs, out correct, out total);
+        var result = VerdictEvaluator.Evaluate(graph, selectedSuspectId, answers, out correct, out total);
 
         // 결과를 엔딩 씬으로 넘긴다. 엔딩 씬이 Build Settings에 있으면 이동, 아니면 패널 내 텍스트로 폴백.
         GameSession.SetVerdict(result, correct, total, graph != null ? graph.culpritSuspectId : null);

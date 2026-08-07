@@ -48,6 +48,9 @@ public class CaseSelectController : MonoBehaviour
     [SerializeField]
     string interrogationSceneName = "Main";
 
+    [SerializeField]
+    string titleSceneName = "Start";
+
     [Header("열린 상태 정보 위치 (0~1 화면 비율, 인스펙터에서 조정)")]
     [Tooltip(
         "열린 파일 위에 표시되는 번호·제목·브리핑 블록의 위치. 왼쪽으로 옮기려면 X값을 낮추면 된다."
@@ -220,6 +223,17 @@ public class CaseSelectController : MonoBehaviour
         navText.gameObject.SetActive(multi);
         prev.gameObject.SetActive(multi);
         next.gameObject.SetActive(multi);
+
+        // 타이틀로 되돌아가는 길(닫힌 상태에서만 — 열린 상태에는 '← 뒤로'가 있다).
+        MakeButton(
+            closedGroup,
+            "TitleBtn",
+            "← 타이틀",
+            new Vector2(0.05f, 0.9f),
+            new Vector2(0.16f, 0.96f),
+            new Color(0.18f, 0.18f, 0.22f, 0.9f),
+            OnTitle
+        );
 
         // 열린 상태 UI — 정보(번호/제목/브리핑/도장)를 한 컨테이너에 담아 통째로 위치 조정 가능
         openGroup = Group(canvas.transform, "OpenGroup");
@@ -542,11 +556,55 @@ public class CaseSelectController : MonoBehaviour
             return;
         loaded = true;
         GameSession.SelectedCase = Current;
+
         if (
             !string.IsNullOrEmpty(interrogationSceneName)
             && Application.CanStreamedLevelBeLoaded(interrogationSceneName)
         )
+        {
             SceneManager.LoadScene(interrogationSceneName);
+            return;
+        }
+
+        // 씬을 못 찾으면 검은 화면에 그대로 멈춘다 — 원인을 남기고 화면을 되돌린다.
+        Debug.LogError(
+            "[CaseSelectController] '"
+                + interrogationSceneName
+                + "' 씬을 로드할 수 없습니다. Build Settings에 등록되어 있는지 확인하세요."
+        );
+        loaded = false;
+        SetAlpha(flicker, 0f);
+        busy = false;
+    }
+
+    // 타이틀 화면으로 되돌아간다.
+    void OnTitle()
+    {
+        if (busy)
+            return;
+        busy = true;
+        GameSession.SelectedCase = null;
+        StartCoroutine(FadeAndLoadTitle());
+    }
+
+    IEnumerator FadeAndLoadTitle()
+    {
+        yield return Lerp(endFade, k => SetAlpha(flicker, k));
+        if (
+            !string.IsNullOrEmpty(titleSceneName)
+            && Application.CanStreamedLevelBeLoaded(titleSceneName)
+        )
+        {
+            SceneManager.LoadScene(titleSceneName);
+            yield break;
+        }
+        Debug.LogError(
+            "[CaseSelectController] '"
+                + titleSceneName
+                + "' 씬을 로드할 수 없습니다. Build Settings에 등록되어 있는지 확인하세요."
+        );
+        SetAlpha(flicker, 0f);
+        busy = false;
     }
 
     // ------------------------------------------------------------------

@@ -1127,6 +1127,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1558408947}
   m_CullTransparentMesh: 1
+--- !u!1 &1900100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1900100001}
+  - component: {fileID: 1900100002}
+  m_Layer: 0
+  m_Name: StartFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1900100001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1900100002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c1b4d0a92e34f5eae06d3b81c47a9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startButton: {fileID: 948041407}
+  howToPlayButton: {fileID: 366068267}
+  autoTutorialOnFirstPlay: 0
+  tutorialCase: {fileID: 0}
+  caseSelectSceneName: CaseSelect
+  interrogationSceneName: Main
+  fadeSeconds: 0.5
+  startSfx: {fileID: 0}
+  howToPlayText: "\u25A0 \uBAA9\uD45C\n  \uC6A9\uC758\uC790\uB4E4\uC744 \uCDE8\uC870\uD574
+    \uC99D\uC5B8\uC744 \uBAA8\uC73C\uACE0, \uC9C4\uC220 \uC0AC\uC774\uC758 \uBAA8\uC21C\uC744
+    \uCC3E\uC544 \uBC94\uC778\uC744 \uC9C0\uBAA9\uD55C\uB2E4.\n\n\u25A0 \uC9C4\uD589\n 
+    1. \uC804\uD654\uAE30\uB85C \uC6A9\uC758\uC790\uB97C \uD638\uCD9C\uD55C\uB2E4.\n 
+    2. \uC9C8\uBB38\uC744 \uACE8\uB77C \uC99D\uC5B8\uC744 \uD655\uBCF4\uD55C\uB2E4.
+    \uC0C8 \uC99D\uC5B8\uC774 \uB2E4\uC74C \uC9C8\uBB38\uC744 \uC5F0\uB2E4.\n  3.
+    \uAE30\uB85D\uC9C0\uC5D0\uC11C \uC99D\uC5B8 \uB450 \uAC1C\uB97C \uACE0\uB974\uBA74
+    \uBAA8\uC21C \uC5EC\uBD80\uB97C \uD310\uC815\uD55C\uB2E4.\n     \uBAA8\uC21C\uC774
+    \uC131\uB9BD\uD558\uBA74 \uD574\uB2F9 \uC6A9\uC758\uC790\uB97C \uACE7\uBC14\uB85C
+    \uCD94\uAD81\uD55C\uB2E4.\n  4. '\uCDE8\uC870 \uC885\uB8CC'\uB85C \uB300\uC0C1\uC744
+    \uBC14\uAFB8\uACE0, \uCDA9\uBD84\uD788 \uBAA8\uC600\uB2E4\uBA74 '\uC0AC\uAC74
+    \uD310\uACB0'\uC744 \uC5F0\uB2E4.\n\n\u25A0 \uD310\uACB0\n  \uBC94\uC778\uC73C\uB85C
+    \uD310\uB2E8\uD55C \uC6A9\uC758\uC790\uB97C \uC9C0\uBAA9\uD558\uACE0 \uC0AC\uAC74
+    \uC124\uBA85\uC758 \uBE48\uCE78\uC744 \uCC44\uC6CC \uC81C\uCD9C\uD55C\uB2E4.\n 
+    \uBC94\uC778\uACFC \uC0AC\uAC74 \uC124\uBA85\uC774 \uBAA8\uB450 \uB9DE\uC544\uC57C
+    \uC720\uC8C4\uAC00 \uC120\uACE0\uB41C\uB2E4."
 --- !u!1 &4474141063585841736
 GameObject:
   m_ObjectHideFlags: 0
@@ -1185,3 +1253,4 @@ SceneRoots:
   - {fileID: 4920536564017878038}
   - {fileID: 392738394}
   - {fileID: 560512474}
+  - {fileID: 1900100001}

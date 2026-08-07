@@ -15,7 +15,9 @@ using UnityEngine.UI;
 public class InterrogationController : MonoBehaviour
 {
     [Header("사건 데이터")]
-    [Tooltip("인스펙터에서 만든 취조 사건(ScriptableObject). 비워두면 코드 샘플(SampleCaseGraph)로 자동 대체된다.")]
+    [Tooltip("이 씬을 단독 실행할 때 쓰는 기본 사건(ScriptableObject).\n" +
+             "사건 선택 화면을 거쳐 들어오면 거기서 고른 사건(GameSession.SelectedCase)이 우선한다.\n" +
+             "둘 다 없으면 코드 샘플(SampleCaseGraph)로 자동 대체된다.")]
     [SerializeField] InterrogationCase caseAsset;
 
     [Header("커스텀 UI 참조 (선택, 비워두면 자동 생성)")]
@@ -51,6 +53,31 @@ public class InterrogationController : MonoBehaviour
     SuspectSession CurrentSession =>
         string.IsNullOrEmpty(currentSuspectId) ? null : sessions[currentSuspectId];
 
+    // ------------------------------------------------------------------
+    // 진행 알림 (튜토리얼 등 관전자용). 게임 로직은 이 이벤트에 의존하지 않는다.
+    // ------------------------------------------------------------------
+    public event System.Action<string> SuspectCalled;        // 용의자 id
+    public event System.Action<string> SuspectEnded;         // 용의자 id
+    public event System.Action<string> TestimonyGranted;     // 증언 id
+    public event System.Action<string> StatementSelected;    // 기록지에서 고른 증언 id
+    public event System.Action<QuestionNode> ContradictionResolved;
+    public event System.Action VerdictOpened;
+
+    /// <summary>현재 진행 중인 사건 그래프. 튜토리얼이 안내할 경로를 짤 때 읽는다.</summary>
+    public CaseGraph Graph => graph;
+
+    /// <summary>해당 용의자의 기록지 아이콘 버튼(없으면 null). 튜토리얼이 하이라이트 대상으로 쓴다.</summary>
+    public Button RecordSheetButtonFor(string suspectId)
+    {
+        if (graph == null || string.IsNullOrEmpty(suspectId)) return null;
+        for (int i = 0; i < graph.Suspects.Count; i++)
+        {
+            if (graph.Suspects[i].id != suspectId) continue;
+            return i < recordSheetButtonOverrides.Length ? recordSheetButtonOverrides[i] : null;
+        }
+        return null;
+    }
+
     void Awake()
     {
         dialogueManager = GetComponent<DialogueManager>();
@@ -73,8 +100,16 @@ public class InterrogationController : MonoBehaviour
 
     void Start()
     {
-        // 그래프 데이터 로드: 인스펙터에 사건 에셋이 지정돼 있으면 그것을, 없으면 코드 샘플을 사용.
-        graph = caseAsset != null ? caseAsset.BuildGraph() : SampleCaseGraph.Build();
+        // 그래프 데이터 로드. 우선순위:
+        //   1) 사건 선택 화면에서 고른 사건(GameSession.SelectedCase)
+        //   2) 인스펙터의 기본 사건(caseAsset) — 이 씬만 단독 실행할 때
+        //   3) 코드 샘플(SampleCaseGraph)
+        var selected = GameSession.SelectedCase != null ? GameSession.SelectedCase : caseAsset;
+        graph = selected != null ? selected.BuildGraph() : SampleCaseGraph.Build();
+
+        // 사건을 새로 시작하는 시점이므로 이전 판결 결과를 지운다(재수사 시 결과가 섞이지 않게).
+        GameSession.ClearVerdict();
+
         progress = new CaseProgress();
 
         // authored 데이터에 잘못된 참조/순환이 없는지 점검.
@@ -87,6 +122,15 @@ public class InterrogationController : MonoBehaviour
         WireRecordSheetButtons();
         phoneCall.SetSuspects(graph.Suspects, CallSuspect);
         ShowBriefing();
+
+        if (GameSession.TutorialMode) StartTutorial();
+    }
+
+    // 튜토리얼은 별도 오브젝트로 띄운다(끝나면 자기 자신만 정리하고 사라지도록).
+    void StartTutorial()
+    {
+        var go = new GameObject("Tutorial");
+        go.AddComponent<TutorialController>().Begin(this, phoneCall, recordBook);
     }
 
     void ShowBriefing()
@@ -165,6 +209,7 @@ public class InterrogationController : MonoBehaviour
         dialogueManager.ResetToIdle();
         recordBook.Hide();
         verdict.Show(graph);
+        VerdictOpened?.Invoke();
     }
 
     // ------------------------------------------------------------------
@@ -190,6 +235,8 @@ public class InterrogationController : MonoBehaviour
                 suspect.useCustomPortraitSize ? suspect.portraitSize : (Vector2?)null);
         else
             PresentChoices();
+
+        SuspectCalled?.Invoke(suspectId);
     }
 
     // 현재 진행 상태를 그래프에 물어 '지금 가능한 질문'만 보여준다(모순 질문은 목록에 없다 — 기록지에서 직접 판정).
@@ -266,15 +313,20 @@ public class InterrogationController : MonoBehaviour
             if (!sessions.TryGetValue(t.ownerSuspectId, out owner)) owner = CurrentSession;
             if (owner == null) continue;
 
-            owner.AddStatement(new StatementRecord(t.id, t.ownerSuspectId, t.ownerSuspectName, t.text));
+            // 표시 이름은 세션(=SuspectData)에서 가져온다. Testimony.ownerSuspectName은
+            // 용의자 이름을 바꿔도 따라오지 않아 옛 이름이 남는다 — 진실은 SuspectData 하나로 둔다.
+            owner.AddStatement(new StatementRecord(t.id, t.ownerSuspectId, owner.suspectName, t.text));
             // 증언 확보 즉시 기록지에 반영하고 아이콘 버튼을 켠다.
             RevealRecordSheetFor(owner);
+
+            TestimonyGranted?.Invoke(t.id);
         }
     }
 
     void EndCurrentSuspect()
     {
         if (CurrentSession == null) return;
+        var endedId = currentSuspectId;
         CurrentSession.completed = true;
         progress.MarkSuspectCompleted(currentSuspectId);
         dialogueManager.ResetToIdle();
@@ -282,6 +334,8 @@ public class InterrogationController : MonoBehaviour
         currentSuspectId = null;
 
         if (lightFlicker != null) lightFlicker.PlayCharacterDismiss();
+
+        SuspectEnded?.Invoke(endedId);
     }
 
     // ------------------------------------------------------------------
@@ -303,6 +357,7 @@ public class InterrogationController : MonoBehaviour
         // 새 문장 선택(최대 2개, 가득 차 있으면 오래된 것부터 밀려남).
         progress.ToggleSelected(sel);
         recordBook.SetSelected(progress.selectedTestimonyIds);
+        StatementSelected?.Invoke(sel);
 
         // 아직 두 개가 다 모이지 않았으면 대기.
         if (progress.SelectedCount < CaseProgress.MaxSelected) return;
@@ -316,6 +371,7 @@ public class InterrogationController : MonoBehaviour
         {
             // 모순 성립 → 근거를 제공한 용의자와 무관하게, 해당 진술의 소유자에게 곧바로 추궁(대상이 바뀌면 자동 전환).
             currentSuspectId = owner;
+            ContradictionResolved?.Invoke(node);
             OnQuestionSelected(node);
             return;
         }

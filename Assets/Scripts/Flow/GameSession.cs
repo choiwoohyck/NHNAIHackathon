@@ -5,6 +5,8 @@ public static class GameSession
 {
     public static InterrogationCase SelectedCase;   // 사건 선택 화면에서 고른 사건 (없으면 컨트롤러의 기본 사건 사용)
 
+    public static bool TutorialMode;                // 취조 씬에서 인터랙티브 튜토리얼을 띄울지
+
     public static bool HasVerdict;
     public static VerdictResult LastVerdict;
     public static int CorrectFields;

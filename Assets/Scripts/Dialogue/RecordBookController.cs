@@ -81,10 +81,20 @@ public class RecordBookController : MonoBehaviour
         }
     }
 
+    /// <summary>기록지가 열렸을 때 알린다(튜토리얼 안내용).</summary>
+    public event Action Opened;
+
     public bool IsVisible => bookPanel != null && bookPanel.gameObject.activeSelf;
-    public void ToggleVisible() => bookPanel.gameObject.SetActive(!bookPanel.gameObject.activeSelf);
-    public void Show() => bookPanel.gameObject.SetActive(true);
-    public void Hide() => bookPanel.gameObject.SetActive(false);
+    public void ToggleVisible() => SetVisible(!bookPanel.gameObject.activeSelf);
+    public void Show() => SetVisible(true);
+    public void Hide() => SetVisible(false);
+
+    void SetVisible(bool visible)
+    {
+        bool wasOpen = bookPanel.gameObject.activeSelf;
+        bookPanel.gameObject.SetActive(visible);
+        if (visible && !wasOpen) Opened?.Invoke();
+    }
 
     /// <summary>
     /// 세션 데이터를 기반으로 기록지 카드 오브젝트를 생성하거나 이미 있으면 내용만 갱신한다.

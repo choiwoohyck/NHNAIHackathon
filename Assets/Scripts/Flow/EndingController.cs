@@ -24,6 +24,7 @@ public class EndingController : MonoBehaviour
 
     [Header("전환")]
     [SerializeField] string caseSelectSceneName = "CaseSelect";
+    [SerializeField] string titleSceneName = "Start";
     [SerializeField] float fadeInSeconds = 0.6f;
 
     void Start()
@@ -84,12 +85,11 @@ public class EndingController : MonoBehaviour
             DialogueUIUtil.Stretch(score.rectTransform, new Vector2(0.1f, 0.11f), new Vector2(0.9f, 0.15f), Vector2.zero, Vector2.zero);
         }
 
-        // 다시 수사하기 → 사건 선택 화면으로
-        var btn = DialogueUIUtil.CreateButton(bg, "AgainBtn", "다시 수사하기", new Color(0.2f, 0.2f, 0.28f, 0.95f));
-        var lbl = btn.GetComponentInChildren<Text>();
-        if (lbl != null) { lbl.font = DialogueUIUtil.KoreanFont; lbl.fontSize = 22; }
-        DialogueUIUtil.Stretch(btn.GetComponent<RectTransform>(), new Vector2(0.38f, 0.03f), new Vector2(0.62f, 0.09f), Vector2.zero, Vector2.zero);
-        btn.onClick.AddListener(GoToCaseSelect);
+        // 루프를 닫는 두 갈래: 사건 선택으로 돌아가 다시 수사하거나, 타이틀로 완전히 나간다.
+        MakeNavButton(bg, "AgainBtn", "다시 수사하기", new Color(0.2f, 0.2f, 0.28f, 0.95f),
+                      new Vector2(0.28f, 0.03f), new Vector2(0.49f, 0.09f), GoToCaseSelect);
+        MakeNavButton(bg, "TitleBtn", "처음으로", new Color(0.16f, 0.16f, 0.2f, 0.95f),
+                      new Vector2(0.51f, 0.03f), new Vector2(0.72f, 0.09f), GoToTitle);
 
         // 사운드
         var clip = success ? successSfx : failSfx;
@@ -100,11 +100,39 @@ public class EndingController : MonoBehaviour
         StartCoroutine(FadeIn(cg));
     }
 
+    void MakeNavButton(RectTransform parent, string name, string label, Color color,
+                       Vector2 anchorMin, Vector2 anchorMax, UnityEngine.Events.UnityAction onClick)
+    {
+        var btn = DialogueUIUtil.CreateButton(parent, name, label, color);
+        var lbl = btn.GetComponentInChildren<Text>();
+        if (lbl != null) { lbl.font = DialogueUIUtil.KoreanFont; lbl.fontSize = 22; }
+        DialogueUIUtil.Stretch(btn.GetComponent<RectTransform>(), anchorMin, anchorMax, Vector2.zero, Vector2.zero);
+        btn.onClick.AddListener(onClick);
+    }
+
+    // 다시 수사하기 → 사건 선택 화면. 고른 사건은 거기서 다시 정해지므로 판결만 지운다.
     void GoToCaseSelect()
     {
         GameSession.ClearVerdict();
-        if (!string.IsNullOrEmpty(caseSelectSceneName) && Application.CanStreamedLevelBeLoaded(caseSelectSceneName))
-            SceneManager.LoadScene(caseSelectSceneName);
+        Load(caseSelectSceneName);
+    }
+
+    // 처음으로 → 타이틀. 한 판이 끝난 것이므로 선택한 사건까지 비운다.
+    void GoToTitle()
+    {
+        GameSession.ClearVerdict();
+        GameSession.SelectedCase = null;
+        Load(titleSceneName);
+    }
+
+    void Load(string sceneName)
+    {
+        if (!string.IsNullOrEmpty(sceneName) && Application.CanStreamedLevelBeLoaded(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
+            return;
+        }
+        Debug.LogError("[EndingController] '" + sceneName + "' 씬을 로드할 수 없습니다. Build Settings에 등록되어 있는지 확인하세요.");
     }
 
     IEnumerator FadeIn(CanvasGroup cg)
