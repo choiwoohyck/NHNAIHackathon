@@ -207,8 +207,10 @@ public class TutorialController : MonoBehaviour
         Text("모순이 성립하면 그 진술의 주인에게 즉시 추궁이 들어갑니다.\n이 일의 요령은 방금 보신 것이 전부입니다.");
 
         // 실제 사건에서 쓸 것들은 '알려만 주고' 시키지는 않는다. 훈련은 모순 한 번으로 끝.
-        Text("실제 사건에서는 이렇게 모은 모순으로 범인을 좁힙니다.\n\n"
-             + "· 한 사람에게 더 물을 게 없어지면 '취조 종료'가 열립니다.\n"
+        // 안내문이 한 화면에 다 안 들어가 잘려 보였으므로 두 단계로 나눠 보여준다.
+        Text("실제 사건에서는 이렇게 모은 모순으로 범인을 좁힙니다.");
+
+        Text("· 한 사람에게 더 물을 게 없어지면 '취조 종료'가 열립니다.\n"
              + "· 기록지는 용의자별 아이콘으로 언제든 다시 열 수 있습니다.\n"
              + "· 확신이 서면 '사건 판결'에서 범인을 지목하고 사건의 전말을 채웁니다.\n"
              + "  단, 사람을 잘못 짚으면 그걸로 끝입니다.");
@@ -269,11 +271,13 @@ public class TutorialController : MonoBehaviour
         else HideHole();
 
         captionText.text = beat.caption;
-        PlaceCaption(spotlight ? target : null);
+        PlaceCaption();
 
         bool manual = beat.isDone == null;
         if (confirmButton.gameObject.activeSelf != manual)
             confirmButton.gameObject.SetActive(manual);
+        // 대사가 아직 출력 중이면(타이핑 등) 안내문을 다음으로 넘기지 못하게 막는다.
+        confirmButton.interactable = !speaking;
 
         if (!manual && beat.isDone()) Advance();
     }
@@ -328,6 +332,10 @@ public class TutorialController : MonoBehaviour
 
         // --- 안내문 ---
         captionBox = DialogueUIUtil.CreatePanel(canvas.transform, "Caption", new Color(0.06f, 0.07f, 0.09f, 0.96f));
+        // 배경 패널 자체는 클릭을 받을 필요가 없다. true로 두면 안내문이 하이라이트 대상과 겹쳤을 때
+        // 그 아래 버튼(예: 전화기)의 클릭까지 먹어버린다.
+        var captionBoxImage = captionBox.GetComponent<Image>();
+        if (captionBoxImage != null) captionBoxImage.raycastTarget = false;
 
         captionText = DialogueUIUtil.CreateText(captionBox, "Text", 22, TextAnchor.MiddleCenter, new Color(0.95f, 0.96f, 0.97f));
         captionText.font = DialogueUIUtil.KoreanFont;
@@ -417,24 +425,14 @@ public class TutorialController : MonoBehaviour
         dimRight.gameObject.SetActive(on);
     }
 
-    // 하이라이트를 가리지 않는 쪽에 안내문을 붙인다.
-    void PlaceCaption(RectTransform target)
+    static readonly Vector2 CaptionTopMin = new Vector2(0.25f, 0.66f);
+    static readonly Vector2 CaptionTopMax = new Vector2(0.75f, 0.95f);
+
+    // 튜토리얼은 인물 이미지를 쓰지 않아 화면 상단이 항상 비어 있으므로,
+    // 대상 위치와 상관없이 안내문을 고정으로 상단에 띄운다(대사창은 하단에 뜨므로 서로 겹치지 않는다).
+    void PlaceCaption()
     {
-        bool bottom = true;
-        if (target != null)
-        {
-            var targetCanvas = target.GetComponentInParent<Canvas>();
-            Camera cam = (targetCanvas != null && targetCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
-                ? targetCanvas.worldCamera : null;
-
-            var corners = new Vector3[4];
-            target.GetWorldCorners(corners);
-            float centerY = RectTransformUtility.WorldToScreenPoint(cam, (corners[0] + corners[2]) * 0.5f).y;
-            bottom = centerY > Screen.height * 0.5f;   // 대상이 위쪽이면 안내문은 아래로
-        }
-
-        if (bottom) Anchor(captionBox, new Vector2(0.17f, 0.05f), new Vector2(0.83f, 0.25f));
-        else Anchor(captionBox, new Vector2(0.17f, 0.75f), new Vector2(0.83f, 0.95f));
+        Anchor(captionBox, CaptionTopMin, CaptionTopMax);
     }
 
     static void Anchor(Component c, Vector2 min, Vector2 max) =>

@@ -21,6 +21,8 @@ MonoBehaviour:
     \uB0B4\uBD80 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC0AC\uC6A9\uB418\uC5C8\uB2E4.
     \uB0B4\uBD80 \uC2DC\uC2A4\uD15C\uC5D0 \uC811\uADFC \uAC00\uB2A5\uD55C 3\uC778\uC744
     \uCDE8\uC870\uD558\uB77C."
+  caseNumber: CASE-000
+  caseImage: {fileID: 0}
   testimonies:
   - id: T_A_ALIBI
     ownerSuspectId: A
@@ -108,6 +110,8 @@ MonoBehaviour:
     suspectName: "\uD074\uB85C\uBC84"
     occupation: "\uC815\uBD80\uAE30\uAD00 \uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uC9C1\uC6D0"
     portrait: {fileID: -2232829338279070883, guid: 10f87886577451245a0bcb85429ae4bc, type: 3}
+    useCustomPortraitSize: 1
+    portraitSize: {x: 400, y: 633}
     questions:
     - id: A_WHERE
       label: "\uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
@@ -244,6 +248,8 @@ MonoBehaviour:
     suspectName: "\uB809\uC2A4"
     occupation: "\uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uB3D9\uB8CC"
     portrait: {fileID: 8210437390359269097, guid: f6a818e865164cd4999ae72fa0989170, type: 3}
+    useCustomPortraitSize: 1
+    portraitSize: {x: 500, y: 678}
     questions:
     - id: B_A_WHERE
       label: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0
@@ -283,6 +289,8 @@ MonoBehaviour:
     suspectName: "\uD578\uB354\uC2A8"
     occupation: "\uC815\uBD80\uAE30\uAD00 \uBCF4\uC548 \uB2F4\uB2F9\uC790"
     portrait: {fileID: 7848557645660954504, guid: f1c3f8ba2ea564f4885b9f7868d768f3, type: 3}
+    useCustomPortraitSize: 1
+    portraitSize: {x: 500, y: 600}
     questions:
     - id: C_ADMIN
       label: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740

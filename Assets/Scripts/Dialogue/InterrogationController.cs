@@ -121,8 +121,12 @@ public class InterrogationController : MonoBehaviour
         BuildActionButtons();
         WireRecordSheetButtons();
         phoneCall.SetSuspects(graph.Suspects, CallSuspect);
-        ShowBriefing();
+        // 브리핑 대사가 다 끝난 뒤에 튜토리얼을 시작해야 안내문과 대사가 동시에 뜨지 않는다.
+        ShowBriefing(StartTutorialIfNeeded);
+    }
 
+    void StartTutorialIfNeeded()
+    {
         if (GameSession.TutorialMode) StartTutorial();
     }
 
@@ -133,15 +137,15 @@ public class InterrogationController : MonoBehaviour
         go.AddComponent<TutorialController>().Begin(this, phoneCall, recordBook);
     }
 
-    void ShowBriefing()
+    void ShowBriefing(System.Action onComplete)
     {
-        if (graph == null || string.IsNullOrEmpty(graph.briefing)) return;
+        if (graph == null || string.IsNullOrEmpty(graph.briefing)) { onComplete?.Invoke(); return; }
         var lines = new List<DialogueLine>
         {
             new DialogueLine("사건 브리핑", graph.caseTitle),
             new DialogueLine("사건 브리핑", graph.briefing),
         };
-        dialogueManager.ShowLines(lines, null);
+        dialogueManager.ShowLines(lines, onComplete);
     }
 
     // ------------------------------------------------------------------
@@ -244,11 +248,18 @@ public class InterrogationController : MonoBehaviour
     {
         if (string.IsNullOrEmpty(currentSuspectId)) return;
         var available = graph.GetAvailableQuestions(currentSuspectId, progress);
-        dialogueManager.ShowChoices(available, OnQuestionSelected);
+        bool noneLeft = available == null || available.Count == 0;
+
+        // 튜토리얼에서는 '더 물어볼 질문이 없습니다' 안내판 대신 대사창 자체를 닫는다.
+        // 다음 지시(지시창)가 바로 이어지므로 빈 선택지창이 화면에 남아 겹칠 이유가 없다.
+        if (noneLeft && GameSession.TutorialMode)
+            dialogueManager.ResetToIdle();
+        else
+            dialogueManager.ShowChoices(available, OnQuestionSelected);
 
         // 더 물어볼 질문이 없으면 지금까지 확보한 진술로 기록지를 만들고 아이콘 버튼을 켠다
         // (증언을 얻을 때마다 이미 갱신되므로, 여긴 안전망 역할).
-        if (available == null || available.Count == 0)
+        if (noneLeft)
             RevealRecordSheetFor(CurrentSession);
     }
 
