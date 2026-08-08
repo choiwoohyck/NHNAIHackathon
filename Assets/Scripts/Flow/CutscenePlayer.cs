@@ -9,7 +9,11 @@ using UnityEngine.Video;
 // 한 컷은 그림(영상 또는 정지컷) + 대사(선택)로 이루어진다.
 //   - 영상   : StreamingAssets에 넣어둔 파일명 (WebGL에서도 되도록 VideoClip이 아니라 URL로 재생)
 //   - 정지컷 : Sprite
-//   - 대사   : 화면 아래 대사창. 대사가 있으면 클릭할 때까지 기다린다(자동 진행 시간을 준 경우는 제외).
+//   - 대사   : 화면 아래 대사창. 대사가 있으면 스페이스바(또는 클릭)를 누를 때까지 기다린다.
+//
+// 전환은 전부 암전을 거친다: 컷이 끝나면 검게 내렸다가, 다음 컷의 그림이 준비된 뒤에 올린다.
+// 덕분에 영상이 끝나는 순간 화면이 비거나 그림이 툭 바뀌는 일이 없다.
+// 정지컷은 아주 천천히 확대되어(Ken Burns) 멈춘 그림처럼 보이지 않게 한다.
 //
 // 영상이 준비되지 않거나(웹 로딩 실패, 코덱 문제, 배치모드 등) 도중에 오류가 나면 그 컷은
 // 건너뛰고 다음으로 넘어간다 — 어떤 경우에도 컷씬에서 멈추지 않는 것이 우선이다.
@@ -19,11 +23,11 @@ public class CutscenePlayer : MonoBehaviour
     {
         public string videoFileName;   // StreamingAssets 파일명 (비우면 정지컷)
         public Sprite still;           // 정지컷 이미지
-        public float seconds;          // >0 이면 이 시간 뒤 자동 진행, <=0 이면 클릭 대기
+        public float seconds;          // >0 이면 이 시간 뒤 자동 진행, <=0 이면 입력 대기
         public string speaker;
         public string line;
         public AudioClip sfx;          // 이 컷이 시작될 때 한 번 재생
-        public AudioClip bgm;          // 지정하면 이 컷부터 배경음을 갈아끼운다
+        public AudioClip bgm;          // 지정하면 이 컷부터 배경음을 갈아끼운다(크로스페이드)
         public bool muteVideoAudio;    // 영상에 들어 있는 소리를 죽인다
 
         public bool IsVideo => !string.IsNullOrEmpty(videoFileName);
@@ -39,33 +43,42 @@ public class CutscenePlayer : MonoBehaviour
         public static Step Still(Sprite sprite, float seconds) =>
             new Step { still = sprite, seconds = seconds };
 
-        /// <summary>정지컷 + 대사. 클릭할 때까지 머문다.</summary>
+        /// <summary>정지컷 + 대사. 입력이 있을 때까지 머문다.</summary>
         public static Step Dialogue(Sprite sprite, string speaker, string line) =>
             new Step { still = sprite, speaker = speaker, line = line };
     }
 
-    const float PrepareTimeout = 8f;    // 준비가 끝나지 않을 때의 백업 타임아웃
-    const float MinLineSeconds = 0.4f;  // 대사가 뜨자마자 클릭되어 넘어가는 것을 막는다
+    const float PrepareTimeout = 8f;     // 영상 준비가 끝나지 않을 때의 백업 타임아웃
+    const float MinLineSeconds = 0.4f;   // 대사가 뜨자마자 넘어가는 것을 막는다
+    const float FadeOutSeconds = 0.22f;  // 컷을 마치며 암전
+    const float FadeInSeconds = 0.30f;   // 다음 컷을 밝히며
+    const float BgmFadeSeconds = 0.6f;
+    const float KenBurnsScale = 0.04f;   // 정지컷이 서서히 커지는 정도
+    const float KenBurnsSeconds = 8f;
 
     Canvas canvas;
     RawImage videoImage;
     Image stillImage;
+    Image fadeOverlay;
     RectTransform dialogueBox;
+    CanvasGroup dialogueGroup;
     Text speakerText;
     Text lineText;
     Text continueHint;
-    Button advanceButton;
 
     System.Action onComplete;
     bool finished;
     bool advanceRequested;
+    bool keepBgmAfterFinish;
 
     AudioSource bgmSource;
     AudioSource sfxSource;
+    float bgmBaseVolume;
+    Coroutine bgmRoutine;
+
+    float stillShownAt = -1f;
 
     public bool IsPlaying => !finished;
-
-    bool keepBgmAfterFinish;
 
     /// <summary>
     /// 컷들을 순서대로 재생하고, 전부 끝나거나 건너뛰면 onComplete를 부른다.
@@ -74,8 +87,8 @@ public class CutscenePlayer : MonoBehaviour
     public void Play(IList<Step> steps, System.Action onComplete, AudioClip bgm = null, float bgmVolume = 0.35f,
                      bool keepBgm = false)
     {
-        keepBgmAfterFinish = keepBgm;
         this.onComplete = onComplete;
+        keepBgmAfterFinish = keepBgm;
 
         if (steps == null || steps.Count == 0)
         {
@@ -88,37 +101,15 @@ public class CutscenePlayer : MonoBehaviour
         StartCoroutine(Run(steps));
     }
 
-    // 영상 자체에 소리가 들어 있는 컷도 있으므로 BGM은 깔아주는 정도로만 둔다.
-    void BuildAudio(AudioClip bgm, float bgmVolume)
-    {
-        sfxSource = gameObject.AddComponent<AudioSource>();
-        sfxSource.playOnAwake = false;
-
-        if (bgm == null) return;
-
-        bgmSource = gameObject.AddComponent<AudioSource>();
-        bgmSource.clip = bgm;
-        bgmSource.loop = true;
-        bgmSource.volume = bgmVolume;
-        bgmSource.playOnAwake = false;
-        bgmSource.Play();
-    }
-
-    // 결과가 갈리는 컷에서 배경음을 바꾼다. 같은 곡이면 끊지 않고 그대로 이어간다.
-    void SwitchBgm(AudioClip next)
-    {
-        if (next == null || bgmSource == null || bgmSource.clip == next) return;
-        bgmSource.clip = next;
-        bgmSource.Play();
-    }
-
     IEnumerator Run(IList<Step> steps)
     {
+        SetFade(1f);   // 첫 컷도 암전에서 밝아지며 시작한다
+
         foreach (var step in steps)
         {
             if (finished) yield break;
 
-            SwitchBgm(step.bgm);
+            if (step.bgm != null) StartBgmSwitch(step.bgm);
             if (step.sfx != null && sfxSource != null) sfxSource.PlayOneShot(step.sfx);
             ShowLine(step);
 
@@ -127,7 +118,13 @@ public class CutscenePlayer : MonoBehaviour
 
             // 대사가 있으면 그림이 끝나도 읽을 때까지 기다린다.
             if (!finished && step.HasLine && step.seconds <= 0f) yield return WaitForAdvance();
+            if (finished) yield break;
+
+            // 다음 컷으로 넘어가기 전에 암전 — 그림이 바뀌는 순간을 가린다.
+            yield return FadeTo(1f, FadeOutSeconds);
+            ClearVisuals();
         }
+
         Finish();
     }
 
@@ -144,6 +141,7 @@ public class CutscenePlayer : MonoBehaviour
         speakerText.gameObject.SetActive(!string.IsNullOrEmpty(step.speaker));
         lineText.text = step.line;
         continueHint.gameObject.SetActive(step.seconds <= 0f);
+        dialogueGroup.alpha = 1f;
     }
 
     IEnumerator WaitForAdvance()
@@ -167,6 +165,7 @@ public class CutscenePlayer : MonoBehaviour
     void Update()
     {
         if (finished) return;
+
         if (SpacePressed()) RequestAdvance();
 
         // 눌러야 넘어간다는 걸 놓치지 않도록 안내를 깜빡인다.
@@ -175,6 +174,14 @@ public class CutscenePlayer : MonoBehaviour
             var c = continueHint.color;
             c.a = 0.5f + 0.5f * Mathf.Abs(Mathf.Sin(Time.unscaledTime * 2.5f));
             continueHint.color = c;
+        }
+
+        // 정지컷을 아주 느리게 확대해 화면이 죽어 보이지 않게 한다.
+        if (stillImage != null && stillImage.gameObject.activeSelf && stillShownAt >= 0f)
+        {
+            float t = Mathf.Clamp01((Time.unscaledTime - stillShownAt) / KenBurnsSeconds);
+            float s = 1f + KenBurnsScale * t;
+            stillImage.rectTransform.localScale = new Vector3(s, s, 1f);
         }
     }
 
@@ -242,6 +249,7 @@ public class CutscenePlayer : MonoBehaviour
         {
             Debug.LogWarning("[Cutscene] '" + fileName + "' 준비 시간 초과 — 이 컷을 건너뜁니다.");
             done = true;
+            yield return FadeTo(0f, FadeInSeconds);   // 대사만이라도 읽히게 화면은 올린다
         }
 
         // 재생이 끝나길 기다린다(끝 이벤트가 누락되는 경우를 대비해 길이 기준 여유를 둔다).
@@ -254,32 +262,50 @@ public class CutscenePlayer : MonoBehaviour
             yield return null;
         }
 
-        CleanupVideo(vp, rt);
+        // 마지막 프레임을 화면에 둔 채로 빠져나간다 — 정리는 암전이 끝난 뒤 ClearVisuals가 한다.
+        pendingPlayer = vp;
+        pendingTexture = rt;
     }
 
-    // 첫 프레임이 RenderTexture에 그려진 뒤에 켠다(텍스처가 없으면 흰 화면이 번쩍인다).
+    VideoPlayer pendingPlayer;
+    RenderTexture pendingTexture;
+
+    // 첫 프레임이 RenderTexture에 그려진 뒤에 켜고, 그때 화면을 밝힌다.
     IEnumerator RevealVideoNextFrame()
     {
         yield return null;
-        if (videoImage != null && !finished) videoImage.gameObject.SetActive(true);
+        if (videoImage == null || finished) yield break;
+
+        videoImage.gameObject.SetActive(true);
+        yield return FadeTo(0f, FadeInSeconds);
     }
 
-    void CleanupVideo(VideoPlayer vp, RenderTexture rt)
+    // 암전이 끝난 뒤 이전 컷의 흔적을 지운다.
+    void ClearVisuals()
     {
         if (videoImage != null)
         {
             videoImage.gameObject.SetActive(false);
             videoImage.texture = null;
         }
-        if (vp != null)
+        if (stillImage != null)
         {
-            vp.Stop();
-            Destroy(vp);
+            stillImage.gameObject.SetActive(false);
+            stillImage.rectTransform.localScale = Vector3.one;
         }
-        if (rt != null)
+        stillShownAt = -1f;
+
+        if (pendingPlayer != null)
         {
-            rt.Release();
-            Destroy(rt);
+            pendingPlayer.Stop();
+            Destroy(pendingPlayer);
+            pendingPlayer = null;
+        }
+        if (pendingTexture != null)
+        {
+            pendingTexture.Release();
+            Destroy(pendingTexture);
+            pendingTexture = null;
         }
     }
 
@@ -292,9 +318,12 @@ public class CutscenePlayer : MonoBehaviour
 
         stillImage.sprite = step.still;
         stillImage.color = Color.white;
+        stillImage.rectTransform.localScale = Vector3.one;
         stillImage.gameObject.SetActive(true);
+        stillShownAt = Time.unscaledTime;
 
-        // 대사가 붙은 정지컷은 클릭으로 넘긴다(대기는 Run에서 처리).
+        yield return FadeTo(0f, FadeInSeconds);
+
         if (step.seconds > 0f)
         {
             float t = 0f;
@@ -305,16 +334,100 @@ public class CutscenePlayer : MonoBehaviour
                 yield return null;
             }
         }
-        else if (!step.HasLine)
-        {
-            yield return null;   // 대사도 시간도 없으면 한 프레임만
-        }
-
-        if (!step.HasLine) stillImage.gameObject.SetActive(false);
     }
 
     // ------------------------------------------------------------------
-    void Skip() => Finish();
+    // 암전
+    // ------------------------------------------------------------------
+    void SetFade(float a)
+    {
+        if (fadeOverlay == null) return;
+        var c = fadeOverlay.color;
+        c.a = Mathf.Clamp01(a);
+        fadeOverlay.color = c;
+    }
+
+    IEnumerator FadeTo(float target, float duration)
+    {
+        if (fadeOverlay == null) yield break;
+
+        float from = fadeOverlay.color.a;
+        if (Mathf.Approximately(from, target)) yield break;
+
+        float t = 0f;
+        while (t < duration)
+        {
+            if (finished) yield break;
+            t += Time.unscaledDeltaTime;
+            SetFade(Mathf.Lerp(from, target, Mathf.SmoothStep(0f, 1f, t / duration)));
+            yield return null;
+        }
+        SetFade(target);
+    }
+
+    // ------------------------------------------------------------------
+    // 소리
+    // ------------------------------------------------------------------
+    void BuildAudio(AudioClip bgm, float bgmVolume)
+    {
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+
+        bgmBaseVolume = bgmVolume;
+        if (bgm == null) return;
+
+        bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.clip = bgm;
+        bgmSource.loop = true;
+        bgmSource.volume = bgmVolume;
+        bgmSource.playOnAwake = false;
+        bgmSource.Play();
+    }
+
+    // 결과가 갈리는 컷에서 배경음을 바꾼다. 뚝 끊지 않고 서로 넘겨준다.
+    void StartBgmSwitch(AudioClip next)
+    {
+        if (next == null || bgmSource == null || bgmSource.clip == next) return;
+        if (bgmRoutine != null) StopCoroutine(bgmRoutine);
+        bgmRoutine = StartCoroutine(SwitchBgm(next));
+    }
+
+    IEnumerator SwitchBgm(AudioClip next)
+    {
+        float half = BgmFadeSeconds * 0.5f;
+        float from = bgmSource.volume;
+
+        float t = 0f;
+        while (t < half)
+        {
+            t += Time.unscaledDeltaTime;
+            bgmSource.volume = Mathf.Lerp(from, 0f, t / half);
+            yield return null;
+        }
+
+        bgmSource.clip = next;
+        bgmSource.Play();
+
+        t = 0f;
+        while (t < half)
+        {
+            t += Time.unscaledDeltaTime;
+            bgmSource.volume = Mathf.Lerp(0f, bgmBaseVolume, t / half);
+            yield return null;
+        }
+        bgmSource.volume = bgmBaseVolume;
+    }
+
+    // ------------------------------------------------------------------
+    void Skip() => StartCoroutine(SkipRoutine());
+
+    // 건너뛰기도 툭 끊지 않고 한 번 접었다 넘긴다.
+    IEnumerator SkipRoutine()
+    {
+        if (finished) yield break;
+        yield return FadeTo(1f, FadeOutSeconds);
+        Finish();
+    }
 
     void Finish()
     {
@@ -325,7 +438,11 @@ public class CutscenePlayer : MonoBehaviour
         onComplete = null;
 
         // 배경음은 남겨둘 수 있다 — AudioSource는 이 오브젝트에 붙어 있으므로 컷씬이 사라져도 계속 울린다.
-        if (bgmSource != null && !keepBgmAfterFinish) bgmSource.Stop();
+        if (bgmSource != null)
+        {
+            if (keepBgmAfterFinish) bgmSource.volume = bgmBaseVolume;
+            else bgmSource.Stop();
+        }
 
         // 건너뛰기로 중간에 끊기면 재생 코루틴이 정리까지 못 가므로 여기서 직접 치운다.
         foreach (var vp in GetComponents<VideoPlayer>())
@@ -336,6 +453,8 @@ public class CutscenePlayer : MonoBehaviour
             Destroy(vp);
             if (rt != null) { rt.Release(); Destroy(rt); }
         }
+        pendingPlayer = null;
+        pendingTexture = null;
 
         if (canvas != null) Destroy(canvas.gameObject);
 
@@ -371,13 +490,19 @@ public class CutscenePlayer : MonoBehaviour
         DialogueUIUtil.Stretch((RectTransform)videoGO.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         videoGO.SetActive(false);
 
-        // 화면 아무 곳이나 눌러 다음으로 (건너뛰기 버튼보다 먼저 만들어 아래에 깔린다)
-        advanceButton = DialogueUIUtil.CreateButton(canvas.transform, "AdvanceArea", "", new Color(0f, 0f, 0f, 0f));
-        advanceButton.transition = Selectable.Transition.None;
-        DialogueUIUtil.Stretch(advanceButton.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        advanceButton.onClick.AddListener(RequestAdvance);
+        // 화면 아무 곳이나 눌러도 다음으로 (건너뛰기 버튼보다 먼저 만들어 아래에 깔린다)
+        var advance = DialogueUIUtil.CreateButton(canvas.transform, "AdvanceArea", "", new Color(0f, 0f, 0f, 0f));
+        advance.transition = Selectable.Transition.None;
+        DialogueUIUtil.Stretch(advance.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        advance.onClick.AddListener(RequestAdvance);
 
         BuildDialogueBox();
+
+        // 암전막 — 그림과 대사 위, 건너뛰기 아래
+        fadeOverlay = DialogueUIUtil.CreatePanel(canvas.transform, "Fade", new Color(0f, 0f, 0f, 1f))
+                                    .GetComponent<Image>();
+        fadeOverlay.raycastTarget = false;
+        DialogueUIUtil.Stretch(fadeOverlay.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
         var skip = DialogueUIUtil.CreateButton(canvas.transform, "SkipBtn", "건너뛰기",
                                                new Color(0.15f, 0.15f, 0.18f, 0.85f));
@@ -397,6 +522,7 @@ public class CutscenePlayer : MonoBehaviour
         DialogueUIUtil.Stretch(dialogueBox, new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.26f), Vector2.zero, Vector2.zero);
         var boxImage = dialogueBox.GetComponent<Image>();
         if (boxImage != null) boxImage.raycastTarget = false;   // 클릭은 뒤의 진행 영역이 받는다
+        dialogueGroup = dialogueBox.gameObject.AddComponent<CanvasGroup>();
 
         speakerText = DialogueUIUtil.CreateText(dialogueBox, "Speaker", 24, TextAnchor.UpperLeft,
                                                 new Color(1f, 0.82f, 0.42f));

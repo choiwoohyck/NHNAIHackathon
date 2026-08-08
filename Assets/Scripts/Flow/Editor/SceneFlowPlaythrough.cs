@@ -268,8 +268,14 @@ public class FlowDriver : MonoBehaviour
         // (배치모드에서는 영상이 준비되지 않아 컷마다 타임아웃을 기다리게 된다).
         var advance = GameObject.Find("AdvanceArea");
         if (advance == null) { Fail("컷씬에 진행 영역(AdvanceArea)이 없습니다."); yield break; }
-        advance.GetComponent<Button>().onClick.Invoke();
-        yield return null;
+
+        // 첫 대사 컷은 페이드인과 최소 노출 시간이 있으므로 몇 프레임에 걸쳐 눌러 본다.
+        var advanceButton = advance.GetComponent<Button>();
+        for (int i = 0; i < 40; i++)
+        {
+            advanceButton.onClick.Invoke();
+            yield return null;
+        }
 
         var stillPlaying = Object.FindFirstObjectByType<CutscenePlayer>();
         if (stillPlaying == null || !stillPlaying.IsPlaying)
@@ -292,20 +298,23 @@ public class FlowDriver : MonoBehaviour
         if (!Failed) yield return null;   // 결과 UI가 만들어질 한 프레임
     }
 
-    // 판결 패널의 (필드, 입력칸) 짝을 그대로 읽어 각 칸에 그 필드의 정답을 넣는다.
-    int FillAnswers(VerdictController verdict)
+    // 판결 패널의 빈칸을 정답 보기 버튼을 눌러 채운다(플레이어가 하는 그대로).
+    internal static int FillAnswers(VerdictController verdict)
     {
-        var pairs = Private(verdict, "pairs") as IEnumerable;
-        if (pairs == null) return 0;
+        var slots = Private(verdict, "slots") as IEnumerable;
+        if (slots == null) return 0;
 
         int n = 0;
-        foreach (var pair in pairs)
+        foreach (var slot in slots)
         {
-            var t = pair.GetType();
-            var field = t.GetField("Item1").GetValue(pair) as CulpritDetection.CaseField;
-            var input = t.GetField("Item2").GetValue(pair) as InputField;
-            if (field == null || input == null) continue;
-            input.text = field.answer ?? "";
+            var field = Private(slot, "field") as CulpritDetection.CaseField;
+            var options = Private(slot, "options") as IDictionary;
+            if (field == null || options == null) continue;
+
+            var answer = field.answer ?? "";
+            if (!options.Contains(answer)) continue;   // 보기에 없는 정답이면 채울 방법이 없다
+
+            ((Button)options[answer]).onClick.Invoke();
             n++;
         }
         return n;
@@ -387,8 +396,9 @@ public class FlowDriver : MonoBehaviour
         Fail(failMessage);
     }
 
-    static object Private(object target, string fieldName)
+    internal static object Private(object target, string fieldName)
     {
+        if (target == null) return null;
         var f = target.GetType().GetField(fieldName,
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         return f != null ? f.GetValue(target) : null;

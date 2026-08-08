@@ -267,20 +267,7 @@ public class TutorialDriver : MonoBehaviour
         }, 15f, "[" + i + "] 판결 패널이 열려 있지 않습니다.");
         if (Failed) yield break;
 
-        var pairs = Private(verdict, "pairs") as IEnumerable;
-        if (pairs == null) { Fail("[" + i + "] 판결 입력칸을 읽지 못했습니다."); yield break; }
-
-        int filled = 0;
-        foreach (var pair in pairs)
-        {
-            var t = pair.GetType();
-            var field = t.GetField("Item1").GetValue(pair) as CulpritDetection.CaseField;
-            var input = t.GetField("Item2").GetValue(pair) as InputField;
-            if (field == null || input == null) continue;
-            input.text = field.answer ?? "";
-            filled++;
-        }
-
+        int filled = FlowDriver.FillAnswers(verdict);   // 씬 흐름 검증기와 같은 방식으로 보기를 누른다
         if (filled == 0) { Fail("[" + i + "] 판결에 채울 빈칸이 없습니다 — 튜토리얼 사건에 판정 항목이 없습니다."); yield break; }
         Step("판결: 빈칸 " + filled + "칸을 정답으로 입력");
 

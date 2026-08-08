@@ -14,6 +14,8 @@ public class VerdictController : MonoBehaviour
 {
     static readonly Color SuspectNormal = new Color(0.2f, 0.2f, 0.26f, 0.95f);
     static readonly Color SuspectSelected = new Color(0.78f, 0.56f, 0.16f, 0.98f);
+    static readonly Color OptionNormal = new Color(0.18f, 0.2f, 0.24f, 0.95f);
+    static readonly Color OptionSelected = new Color(0.2f, 0.5f, 0.42f, 0.98f);
 
     const string CulpritToken = "범인";  // 템플릿의 {범인} 자리 = 지목한 용의자 이름이 채워짐
 
@@ -35,7 +37,19 @@ public class VerdictController : MonoBehaviour
 
     public string endingSceneName = "EndingScene";   // 제출 시 이 씬으로 결과 전달(Build Settings에 등록돼 있어야 이동).
 
-    readonly List<(CaseField field, InputField input)> pairs = new List<(CaseField, InputField)>();
+    // 빈칸 하나. 문장 속 자리(label)와 아래 보기 버튼들이 같은 값을 공유한다.
+    //
+    // 타이핑 대신 보기에서 고르게 하는 이유: 답은 원래 CaseField.options 안에서만 나오고(자유 서술이 아니다),
+    // WebGL은 InputField에서 한글 IME 조합 입력을 받지 못해 웹에서는 아예 입력이 불가능하다.
+    class FieldSlot
+    {
+        public CaseField field;
+        public Text label;                 // 문장 속 빈칸 (없으면 보기 줄에 만든다)
+        public string value = "";
+        public readonly Dictionary<string, Button> options = new Dictionary<string, Button>();
+    }
+
+    readonly List<FieldSlot> slots = new List<FieldSlot>();
     readonly Dictionary<string, Button> suspectButtons = new Dictionary<string, Button>();
 
     public bool IsOpen => dim != null && dim.gameObject.activeSelf;
@@ -102,7 +116,7 @@ public class VerdictController : MonoBehaviour
     void Populate()
     {
         selectedSuspectId = null;
-        pairs.Clear();
+        slots.Clear();
         suspectButtons.Clear();
         resultText = null;
         culpritSlotLabel = null;
@@ -135,14 +149,20 @@ public class VerdictController : MonoBehaviour
                 BuildTemplateRow(rawLine.Replace("\r", ""), referenced);
         }
 
+        // 문장에 안 쓰인 필드도 빠짐없이 채울 수 있게 슬롯을 만들어 둔다.
         if (graph != null)
             foreach (var field in graph.verdictFields)
             {
                 if (field == null || referenced.Contains(field.label)) continue;
-                AddLabel(field.DisplayPrompt(), 13, FontStyle.Bold, new Color(0.85f, 0.9f, 1f));
-                var input = AddStackedInput(string.Join(" / ", field.OptionValues()));
-                Register(field, input);
+                SlotFor(field);   // 문장 속 자리가 없는 필드 — 보기 줄에서 값을 보여준다
             }
+
+        // --- 보기 (빈칸마다 고를 수 있는 값들) ---
+        if (slots.Count > 0)
+        {
+            AddLabel("보기에서 골라 빈칸을 채우세요", 13, FontStyle.Normal, new Color(1f, 0.82f, 0.42f));
+            foreach (var slot in slots) BuildOptionRow(slot);
+        }
 
         // --- 제출 / 닫기 ---
         var actionRow = AddRow(44, TextAnchor.MiddleCenter, true);
@@ -208,8 +228,8 @@ public class VerdictController : MonoBehaviour
         // 빈칸은 문장(verdictTemplate) 순서로 놓여 있고 채점은 verdictFields 순서로 하므로,
         // 값만 넘기면 엉뚱한 필드와 대조된다. 어느 필드의 답인지 붙여서 넘긴다.
         var answers = new List<KeyValuePair<CaseField, string>>();
-        foreach (var p in pairs)
-            answers.Add(new KeyValuePair<CaseField, string>(p.field, p.input != null ? p.input.text : ""));
+        foreach (var slot in slots)
+            answers.Add(new KeyValuePair<CaseField, string>(slot.field, slot.value));
 
         int correct, total;
         var result = VerdictEvaluator.Evaluate(graph, selectedSuspectId, answers, out correct, out total);
@@ -282,8 +302,9 @@ public class VerdictController : MonoBehaviour
             var field = FindField(label);
             if (field != null)
             {
-                var input = AddInlineInput(row);
-                Register(field, input);
+                var slot = SlotFor(field);
+                slot.label = AddBlankLabel(row, 120);
+                RefreshSlot(slot);
                 referenced.Add(field.label);
             }
             else if (label == CulpritToken) AddCulpritSlot(row);
@@ -301,7 +322,86 @@ public class VerdictController : MonoBehaviour
         return null;
     }
 
-    void Register(CaseField field, InputField input) => pairs.Add((field, input));
+    // 필드마다 슬롯은 하나만 둔다(문장에 두 번 나와도 같은 값을 공유).
+    FieldSlot SlotFor(CaseField field)
+    {
+        foreach (var s in slots)
+            if (s.field == field) return s;
+
+        var slot = new FieldSlot { field = field };
+        slots.Add(slot);
+        return slot;
+    }
+
+    // 문장 속 빈칸(밑줄). 보기를 고르면 여기에 값이 들어간다.
+    Text AddBlankLabel(RectTransform row, float minWidth)
+    {
+        var go = new GameObject("Blank", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(row, false);
+
+        var img = go.GetComponent<Image>();
+        img.color = new Color(0.78f, 0.56f, 0.16f, 0.22f);
+        img.raycastTarget = false;
+
+        var le = go.AddComponent<LayoutElement>();
+        le.minWidth = minWidth; le.preferredHeight = 30;
+
+        var t = DialogueUIUtil.CreateText(go.transform, "Txt", 15, TextAnchor.MiddleCenter,
+                                          new Color(1f, 0.85f, 0.45f));
+        t.font = font; t.fontStyle = FontStyle.Bold; t.raycastTarget = false;
+        var rt = t.rectTransform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(6, 2); rt.offsetMax = new Vector2(-6, -2);
+        return t;
+    }
+
+    // "동기 :  [증오] [복수] [질투]"  — 눌러서 빈칸을 채운다.
+    void BuildOptionRow(FieldSlot slot)
+    {
+        var row = AddRow(40, TextAnchor.MiddleLeft, false);
+
+        var name = DialogueUIUtil.CreateText(row, "FieldName", 15, TextAnchor.MiddleRight,
+                                             new Color(0.85f, 0.9f, 1f));
+        name.font = font; name.fontStyle = FontStyle.Bold;
+        name.text = slot.field.DisplayPrompt();
+        name.horizontalOverflow = HorizontalWrapMode.Overflow;
+        var nameLe = name.gameObject.AddComponent<LayoutElement>();
+        nameLe.minWidth = 90; nameLe.preferredHeight = 30;
+
+        // 문장에 자리가 없는 필드는 여기서 고른 값을 보여준다.
+        if (slot.label == null) slot.label = AddBlankLabel(row, 110);
+
+        foreach (var value in slot.field.OptionValues())
+        {
+            var captured = value;
+            var btn = MakeButton(row, value, OptionNormal, () => ChooseOption(slot, captured));
+            btn.gameObject.name = "Opt_" + slot.field.label + "_" + value;
+            var le = btn.gameObject.GetComponent<LayoutElement>();
+            le.minWidth = 84; le.preferredHeight = 32;
+            slot.options[value] = btn;
+        }
+
+        RefreshSlot(slot);
+    }
+
+    void ChooseOption(FieldSlot slot, string value)
+    {
+        // 고른 것을 한 번 더 누르면 해제한다.
+        slot.value = slot.value == value ? "" : value;
+        RefreshSlot(slot);
+    }
+
+    void RefreshSlot(FieldSlot slot)
+    {
+        if (slot.label != null)
+            slot.label.text = string.IsNullOrEmpty(slot.value) ? "＿＿＿" : slot.value;
+
+        foreach (var kv in slot.options)
+        {
+            var img = kv.Value.GetComponent<Image>();
+            if (img != null) img.color = kv.Key == slot.value ? OptionSelected : OptionNormal;
+        }
+    }
 
     // ------------------------------------------------------------------
     // uGUI 헬퍼
@@ -348,54 +448,4 @@ public class VerdictController : MonoBehaviour
         return btn;
     }
 
-    InputField AddInlineInput(RectTransform row)
-    {
-        var input = MakeInput(row, TextAnchor.MiddleCenter);
-        var le = input.gameObject.GetComponent<LayoutElement>();
-        le.preferredWidth = 120; le.minWidth = 90; le.flexibleWidth = 0;
-        le.minHeight = le.preferredHeight = 32;
-        return input;
-    }
-
-    InputField AddStackedInput(string placeholder)
-    {
-        var input = MakeInput(panel, TextAnchor.MiddleLeft);
-        var ph = input.placeholder as Text; if (ph != null) ph.text = placeholder;
-        input.gameObject.GetComponent<LayoutElement>().minHeight = 32;
-        return input;
-    }
-
-    InputField MakeInput(Transform parent, TextAnchor align)
-    {
-        var go = new GameObject("InputField", typeof(RectTransform), typeof(Image), typeof(InputField), typeof(LayoutElement));
-        go.transform.SetParent(parent, false);
-        go.GetComponent<Image>().color = Color.white;
-
-        var input = go.GetComponent<InputField>();
-        input.targetGraphic = go.GetComponent<Image>();
-        input.lineType = InputField.LineType.SingleLine;
-
-        var text = MakeChildText(go.transform, Color.black, align);
-        text.supportRichText = false;
-        var placeholder = MakeChildText(go.transform, new Color(0.6f, 0.6f, 0.6f), align);
-        placeholder.fontStyle = FontStyle.Italic;
-
-        input.textComponent = text;
-        input.placeholder = placeholder;
-        return input;
-    }
-
-    Text MakeChildText(Transform parent, Color color, TextAnchor align)
-    {
-        var go = new GameObject("Text", typeof(RectTransform), typeof(Text));
-        go.transform.SetParent(parent, false);
-        var t = go.GetComponent<Text>();
-        t.font = font; t.fontSize = 15; t.color = color; t.alignment = align;
-        t.horizontalOverflow = HorizontalWrapMode.Wrap;
-        t.verticalOverflow = VerticalWrapMode.Overflow;
-        var rt = t.rectTransform;
-        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
-        rt.offsetMin = new Vector2(8, 4); rt.offsetMax = new Vector2(-8, -4);
-        return t;
-    }
 }
