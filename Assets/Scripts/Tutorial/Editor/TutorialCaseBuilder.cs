@@ -85,10 +85,23 @@ public static class TutorialCaseBuilder
 
         c.suspects = new List<SuspectData> { a, b };
 
-        // 판결까지 가지 않는 훈련 과제라 판정 필드는 두지 않는다(정답 지목은 실제 사건에서).
+        // --- 판결 ---
+        // 훈련 과제이므로 빈칸 두 개만 둔다. 두 답 모두 플레이어가 방금 기록지에서 읽은 진술에
+        // 그대로 적혀 있어야 한다("답은 증언 안에 있다"를 몸으로 익히게 하는 게 목적).
         c.culpritSuspectId = "A";
-        c.verdictTemplate = "";
-        c.verdictFields = new List<CaseField>();
+        c.verdictTemplate = "{범인}은(는) {시각}쯤 {장소}에 들어갔다.";
+        c.verdictFields = new List<CaseField>
+        {
+            new CaseField("시각", "열 시")
+                .AddOption("열 시", "10시", "열시", "밤 열 시", "밤 10시", "22시")
+                .AddOption("새벽 세 시", "3시", "새벽 3시")
+                .AddOption("점심시간", "정오"),
+
+            new CaseField("장소", "자료실")
+                .AddOption("자료실")
+                .AddOption("탕비실")
+                .AddOption("서버실"),
+        };
 
         var existing = AssetDatabase.LoadAssetAtPath<InterrogationCase>(AssetPath);
         if (existing != null) AssetDatabase.DeleteAsset(AssetPath);

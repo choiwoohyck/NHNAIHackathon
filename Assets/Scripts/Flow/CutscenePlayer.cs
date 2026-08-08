@@ -1,0 +1,427 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Video;
+
+// 컷을 순서대로 이어 붙여 재생하는 전체화면 플레이어.
+//
+// 한 컷은 그림(영상 또는 정지컷) + 대사(선택)로 이루어진다.
+//   - 영상   : StreamingAssets에 넣어둔 파일명 (WebGL에서도 되도록 VideoClip이 아니라 URL로 재생)
+//   - 정지컷 : Sprite
+//   - 대사   : 화면 아래 대사창. 대사가 있으면 클릭할 때까지 기다린다(자동 진행 시간을 준 경우는 제외).
+//
+// 영상이 준비되지 않거나(웹 로딩 실패, 코덱 문제, 배치모드 등) 도중에 오류가 나면 그 컷은
+// 건너뛰고 다음으로 넘어간다 — 어떤 경우에도 컷씬에서 멈추지 않는 것이 우선이다.
+public class CutscenePlayer : MonoBehaviour
+{
+    public struct Step
+    {
+        public string videoFileName;   // StreamingAssets 파일명 (비우면 정지컷)
+        public Sprite still;           // 정지컷 이미지
+        public float seconds;          // >0 이면 이 시간 뒤 자동 진행, <=0 이면 클릭 대기
+        public string speaker;
+        public string line;
+        public AudioClip sfx;          // 이 컷이 시작될 때 한 번 재생
+        public AudioClip bgm;          // 지정하면 이 컷부터 배경음을 갈아끼운다
+        public bool muteVideoAudio;    // 영상에 들어 있는 소리를 죽인다
+
+        public bool IsVideo => !string.IsNullOrEmpty(videoFileName);
+        public bool HasLine => !string.IsNullOrEmpty(line);
+
+        public static Step Video(string fileName) =>
+            new Step { videoFileName = fileName };
+
+        /// <summary>영상 위에 대사를 얹는다. 영상이 끝나도 대사를 읽을 때까지 기다린다.</summary>
+        public static Step Video(string fileName, string speaker, string line) =>
+            new Step { videoFileName = fileName, speaker = speaker, line = line };
+
+        public static Step Still(Sprite sprite, float seconds) =>
+            new Step { still = sprite, seconds = seconds };
+
+        /// <summary>정지컷 + 대사. 클릭할 때까지 머문다.</summary>
+        public static Step Dialogue(Sprite sprite, string speaker, string line) =>
+            new Step { still = sprite, speaker = speaker, line = line };
+    }
+
+    const float PrepareTimeout = 8f;    // 준비가 끝나지 않을 때의 백업 타임아웃
+    const float MinLineSeconds = 0.4f;  // 대사가 뜨자마자 클릭되어 넘어가는 것을 막는다
+
+    Canvas canvas;
+    RawImage videoImage;
+    Image stillImage;
+    RectTransform dialogueBox;
+    Text speakerText;
+    Text lineText;
+    Text continueHint;
+    Button advanceButton;
+
+    System.Action onComplete;
+    bool finished;
+    bool advanceRequested;
+
+    AudioSource bgmSource;
+    AudioSource sfxSource;
+
+    public bool IsPlaying => !finished;
+
+    bool keepBgmAfterFinish;
+
+    /// <summary>
+    /// 컷들을 순서대로 재생하고, 전부 끝나거나 건너뛰면 onComplete를 부른다.
+    /// keepBgm이 true면 컷씬이 끝나도 배경음을 끊지 않는다(결과 화면까지 곡을 이어갈 때).
+    /// </summary>
+    public void Play(IList<Step> steps, System.Action onComplete, AudioClip bgm = null, float bgmVolume = 0.35f,
+                     bool keepBgm = false)
+    {
+        keepBgmAfterFinish = keepBgm;
+        this.onComplete = onComplete;
+
+        if (steps == null || steps.Count == 0)
+        {
+            Finish();
+            return;
+        }
+
+        BuildUI();
+        BuildAudio(bgm, bgmVolume);
+        StartCoroutine(Run(steps));
+    }
+
+    // 영상 자체에 소리가 들어 있는 컷도 있으므로 BGM은 깔아주는 정도로만 둔다.
+    void BuildAudio(AudioClip bgm, float bgmVolume)
+    {
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+
+        if (bgm == null) return;
+
+        bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.clip = bgm;
+        bgmSource.loop = true;
+        bgmSource.volume = bgmVolume;
+        bgmSource.playOnAwake = false;
+        bgmSource.Play();
+    }
+
+    // 결과가 갈리는 컷에서 배경음을 바꾼다. 같은 곡이면 끊지 않고 그대로 이어간다.
+    void SwitchBgm(AudioClip next)
+    {
+        if (next == null || bgmSource == null || bgmSource.clip == next) return;
+        bgmSource.clip = next;
+        bgmSource.Play();
+    }
+
+    IEnumerator Run(IList<Step> steps)
+    {
+        foreach (var step in steps)
+        {
+            if (finished) yield break;
+
+            SwitchBgm(step.bgm);
+            if (step.sfx != null && sfxSource != null) sfxSource.PlayOneShot(step.sfx);
+            ShowLine(step);
+
+            if (step.IsVideo) yield return PlayVideo(step.videoFileName, step.muteVideoAudio);
+            else yield return ShowStill(step);
+
+            // 대사가 있으면 그림이 끝나도 읽을 때까지 기다린다.
+            if (!finished && step.HasLine && step.seconds <= 0f) yield return WaitForAdvance();
+        }
+        Finish();
+    }
+
+    // ------------------------------------------------------------------
+    // 대사
+    // ------------------------------------------------------------------
+    void ShowLine(Step step)
+    {
+        bool has = step.HasLine;
+        dialogueBox.gameObject.SetActive(has);
+        if (!has) return;
+
+        speakerText.text = step.speaker ?? "";
+        speakerText.gameObject.SetActive(!string.IsNullOrEmpty(step.speaker));
+        lineText.text = step.line;
+        continueHint.gameObject.SetActive(step.seconds <= 0f);
+    }
+
+    IEnumerator WaitForAdvance()
+    {
+        advanceRequested = false;
+
+        float shown = 0f;
+        while (shown < MinLineSeconds)
+        {
+            if (finished) yield break;
+            shown += Time.deltaTime;
+            yield return null;
+        }
+
+        while (!advanceRequested && !finished) yield return null;
+        advanceRequested = false;
+    }
+
+    void RequestAdvance() => advanceRequested = true;
+
+    void Update()
+    {
+        if (finished) return;
+        if (SpacePressed()) RequestAdvance();
+
+        // 눌러야 넘어간다는 걸 놓치지 않도록 안내를 깜빡인다.
+        if (continueHint != null && continueHint.gameObject.activeSelf)
+        {
+            var c = continueHint.color;
+            c.a = 0.5f + 0.5f * Mathf.Abs(Mathf.Sin(Time.unscaledTime * 2.5f));
+            continueHint.color = c;
+        }
+    }
+
+    // Active Input Handling이 New 전용인 프로젝트에서도 스페이스바가 먹도록 양쪽을 다 본다.
+    static bool SpacePressed()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        return Input.GetKeyDown(KeyCode.Space);
+#elif ENABLE_INPUT_SYSTEM
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        return keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
+#else
+        return false;
+#endif
+    }
+
+    // ------------------------------------------------------------------
+    // 영상 한 컷
+    // ------------------------------------------------------------------
+    IEnumerator PlayVideo(string fileName, bool muteAudio)
+    {
+        var vp = gameObject.AddComponent<VideoPlayer>();
+        vp.playOnAwake = false;
+        vp.isLooping = false;
+        vp.waitForFirstFrame = true;
+        vp.renderMode = VideoRenderMode.RenderTexture;
+        // 영상에 붙은 소리를 쓰지 않는 컷은 트랙 자체를 끈다(음소거보다 확실하다).
+        vp.audioOutputMode = muteAudio ? VideoAudioOutputMode.None : VideoAudioOutputMode.Direct;
+        vp.source = VideoSource.Url;
+        vp.url = Application.streamingAssetsPath + "/" + fileName;
+
+        bool done = false;
+        RenderTexture rt = null;
+
+        vp.prepareCompleted += src =>
+        {
+            // 원본 해상도로 RenderTexture를 만들어 다운스케일 없이 선명하게 재생한다.
+            int w = (int)src.width, h = (int)src.height;
+            if (w <= 0 || h <= 0) { w = 1280; h = 720; }
+
+            rt = new RenderTexture(w, h, 0);
+            src.targetTexture = rt;
+            videoImage.texture = rt;
+            src.Play();
+            StartCoroutine(RevealVideoNextFrame());
+        };
+        vp.loopPointReached += _ => done = true;
+        vp.errorReceived += (_, msg) =>
+        {
+            Debug.LogWarning("[Cutscene] '" + fileName + "' 재생 오류: " + msg);
+            done = true;
+        };
+        vp.Prepare();
+
+        // 준비가 끝나길 기다린다. 실패하면 이 컷은 건너뛴다.
+        float waited = 0f;
+        while (!done && !vp.isPrepared && waited < PrepareTimeout)
+        {
+            if (finished) break;
+            waited += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!done && !vp.isPrepared)
+        {
+            Debug.LogWarning("[Cutscene] '" + fileName + "' 준비 시간 초과 — 이 컷을 건너뜁니다.");
+            done = true;
+        }
+
+        // 재생이 끝나길 기다린다(끝 이벤트가 누락되는 경우를 대비해 길이 기준 여유를 둔다).
+        float limit = vp.isPrepared ? (float)vp.length + 1.5f : 0f;
+        float played = 0f;
+        while (!done && played < limit)
+        {
+            if (finished) break;
+            played += Time.deltaTime;
+            yield return null;
+        }
+
+        CleanupVideo(vp, rt);
+    }
+
+    // 첫 프레임이 RenderTexture에 그려진 뒤에 켠다(텍스처가 없으면 흰 화면이 번쩍인다).
+    IEnumerator RevealVideoNextFrame()
+    {
+        yield return null;
+        if (videoImage != null && !finished) videoImage.gameObject.SetActive(true);
+    }
+
+    void CleanupVideo(VideoPlayer vp, RenderTexture rt)
+    {
+        if (videoImage != null)
+        {
+            videoImage.gameObject.SetActive(false);
+            videoImage.texture = null;
+        }
+        if (vp != null)
+        {
+            vp.Stop();
+            Destroy(vp);
+        }
+        if (rt != null)
+        {
+            rt.Release();
+            Destroy(rt);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // 정지컷 한 컷
+    // ------------------------------------------------------------------
+    IEnumerator ShowStill(Step step)
+    {
+        if (step.still == null) yield break;
+
+        stillImage.sprite = step.still;
+        stillImage.color = Color.white;
+        stillImage.gameObject.SetActive(true);
+
+        // 대사가 붙은 정지컷은 클릭으로 넘긴다(대기는 Run에서 처리).
+        if (step.seconds > 0f)
+        {
+            float t = 0f;
+            while (t < step.seconds)
+            {
+                if (finished) break;
+                t += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else if (!step.HasLine)
+        {
+            yield return null;   // 대사도 시간도 없으면 한 프레임만
+        }
+
+        if (!step.HasLine) stillImage.gameObject.SetActive(false);
+    }
+
+    // ------------------------------------------------------------------
+    void Skip() => Finish();
+
+    void Finish()
+    {
+        if (finished) return;
+        finished = true;
+
+        var callback = onComplete;
+        onComplete = null;
+
+        // 배경음은 남겨둘 수 있다 — AudioSource는 이 오브젝트에 붙어 있으므로 컷씬이 사라져도 계속 울린다.
+        if (bgmSource != null && !keepBgmAfterFinish) bgmSource.Stop();
+
+        // 건너뛰기로 중간에 끊기면 재생 코루틴이 정리까지 못 가므로 여기서 직접 치운다.
+        foreach (var vp in GetComponents<VideoPlayer>())
+        {
+            var rt = vp.targetTexture;
+            vp.targetTexture = null;
+            vp.Stop();
+            Destroy(vp);
+            if (rt != null) { rt.Release(); Destroy(rt); }
+        }
+
+        if (canvas != null) Destroy(canvas.gameObject);
+
+        callback?.Invoke();
+        Destroy(this);   // 재생이 끝난 플레이어는 남겨둘 이유가 없다
+    }
+
+    // ------------------------------------------------------------------
+    // 화면 구성
+    // ------------------------------------------------------------------
+    void BuildUI()
+    {
+        DialogueUIUtil.EnsureEventSystem();
+        canvas = DialogueUIUtil.CreateCanvas("CutsceneCanvas", 70);
+
+        var background = DialogueUIUtil.CreatePanel(canvas.transform, "Black", Color.black);
+        DialogueUIUtil.Stretch(background, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+        // 정지컷 — 화면비를 유지한 채 가운데 맞춤
+        var stillGO = new GameObject("Still", typeof(RectTransform), typeof(Image));
+        stillGO.transform.SetParent(canvas.transform, false);
+        stillImage = stillGO.GetComponent<Image>();
+        stillImage.preserveAspect = true;
+        stillImage.raycastTarget = false;
+        DialogueUIUtil.Stretch((RectTransform)stillGO.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        stillGO.SetActive(false);
+
+        // 영상 — 첫 프레임이 그려지기 전까지 꺼 둔다
+        var videoGO = new GameObject("Video", typeof(RectTransform), typeof(RawImage));
+        videoGO.transform.SetParent(canvas.transform, false);
+        videoImage = videoGO.GetComponent<RawImage>();
+        videoImage.raycastTarget = false;
+        DialogueUIUtil.Stretch((RectTransform)videoGO.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        videoGO.SetActive(false);
+
+        // 화면 아무 곳이나 눌러 다음으로 (건너뛰기 버튼보다 먼저 만들어 아래에 깔린다)
+        advanceButton = DialogueUIUtil.CreateButton(canvas.transform, "AdvanceArea", "", new Color(0f, 0f, 0f, 0f));
+        advanceButton.transition = Selectable.Transition.None;
+        DialogueUIUtil.Stretch(advanceButton.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        advanceButton.onClick.AddListener(RequestAdvance);
+
+        BuildDialogueBox();
+
+        var skip = DialogueUIUtil.CreateButton(canvas.transform, "SkipBtn", "건너뛰기",
+                                               new Color(0.15f, 0.15f, 0.18f, 0.85f));
+        var skipLabel = skip.GetComponentInChildren<Text>();
+        if (skipLabel != null) { skipLabel.font = DialogueUIUtil.KoreanFont; skipLabel.fontSize = 18; }
+        var srt = skip.GetComponent<RectTransform>();
+        srt.anchorMin = srt.anchorMax = new Vector2(1f, 1f);
+        srt.pivot = new Vector2(1f, 1f);
+        srt.sizeDelta = new Vector2(150, 44);
+        srt.anchoredPosition = new Vector2(-24, -24);
+        skip.onClick.AddListener(Skip);
+    }
+
+    void BuildDialogueBox()
+    {
+        dialogueBox = DialogueUIUtil.CreatePanel(canvas.transform, "CutsceneDialogue", new Color(0f, 0f, 0f, 0.78f));
+        DialogueUIUtil.Stretch(dialogueBox, new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.26f), Vector2.zero, Vector2.zero);
+        var boxImage = dialogueBox.GetComponent<Image>();
+        if (boxImage != null) boxImage.raycastTarget = false;   // 클릭은 뒤의 진행 영역이 받는다
+
+        speakerText = DialogueUIUtil.CreateText(dialogueBox, "Speaker", 24, TextAnchor.UpperLeft,
+                                                new Color(1f, 0.82f, 0.42f));
+        speakerText.font = DialogueUIUtil.KoreanFont;
+        speakerText.fontStyle = FontStyle.Bold;
+        speakerText.raycastTarget = false;
+        DialogueUIUtil.Stretch(speakerText.rectTransform, new Vector2(0f, 0.68f), new Vector2(1f, 1f),
+                               new Vector2(28, 0), new Vector2(-28, -8));
+
+        lineText = DialogueUIUtil.CreateText(dialogueBox, "Line", 26, TextAnchor.UpperLeft,
+                                             new Color(0.96f, 0.97f, 0.98f));
+        lineText.font = DialogueUIUtil.KoreanFont;
+        lineText.raycastTarget = false;
+        DialogueUIUtil.Stretch(lineText.rectTransform, new Vector2(0f, 0.16f), new Vector2(1f, 0.70f),
+                               new Vector2(28, 0), new Vector2(-28, 0));
+
+        continueHint = DialogueUIUtil.CreateText(dialogueBox, "ContinueHint", 20, TextAnchor.LowerRight,
+                                                 new Color(1f, 0.86f, 0.5f, 0.95f));
+        continueHint.font = DialogueUIUtil.KoreanFont;
+        continueHint.fontStyle = FontStyle.Bold;
+        continueHint.text = "[ Space ] 를 눌러 계속";
+        continueHint.raycastTarget = false;
+        DialogueUIUtil.Stretch(continueHint.rectTransform, new Vector2(0.4f, 0f), new Vector2(1f, 0.18f),
+                               Vector2.zero, new Vector2(-20, 0));
+
+        dialogueBox.gameObject.SetActive(false);
+    }
+}

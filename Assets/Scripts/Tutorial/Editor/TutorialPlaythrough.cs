@@ -84,18 +84,24 @@ public class TutorialDriver : MonoBehaviour
 
     IEnumerator Run()
     {
-        // --- 타이틀에서 START ---
+        // --- 타이틀 → How To Play → 튜토리얼로 해보기 ---
+        // (START가 첫 플레이에 튜토리얼을 가로챌지는 씬 설정에 달렸으므로,
+        //  씬 설정과 무관하게 항상 존재하는 이 입구로 검증한다.)
         yield return WaitForScene("Start", 20f);
         if (Failed) { Report(); yield break; }
 
-        if (!Click("START")) { Fail("타이틀에서 START 버튼을 찾지 못했습니다."); Report(); yield break; }
-        Step("타이틀: START (첫 플레이)");
+        if (!Click("How To Play")) { Fail("타이틀에서 'How To Play' 버튼을 찾지 못했습니다."); Report(); yield break; }
+        yield return null;
+        Step("타이틀: How To Play 열기");
+
+        if (!Click("튜토리얼로 해보기")) { Fail("설명서에서 '튜토리얼로 해보기' 버튼을 찾지 못했습니다."); Report(); yield break; }
+        Step("설명서: 튜토리얼로 해보기");
 
         // 사건 선택을 건너뛰고 곧장 취조실로 가야 한다.
         yield return WaitForScene("Main", 20f);
         if (Failed)
         {
-            Fail("현재 씬: " + SceneManager.GetActiveScene().name + " — 첫 START는 사건 선택을 건너뛰고 Main으로 가야 합니다.");
+            Fail("현재 씬: " + SceneManager.GetActiveScene().name + " — 튜토리얼은 사건 선택을 건너뛰고 Main으로 가야 합니다.");
             Report();
             yield break;
         }
@@ -110,12 +116,14 @@ public class TutorialDriver : MonoBehaviour
         if (Failed) { Report(); yield break; }
 
         // --- 튜토리얼 비트 진행 ---
+        // 튜토리얼은 사건 브리핑 대사가 끝난 뒤에 뜬다 — 대사를 넘겨 주며 기다린다.
         TutorialController tutorial = null;
         yield return WaitUntil(() =>
         {
+            AdvanceDialogueIfSpeaking();
             tutorial = Object.FindFirstObjectByType<TutorialController>();
             return tutorial != null;
-        }, 20f, "튜토리얼이 시작되지 않았습니다(TutorialController를 찾지 못함).");
+        }, 30f, "튜토리얼이 시작되지 않았습니다(브리핑 후 TutorialController를 찾지 못함).");
         if (Failed) { Report(); yield break; }
 
         var plan = Private(tutorial, "plan");
@@ -128,6 +136,8 @@ public class TutorialDriver : MonoBehaviour
         int guard = 0;
         int lastIndex = -1;
         bool sawContradiction = false;
+        bool sawVerdict = false;
+        VerdictResult verdictResult = VerdictResult.WrongSuspect;
 
         while (tutorial != null && !tutorial.IsFinished && guard++ < 200)
         {
@@ -142,6 +152,14 @@ public class TutorialDriver : MonoBehaviour
             if (Failed) break;
 
             if ((bool)Private(tutorial, "contradictionDone")) sawContradiction = true;
+
+            // 판정 결과는 씬이 바뀌기 전에 잡아둬야 한다(타이틀로 가면 초기화된다).
+            if (!sawVerdict && (bool)Private(tutorial, "verdictSubmitted"))
+            {
+                sawVerdict = true;
+                verdictResult = GameSession.LastVerdict;
+            }
+
             yield return null;
         }
 
@@ -149,6 +167,13 @@ public class TutorialDriver : MonoBehaviour
             Fail("모순이 성립하지 않았습니다 — 튜토리얼이 핵심을 가르치지 못했습니다.");
         else if (!Failed)
             Step("모순 성립 확인");
+
+        if (!Failed && !sawVerdict)
+            Fail("판결까지 진행되지 않았습니다 — 튜토리얼에서 판단을 해보지 못했습니다.");
+        else if (!Failed && verdictResult != VerdictResult.Success)
+            Fail("판결 결과가 유죄가 아닙니다: " + verdictResult + " (정답만 넣었으므로 Success여야 합니다).");
+        else if (!Failed)
+            Step("판결 진행 확인 — " + verdictResult);
 
         if (Failed) { Report(); yield break; }
 
@@ -166,13 +191,13 @@ public class TutorialDriver : MonoBehaviour
         if (GameSession.TutorialMode) Fail("타이틀로 왔는데 TutorialMode가 아직 켜져 있습니다.");
         if (GameSession.SelectedCase != null) Fail("타이틀로 왔는데 튜토리얼 사건이 남아 있습니다.");
 
-        // --- 두 번째 START는 이제 사건 선택으로 ---
+        // --- 복귀한 타이틀에서 START를 누르면 실제 게임으로 ---
         if (!Click("START")) { Fail("복귀한 타이틀에서 START 버튼을 찾지 못했습니다."); Report(); yield break; }
         yield return WaitForScene("CaseSelect", 20f);
         if (Failed)
-            Fail("두 번째 START는 사건 선택으로 가야 합니다 (현재 씬: " + SceneManager.GetActiveScene().name + ").");
+            Fail("튜토리얼 후 START는 사건 선택으로 가야 합니다 (현재 씬: " + SceneManager.GetActiveScene().name + ").");
         else
-            Step("두 번째 START → 사건 선택 (튜토리얼 반복되지 않음)");
+            Step("복귀 후 START → 사건 선택 (튜토리얼 반복되지 않음)");
 
         Report();
     }
@@ -187,14 +212,21 @@ public class TutorialDriver : MonoBehaviour
         var targetFunc = Private(beat, "target");
         var isDone = Private(beat, "isDone");
 
-        // 텍스트 전용 비트 → '확인'
         if (targetFunc == null)
         {
-            yield return WaitUntil(() => FindButton("확인") != null, 10f,
-                "[" + i + "] '확인' 버튼이 나타나지 않았습니다.");
-            if (Failed) yield break;
-            FindButton("확인").onClick.Invoke();
-            yield return null;
+            // 텍스트 전용 비트 → '확인'
+            if (isDone == null)
+            {
+                yield return WaitUntil(() => FindButton("확인") != null, 10f,
+                    "[" + i + "] '확인' 버튼이 나타나지 않았습니다.");
+                if (Failed) yield break;
+                FindButton("확인").onClick.Invoke();
+                yield return null;
+                yield break;
+            }
+
+            // 하이라이트 없이 조건만 기다리는 비트 → 지금은 '판결 빈칸 채우고 제출' 단계다.
+            yield return DriveVerdictSubmit(i, isDone);
             yield break;
         }
 
@@ -222,6 +254,42 @@ public class TutorialDriver : MonoBehaviour
             if (tutorial == null || tutorial.IsFinished) return true;
             return (bool)Invoke(isDone) || (int)Private(tutorial, "index") != startIndex;
         }, 25f, "[" + i + "] '" + target.name + "' 을 눌렀지만 다음 비트로 넘어가지 않았습니다.");
+    }
+
+    // 판결 패널의 (항목, 입력칸) 짝을 읽어 각 칸에 그 항목의 정답을 넣고 제출한다.
+    IEnumerator DriveVerdictSubmit(int i, object isDone)
+    {
+        VerdictController verdict = null;
+        yield return WaitUntil(() =>
+        {
+            verdict = Object.FindFirstObjectByType<VerdictController>();
+            return verdict != null && verdict.IsOpen;
+        }, 15f, "[" + i + "] 판결 패널이 열려 있지 않습니다.");
+        if (Failed) yield break;
+
+        var pairs = Private(verdict, "pairs") as IEnumerable;
+        if (pairs == null) { Fail("[" + i + "] 판결 입력칸을 읽지 못했습니다."); yield break; }
+
+        int filled = 0;
+        foreach (var pair in pairs)
+        {
+            var t = pair.GetType();
+            var field = t.GetField("Item1").GetValue(pair) as CulpritDetection.CaseField;
+            var input = t.GetField("Item2").GetValue(pair) as InputField;
+            if (field == null || input == null) continue;
+            input.text = field.answer ?? "";
+            filled++;
+        }
+
+        if (filled == 0) { Fail("[" + i + "] 판결에 채울 빈칸이 없습니다 — 튜토리얼 사건에 판정 항목이 없습니다."); yield break; }
+        Step("판결: 빈칸 " + filled + "칸을 정답으로 입력");
+
+        var submit = FindButton("제출");
+        if (submit == null) { Fail("[" + i + "] '제출' 버튼을 찾지 못했습니다."); yield break; }
+        submit.onClick.Invoke();
+
+        yield return WaitUntil(() => (bool)Invoke(isDone), 15f,
+            "[" + i + "] 제출했지만 판정이 완료되지 않았습니다.");
     }
 
     // 대사가 출력 중이면 대사창을 클릭해 넘긴다(튜토리얼은 대사 중 화면을 막지 않는다).

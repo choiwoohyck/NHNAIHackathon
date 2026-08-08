@@ -11,14 +11,16 @@ public static class GameSession
     public static VerdictResult LastVerdict;
     public static int CorrectFields;
     public static int TotalFields;
-    public static string CulpritId;
+    public static string CulpritId;      // 실제 범인
+    public static string AccusedId;      // 플레이어가 지목한 용의자 (엔딩 컷씬 분기에 쓴다)
 
-    public static void SetVerdict(VerdictResult result, int correct, int total, string culpritId)
+    public static void SetVerdict(VerdictResult result, int correct, int total, string culpritId, string accusedId)
     {
         LastVerdict = result;
         CorrectFields = correct;
         TotalFields = total;
         CulpritId = culpritId;
+        AccusedId = accusedId;
         HasVerdict = true;
     }
 
@@ -28,5 +30,6 @@ public static class GameSession
         HasVerdict = false;
         CorrectFields = TotalFields = 0;
         CulpritId = null;
+        AccusedId = null;
     }
 }

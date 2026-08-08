@@ -115,5 +115,34 @@ MonoBehaviour:
   culpritSuspectId: A
   verdictTypoThreshold: 0.8
   minimumCorrectFields: 0
-  verdictTemplate: 
-  verdictFields: []
+  verdictTemplate: "{\uBC94\uC778}\uC740(\uB294) {\uC2DC\uAC01}\uCBE4 {\uC7A5\uC18C}\uC5D0
+    \uB4E4\uC5B4\uAC14\uB2E4."
+  verdictFields:
+  - label: "\uC2DC\uAC01"
+    prompt: 
+    answer: "\uC5F4 \uC2DC"
+    options:
+    - value: "\uC5F4 \uC2DC"
+      synonyms:
+      - "10\uC2DC"
+      - "\uC5F4\uC2DC"
+      - "\uBC24 \uC5F4 \uC2DC"
+      - "\uBC24 10\uC2DC"
+      - "22\uC2DC"
+    - value: "\uC0C8\uBCBD \uC138 \uC2DC"
+      synonyms:
+      - "3\uC2DC"
+      - "\uC0C8\uBCBD 3\uC2DC"
+    - value: "\uC810\uC2EC\uC2DC\uAC04"
+      synonyms:
+      - "\uC815\uC624"
+  - label: "\uC7A5\uC18C"
+    prompt: 
+    answer: "\uC790\uB8CC\uC2E4"
+    options:
+    - value: "\uC790\uB8CC\uC2E4"
+      synonyms: []
+    - value: "\uD0D5\uBE44\uC2E4"
+      synonyms: []
+    - value: "\uC11C\uBC84\uC2E4"
+      synonyms: []

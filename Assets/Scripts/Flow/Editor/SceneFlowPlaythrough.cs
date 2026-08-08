@@ -233,6 +233,10 @@ public class FlowDriver : MonoBehaviour
         yield return WaitForScene("EndingScene", 20f);
         if (Failed) yield break;
 
+        // 결과 화면 앞에 엔딩 컷씬이 붙는다 — 배치모드에서는 영상이 안 뜨므로 건너뛴다.
+        yield return SkipCutsceneIfPlaying();
+        if (Failed) yield break;
+
         if (!GameSession.HasVerdict)
             Fail("EndingScene: 판결 결과가 전달되지 않았습니다.");
         else if (GameSession.LastVerdict != expected)
@@ -247,6 +251,45 @@ public class FlowDriver : MonoBehaviour
         yield return ClickAndWait(exitLabel, exitScene, 20f);
         if (Failed) yield break;
         Step("EndingScene → " + exitScene + " ('" + exitLabel + "')");
+    }
+
+    // 엔딩 컷씬이 재생 중이면 '건너뛰기'를 눌러 결과 화면까지 진행시킨다.
+    IEnumerator SkipCutsceneIfPlaying()
+    {
+        var player = Object.FindFirstObjectByType<CutscenePlayer>();
+        if (player == null) yield break;
+
+        var ending = Object.FindFirstObjectByType<EndingController>();
+        int cuts = ending != null ? ending.BuildCutscene().Count : 0;
+        if (cuts == 0) { Fail("엔딩 컷씬이 한 컷도 만들어지지 않았습니다."); yield break; }
+        Step("엔딩 컷씬 " + cuts + "컷 구성됨");
+
+        // 대사 컷이 클릭으로 넘어가는지 한 번 확인하고 나머지는 건너뛴다
+        // (배치모드에서는 영상이 준비되지 않아 컷마다 타임아웃을 기다리게 된다).
+        var advance = GameObject.Find("AdvanceArea");
+        if (advance == null) { Fail("컷씬에 진행 영역(AdvanceArea)이 없습니다."); yield break; }
+        advance.GetComponent<Button>().onClick.Invoke();
+        yield return null;
+
+        var stillPlaying = Object.FindFirstObjectByType<CutscenePlayer>();
+        if (stillPlaying == null || !stillPlaying.IsPlaying)
+        {
+            Fail("대사 컷에서 클릭 한 번에 컷씬 전체가 끝나버렸습니다.");
+            yield break;
+        }
+        Step("대사 컷 클릭 진행 확인 — 나머지는 건너뛰기");
+
+        var skip = FindButton("건너뛰기");
+        if (skip == null) { Fail("엔딩 컷씬에 '건너뛰기' 버튼이 없습니다 — 넘어갈 방법이 없습니다."); yield break; }
+        skip.onClick.Invoke();
+
+        yield return WaitUntil(() =>
+            {
+                var p = Object.FindFirstObjectByType<CutscenePlayer>();
+                return p == null || !p.IsPlaying;
+            },
+            10f, "'건너뛰기'를 눌렀지만 컷씬이 끝나지 않았습니다.");
+        if (!Failed) yield return null;   // 결과 UI가 만들어질 한 프레임
     }
 
     // 판결 패널의 (필드, 입력칸) 짝을 그대로 읽어 각 칸에 그 필드의 정답을 넣는다.

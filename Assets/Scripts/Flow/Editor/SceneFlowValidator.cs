@@ -245,6 +245,49 @@ public static class SceneFlowValidator
         var so = new SerializedObject(controller);
         RequireSceneRef(r, edges, so, "caseSelectSceneName", EndingScene, "다시 수사하기", buildScenes);
         RequireSceneRef(r, edges, so, "titleSceneName", EndingScene, "처음으로", buildScenes);
+
+        CheckCutsceneClips(r, so);
+    }
+
+    // 엔딩 컷씬 파일이 StreamingAssets에 실제로 있는지 확인한다.
+    // 없으면 그 컷은 런타임에 조용히 빠지므로, 여기서 잡아주지 않으면 눈치채기 어렵다.
+    static void CheckCutsceneClips(Report r, SerializedObject so)
+    {
+        if (!so.FindProperty("playCutscene").boolValue)
+        {
+            r.Warnings.Add("EndingScene: 엔딩 컷씬이 꺼져 있습니다(playCutscene = false).");
+            return;
+        }
+
+        var wanted = new List<(string label, string file)>
+        {
+            ("지목", so.FindProperty("accuseClip").stringValue),
+            ("판결", so.FindProperty("verdictClip").stringValue),
+            ("유죄 머그샷", so.FindProperty("guiltyMugshotClip").stringValue),
+            ("유죄 사건기록", so.FindProperty("guiltyCaseClip").stringValue),
+        };
+
+        var innocent = so.FindProperty("innocentClips");
+        for (int i = 0; i < innocent.arraySize; i++)
+        {
+            var entry = innocent.GetArrayElementAtIndex(i);
+            var id = entry.FindPropertyRelative("suspectId").stringValue;
+            wanted.Add(("무죄(" + id + ")", entry.FindPropertyRelative("fileName").stringValue));
+        }
+
+        int found = 0;
+        foreach (var (label, file) in wanted)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                r.Warnings.Add("엔딩 컷씬 '" + label + "' 파일명이 비어 있습니다.");
+                continue;
+            }
+            if (EndingController.ClipExists(file)) { found++; continue; }
+            r.Errors.Add("엔딩 컷씬 파일이 StreamingAssets에 없습니다: " + file + " (" + label + ")");
+        }
+
+        if (found > 0) r.Info.Add("엔딩 컷씬 영상 " + found + "개 확인됨");
     }
 
     // ------------------------------------------------------------------

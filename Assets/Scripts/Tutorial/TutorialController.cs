@@ -61,10 +61,14 @@ public class TutorialController : MonoBehaviour
     readonly HashSet<string> ended = new HashSet<string>();
     readonly HashSet<string> selected = new HashSet<string>();
 
+    bool verdictOpened;
+    bool verdictSubmitted;
+
     // 구독 해제를 위해 핸들러를 들고 있는다.
     System.Action<string> hCalled, hEnded, hGranted, hSelected;
     System.Action<QuestionNode> hContradiction;
     System.Action hPhone, hRecord, hVerdict;
+    System.Action<VerdictResult> hSubmitted;
 
     // ---- UI ----
     Canvas canvas;
@@ -109,8 +113,9 @@ public class TutorialController : MonoBehaviour
         hPhone = () => phoneOpenCount++;
         hRecord = () => recordOpenCount++;
 
-        // 판결 화면을 열었다면 안내는 여기서 끝. 안 그러면 튜토리얼 오버레이가 판결 패널을 덮는다.
-        hVerdict = Finish;
+        // 판결도 튜토리얼의 한 단계다 — 열리고 제출되는 것을 지켜본다.
+        hVerdict = () => verdictOpened = true;
+        hSubmitted = _ => verdictSubmitted = true;
 
         interrogation.SuspectCalled += hCalled;
         interrogation.SuspectEnded += hEnded;
@@ -118,6 +123,7 @@ public class TutorialController : MonoBehaviour
         interrogation.StatementSelected += hSelected;
         interrogation.ContradictionResolved += hContradiction;
         interrogation.VerdictOpened += hVerdict;
+        if (interrogation.Verdict != null) interrogation.Verdict.Submitted += hSubmitted;
         if (phone != null) phone.PopupOpened += hPhone;
         if (recordBook != null) recordBook.Opened += hRecord;
     }
@@ -132,6 +138,7 @@ public class TutorialController : MonoBehaviour
             interrogation.StatementSelected -= hSelected;
             interrogation.ContradictionResolved -= hContradiction;
             interrogation.VerdictOpened -= hVerdict;
+            if (interrogation.Verdict != null) interrogation.Verdict.Submitted -= hSubmitted;
         }
         if (phone != null) phone.PopupOpened -= hPhone;
         if (recordBook != null) recordBook.Opened -= hRecord;
@@ -206,16 +213,37 @@ public class TutorialController : MonoBehaviour
 
         Text("모순이 성립하면 그 진술의 주인에게 즉시 추궁이 들어갑니다.\n이 일의 요령은 방금 보신 것이 전부입니다.");
 
-        // 실제 사건에서 쓸 것들은 '알려만 주고' 시키지는 않는다. 훈련은 모순 한 번으로 끝.
-        // 안내문이 한 화면에 다 안 들어가 잘려 보였으므로 두 단계로 나눠 보여준다.
-        Text("실제 사건에서는 이렇게 모은 모순으로 범인을 좁힙니다.");
+        // --- 판결까지 직접 해본다 ---
+        // 안내문이 한 화면에 다 안 들어가 잘려 보였으므로 단계를 나눠 보여준다.
+        Text("이제 마지막입니다.\n모아둔 진술로 사건을 마무리해 봅시다.\n\n한 사람에게 더 물을 게 없어지면 '사건 판결'이 열립니다.");
 
-        Text("· 한 사람에게 더 물을 게 없어지면 '취조 종료'가 열립니다.\n"
-             + "· 기록지는 용의자별 아이콘으로 언제든 다시 열 수 있습니다.\n"
-             + "· 확신이 서면 '사건 판결'에서 범인을 지목하고 사건의 전말을 채웁니다.\n"
-             + "  단, 사람을 잘못 짚으면 그걸로 끝입니다.");
+        Spot("'사건 판결'을 여세요.",
+             FindVerdictButton,
+             () => verdictOpened);
+
+        Spot($"범인으로 판단한 사람을 지목하세요.\n방금 말을 바꾼 사람이 있었죠.",
+             () => FindRect("Btn_" + CulpritName()),
+             () => interrogation.Verdict != null
+                   && interrogation.Verdict.SelectedSuspectId == interrogation.Graph.culpritSuspectId);
+
+        Wait("이제 빈칸을 채우고 '제출'을 누르세요.\n\n답은 전부 기록지의 진술 안에 적혀 있습니다.\n지어내지 말고, 들은 대로 쓰십시오.",
+             () => verdictSubmitted);
+
+        Text("범인과 사건 설명이 모두 맞아야 유죄가 선고됩니다.\n사람을 잘못 짚으면 설명이 아무리 정확해도 무죄입니다.");
 
         Text("훈련은 여기까지입니다.\n타이틀로 돌아갑니다 — 이제 진짜 사건을 맡으십시오.\n\n— 행운을 빕니다, 수사관님.");
+    }
+
+    // 씬에 미리 배치된 판결 버튼. 이름이 프로젝트마다 다를 수 있어 몇 가지를 훑는다.
+    RectTransform FindVerdictButton() =>
+        FindRect("Verdict") ?? FindRect("VerdictBtn") ?? FindRectByLabel("사건 판결");
+
+    string CulpritName()
+    {
+        var culprit = interrogation.Graph != null
+            ? interrogation.Graph.GetSuspect(interrogation.Graph.culpritSuspectId)
+            : null;
+        return culprit != null ? culprit.suspectName : "";
     }
 
     // 기록지 아이콘은 두 용의자 중 켜져 있는 쪽을 쓴다.
@@ -230,6 +258,11 @@ public class TutorialController : MonoBehaviour
         beats.Add(new Beat { caption = caption, target = target, isDone = isDone });
 
     void Text(string caption) => beats.Add(new Beat { caption = caption });
+
+    // 안내만 하고 조건이 설 때까지 기다린다(하이라이트 없음 → 화면을 막지 않는다).
+    // 입력칸을 채우는 것처럼 '한 곳만 눌러서' 끝나지 않는 단계에 쓴다.
+    void Wait(string caption, System.Func<bool> isDone) =>
+        beats.Add(new Beat { caption = caption, isDone = isDone });
 
     // 증언 원문은 줄바꿈·들여쓰기가 섞여 있어 안내문에 그대로 넣으면 지저분하다.
     static string Flatten(string s)
@@ -247,6 +280,20 @@ public class TutorialController : MonoBehaviour
     {
         foreach (var rt in Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             if (rt.gameObject.name == name) return rt;
+        return null;
+    }
+
+    // 씬에 배치된 아이콘 버튼은 이름이 제각각이라, 글자로도 한 번 찾아본다.
+    static RectTransform FindRectByLabel(string label)
+    {
+        foreach (var b in Object.FindObjectsByType<Button>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            var t = b.GetComponentInChildren<Text>(true);
+            if (t != null && t.text != null && t.text.Trim() == label) return (RectTransform)b.transform;
+
+            var tmp = b.GetComponentInChildren<TMPro.TMP_Text>(true);
+            if (tmp != null && tmp.text != null && tmp.text.Trim() == label) return (RectTransform)b.transform;
+        }
         return null;
     }
 

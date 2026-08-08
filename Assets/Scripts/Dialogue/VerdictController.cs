@@ -40,6 +40,12 @@ public class VerdictController : MonoBehaviour
 
     public bool IsOpen => dim != null && dim.gameObject.activeSelf;
 
+    /// <summary>지금 지목되어 있는 용의자 id(없으면 null). 튜토리얼이 진행 확인에 쓴다.</summary>
+    public string SelectedSuspectId => selectedSuspectId;
+
+    /// <summary>제출이 실제로 판정까지 간 순간 알린다(용의자 미지목 등으로 반려된 경우엔 발생하지 않는다).</summary>
+    public event System.Action<VerdictResult> Submitted;
+
     void Awake()
     {
         font = DialogueUIUtil.KoreanFont;
@@ -209,7 +215,17 @@ public class VerdictController : MonoBehaviour
         var result = VerdictEvaluator.Evaluate(graph, selectedSuspectId, answers, out correct, out total);
 
         // 결과를 엔딩 씬으로 넘긴다. 엔딩 씬이 Build Settings에 있으면 이동, 아니면 패널 내 텍스트로 폴백.
-        GameSession.SetVerdict(result, correct, total, graph != null ? graph.culpritSuspectId : null);
+        GameSession.SetVerdict(result, correct, total,
+                               graph != null ? graph.culpritSuspectId : null, selectedSuspectId);
+        Submitted?.Invoke(result);
+
+        // 튜토리얼 중에는 엔딩 씬으로 빠지지 않는다. 훈련 과제는 여기서 결과만 보여주고
+        // 튜토리얼이 마무리 안내를 한 뒤 타이틀로 돌려보낸다.
+        if (GameSession.TutorialMode)
+        {
+            ShowInlineResult(result, correct, total);
+            return;
+        }
 
         if (!string.IsNullOrEmpty(endingSceneName) && Application.CanStreamedLevelBeLoaded(endingSceneName))
         {

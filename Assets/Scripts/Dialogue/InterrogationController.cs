@@ -66,6 +66,9 @@ public class InterrogationController : MonoBehaviour
     /// <summary>현재 진행 중인 사건 그래프. 튜토리얼이 안내할 경로를 짤 때 읽는다.</summary>
     public CaseGraph Graph => graph;
 
+    /// <summary>판결 화면. 튜토리얼이 지목/제출 진행을 지켜볼 때 쓴다.</summary>
+    public VerdictController Verdict => verdict;
+
     /// <summary>해당 용의자의 기록지 아이콘 버튼(없으면 null). 튜토리얼이 하이라이트 대상으로 쓴다.</summary>
     public Button RecordSheetButtonFor(string suspectId)
     {
