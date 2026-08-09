@@ -13,159 +13,189 @@ MonoBehaviour:
   m_Name: SampleInterrogationCase
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationCase
   caseId: CASE_NETWORK_INTRUSION
-  caseTitle: "아슬라니아 국가 전산망 침입 사건"
-  briefing: "7월 23일 오후 3시 20분, 국가 DB에 비인가 접근이 발생해 전산망이 약 3시간 동안 마비되었다.\n용의자 3인을 취조하라."
+  caseTitle: "\uC544\uC2AC\uB77C\uB2C8\uC544 \uAD6D\uAC00 \uC804\uC0B0\uB9DD \uCE68\uC785
+    \uC0AC\uAC74"
+  briefing: "7\uC6D4 23\uC77C \uC624\uD6C4 3\uC2DC 20\uBD84, \uAD6D\uAC00 DB\uC5D0
+    \uBE44\uC778\uAC00 \uC811\uADFC\uC774 \uBC1C\uC0DD\uD574 \uC804\uC0B0\uB9DD\uC774
+    \uC57D 3\uC2DC\uAC04 \uB3D9\uC548 \uB9C8\uBE44\uB418\uC5C8\uB2E4.\n\uC6A9\uC758\uC790
+    3\uC778\uC744 \uCDE8\uC870\uD558\uB77C."
   caseNumber: CASE-000
   caseImage: {fileID: 0}
   testimonies:
   - id: T_A_WHERE
     ownerSuspectId: A
-    ownerSuspectName: "클로버"
-    text: "클로버는 사건 당일 회사에서 근무하고 있었다고 진술함."
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uD68C\uC0AC\uC5D0\uC11C
+      \uADFC\uBB34\uD558\uACE0 \uC788\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "알리바이"
-    - "근무"
+    - "\uC54C\uB9AC\uBC14\uC774"
+    - "\uADFC\uBB34"
   - id: T_A_COMPANY
     ownerSuspectId: A
-    ownerSuspectName: "클로버"
-    text: "클로버는 사건 당일 부서에 자신 혼자 있었다고 진술함(기억이 확실하지 않음)."
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uBD80\uC11C\uC5D0
+      \uC790\uC2E0 \uD63C\uC790 \uC788\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568(\uAE30\uC5B5\uC774
+      \uD655\uC2E4\uD558\uC9C0 \uC54A\uC74C)."
     keywords:
-    - "부서"
-    - "단독근무"
+    - "\uBD80\uC11C"
+    - "\uB2E8\uB3C5\uADFC\uBB34"
   - id: T_A_AUTH
     ownerSuspectId: A
-    ownerSuspectName: "클로버"
-    text: "클로버는 ASNET-B 등급까지 접근 가능하다고 진술함."
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 ASNET-B \uB4F1\uAE09\uAE4C\uC9C0 \uC811\uADFC
+      \uAC00\uB2A5\uD558\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "권한"
-    - "ASNET-B"
+    - "\uAD8C\uD55C"
+    - ASNET-B
   - id: T_A_CONFESS_ABSENT
     ownerSuspectId: A
-    ownerSuspectName: "클로버"
-    text: "클로버는 사건 당일 출근하지 않았음을 인정함."
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uCD9C\uADFC\uD558\uC9C0
+      \uC54A\uC558\uC74C\uC744 \uC778\uC815\uD568."
     keywords:
-    - "번복"
-    - "결근"
+    - "\uBC88\uBCF5"
+    - "\uACB0\uADFC"
   - id: T_A_CONFESS_AUTH
     ownerSuspectId: A
-    ownerSuspectName: "클로버"
-    text: "클로버는 최고 등급 보안 문서 접근 권한에 대해 모른다며 얼버무림."
+    ownerSuspectName: "\uD074\uB85C\uBC84"
+    text: "\uD074\uB85C\uBC84\uB294 \uCD5C\uACE0 \uB4F1\uAE09 \uBCF4\uC548 \uBB38\uC11C
+      \uC811\uADFC \uAD8C\uD55C\uC5D0 \uB300\uD574 \uBAA8\uB978\uB2E4\uBA70 \uC5BC\uBC84\uBB34\uB9BC."
     keywords:
-    - "번복"
-    - "권한"
+    - "\uBC88\uBCF5"
+    - "\uAD8C\uD55C"
   - id: T_B_WHERE
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 사건 당일 회사에 있었다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uD68C\uC0AC\uC5D0 \uC788\uC5C8\uB2E4\uACE0
+      \uC9C4\uC220\uD568."
     keywords:
-    - "알리바이"
+    - "\uC54C\uB9AC\uBC14\uC774"
   - id: T_B_AUTH
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 보안 문서에 전혀 접근할 수 없다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uBCF4\uC548 \uBB38\uC11C\uC5D0 \uC804\uD600 \uC811\uADFC\uD560
+      \uC218 \uC5C6\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "권한없음"
+    - "\uAD8C\uD55C\uC5C6\uC74C"
   - id: T_B_COMPANY
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 사건 당일 부서에 클레이튼 과장, 핸더슨 부장과 함께 있었으나 클레이튼 과장이 곧 출장을 떠나 자신과 핸더슨만 남았다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uBD80\uC11C\uC5D0 \uD074\uB808\uC774\uD2BC
+      \uACFC\uC7A5, \uD578\uB354\uC2A8 \uBD80\uC7A5\uACFC \uD568\uAED8 \uC788\uC5C8\uB2E4\uACE0
+      \uC9C4\uC220\uD568."
     keywords:
-    - "부서"
-    - "인원"
+    - "\uBD80\uC11C"
+    - "\uC778\uC6D0"
   - id: T_B_COMPANY2
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 클로버가 사건 당일 연차였다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uD074\uB85C\uBC84\uAC00 \uC0AC\uAC74 \uB2F9\uC77C
+      \uC5F0\uCC28\uC600\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "연차"
+    - "\uD074\uB85C\uBC84"
+    - "\uC5F0\uCC28"
   - id: T_B_CLOVER
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 클로버가 근래 불안한 모습을 보였다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uD074\uB85C\uBC84\uAC00 \uADFC\uB798 \uBD88\uC548\uD55C
+      \uBAA8\uC2B5\uC744 \uBCF4\uC600\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "불안"
+    - "\uD074\uB85C\uBC84"
+    - "\uBD88\uC548"
   - id: T_B_CLOVER2
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 클로버가 책상 위 아버지 사진을 보며 눈물을 흘리는 모습을 목격했다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uD074\uB85C\uBC84\uAC00 \uCC45\uC0C1 \uC704 \uC544\uBC84\uC9C0
+      \uC0AC\uC9C4\uC744 \uBCF4\uBA70 \uB208\uBB3C\uC744 \uD758\uB9AC\uB294 \uBAA8\uC2B5\uC744
+      \uBAA9\uACA9\uD588\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "아버지"
+    - "\uD074\uB85C\uBC84"
+    - "\uC544\uBC84\uC9C0"
   - id: T_B_CLOVER3
     ownerSuspectId: B
-    ownerSuspectName: "렉스"
-    text: "렉스는 클로버의 아버지가 독립영웅이며, 독립 후 더 킹에 의해 숙청당했다는 소문을 들었다고 진술함."
+    ownerSuspectName: "\uB809\uC2A4"
+    text: "\uB809\uC2A4\uB294 \uD074\uB85C\uBC84\uC758 \uC544\uBC84\uC9C0\uAC00 \uB3C5\uB9BD\uC601\uC6C5\uC774\uBA70,
+      \uB3C5\uB9BD \uD6C4 \uB354 \uD0B9\uC5D0 \uC758\uD574 \uC219\uCCAD\uB2F9\uD588\uB2E4\uB294
+      \uC18C\uBB38\uC744 \uB4E4\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "더킹"
-    - "소문"
+    - "\uD074\uB85C\uBC84"
+    - "\uB354\uD0B9"
+    - "\uC18C\uBB38"
   - id: T_C_WHERE
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 사건 당일 회사에서 회의를 하고 있었다고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uC0AC\uAC74 \uB2F9\uC77C \uD68C\uC0AC\uC5D0\uC11C
+      \uD68C\uC758\uB97C \uD558\uACE0 \uC788\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "알리바이"
-    - "회의"
+    - "\uC54C\uB9AC\uBC14\uC774"
+    - "\uD68C\uC758"
   - id: T_C_AUTH
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 최고 등급까지 접근 가능하다고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uCD5C\uACE0 \uB4F1\uAE09\uAE4C\uC9C0 \uC811\uADFC
+      \uAC00\uB2A5\uD558\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "권한"
-    - "최고등급"
+    - "\uAD8C\uD55C"
+    - "\uCD5C\uACE0\uB4F1\uAE09"
   - id: T_C_AUTH2
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 클레이튼 과장과 렉스가 자신의 알리바이를 증명해줄 것이라고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uD074\uB808\uC774\uD2BC \uACFC\uC7A5\uACFC \uB809\uC2A4\uAC00
+      \uC790\uC2E0\uC758 \uC54C\uB9AC\uBC14\uC774\uB97C \uC99D\uBA85\uD574\uC904
+      \uAC83\uC774\uB77C\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "알리바이"
-    - "증인"
+    - "\uC54C\uB9AC\uBC14\uC774"
+    - "\uC99D\uC778"
   - id: T_C_AUTH3
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 최고 등급 권한을 가진 사람으로 클레이튼 과장과 클로버를 지목함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uCD5C\uACE0 \uB4F1\uAE09 \uAD8C\uD55C\uC744
+      \uAC00\uC9C4 \uC0AC\uB78C\uC73C\uB85C \uD074\uB808\uC774\uD2BC \uACFC\uC7A5\uACFC
+      \uD074\uB85C\uBC84\uB97C \uC9C0\uBAA9\uD568."
     keywords:
-    - "권한"
-    - "클로버"
+    - "\uAD8C\uD55C"
+    - "\uD074\uB85C\uBC84"
   - id: T_C_CLOVER
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 클로버가 과거 해커로 활동했다고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uD074\uB85C\uBC84\uAC00 \uACFC\uAC70 \uD574\uCEE4\uB85C
+      \uD65C\uB3D9\uD588\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "해커"
+    - "\uD074\uB85C\uBC84"
+    - "\uD574\uCEE4"
   - id: T_C_CLOVER2
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 클로버의 아버지가 더 킹에 의해 살해되었다고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uD074\uB85C\uBC84\uC758 \uC544\uBC84\uC9C0\uAC00
+      \uB354 \uD0B9\uC5D0 \uC758\uD574 \uC0B4\uD574\uB418\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "더킹"
+    - "\uD074\uB85C\uBC84"
+    - "\uB354\uD0B9"
   - id: T_C_CLOVER3
     ownerSuspectId: C
-    ownerSuspectName: "핸더슨"
-    text: "핸더슨은 클로버에게 더 킹이 증오의 대상이었다고 진술함."
+    ownerSuspectName: "\uD578\uB354\uC2A8"
+    text: "\uD578\uB354\uC2A8\uC740 \uD074\uB85C\uBC84\uC5D0\uAC8C \uB354 \uD0B9\uC774
+      \uC99D\uC624\uC758 \uB300\uC0C1\uC774\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
     keywords:
-    - "클로버"
-    - "증오"
+    - "\uD074\uB85C\uBC84"
+    - "\uC99D\uC624"
   suspects:
   - id: A
-    suspectName: "클로버"
-    occupation: "정부기관 전산관리 부서 직원"
+    suspectName: "\uD074\uB85C\uBC84"
+    occupation: "\uC815\uBD80\uAE30\uAD00 \uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uC9C1\uC6D0"
     portrait: {fileID: 21300000, guid: a45d395982d6d6243958ed703365e637, type: 3}
     useCustomPortraitSize: 0
     portraitSize: {x: 400, y: 500}
     questions:
     - id: A_WHERE
-      label: "사건 당시 어디에 있었습니까?"
+      label: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "사건 당시 어디에 있었습니까?"
-      - speaker: "클로버"
-        text: "그날은 회사에서 근무하고 있었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uADF8\uB0A0\uC740 \uD68C\uC0AC\uC5D0\uC11C \uADFC\uBB34\uD558\uACE0
+          \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -174,13 +204,13 @@ MonoBehaviour:
       - T_A_WHERE
       repeatable: 0
     - id: A_COMPANY
-      label: "사건 당일 날 부서에 누가 있었습니까?"
+      label: "\uC0AC\uAC74 \uB2F9\uC77C \uB0A0 \uBD80\uC11C\uC5D0 \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "사건 당일 날 부서에 누가 있었습니까?"
-      - speaker: "클로버"
-        text: "기억은 잘 안나지만 저 혼자였습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC77C \uB0A0 \uBD80\uC11C\uC5D0 \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uAE30\uC5B5\uC740 \uC798 \uC548\uB098\uC9C0\uB9CC \uC800 \uD63C\uC790\uC600\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - A_WHERE
       requiredTestimonyIds: []
@@ -190,13 +220,16 @@ MonoBehaviour:
       - T_A_COMPANY
       repeatable: 0
     - id: A_AUTH
-      label: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
+      label: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+        \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
-      - speaker: "클로버"
-        text: "저는 ASNET-B 등급 데이터까지 접근이 가능합니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+          \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uC800\uB294 ASNET-B \uB4F1\uAE09 \uB370\uC774\uD130\uAE4C\uC9C0 \uC811\uADFC\uC774
+          \uAC00\uB2A5\uD569\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -205,13 +238,16 @@ MonoBehaviour:
       - T_A_AUTH
       repeatable: 0
     - id: A_FIRSTLIE
-      label: "다른 동료의 증언에 따르면 그날 당신은 연차라고 했습니다."
+      label: "\uB2E4\uB978 \uB3D9\uB8CC\uC758 \uC99D\uC5B8\uC5D0 \uB530\uB974\uBA74
+        \uADF8\uB0A0 \uB2F9\uC2E0\uC740 \uC5F0\uCC28\uB77C\uACE0 \uD588\uC2B5\uB2C8\uB2E4."
       kind: 1
       lines:
-      - speaker: "월터"
-        text: "다른 동료의 증언에 따르면 그날 당신은 연차라고 했습니다."
-      - speaker: "클로버"
-        text: "제가 헷갈렸던 것 같습니다. 그날 출근하지 않은 것 맞습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uB2E4\uB978 \uB3D9\uB8CC\uC758 \uC99D\uC5B8\uC5D0 \uB530\uB974\uBA74
+          \uADF8\uB0A0 \uB2F9\uC2E0\uC740 \uC5F0\uCC28\uB77C\uACE0 \uD588\uC2B5\uB2C8\uB2E4."
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uC81C\uAC00 \uD5F7\uAC08\uB838\uB358 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4.
+          \uADF8\uB0A0 \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC740 \uAC83 \uB9DE\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -222,13 +258,15 @@ MonoBehaviour:
       - T_A_CONFESS_ABSENT
       repeatable: 0
     - id: A_SECONDLIE
-      label: "당신은 최고 등급의 보안 문서에 접근이 가능하지 않습니까?"
+      label: "\uB2F9\uC2E0\uC740 \uCD5C\uACE0 \uB4F1\uAE09\uC758 \uBCF4\uC548 \uBB38\uC11C\uC5D0
+        \uC811\uADFC\uC774 \uAC00\uB2A5\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uAE4C?"
       kind: 1
       lines:
-      - speaker: "월터"
-        text: "당신은 최고 등급의 보안 문서에 접근이 가능하지 않습니까?"
-      - speaker: "클로버"
-        text: "아 그랬습니까? 저는 잘 모릅니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uB2F9\uC2E0\uC740 \uCD5C\uACE0 \uB4F1\uAE09\uC758 \uBCF4\uC548 \uBB38\uC11C\uC5D0
+          \uC811\uADFC\uC774 \uAC00\uB2A5\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD074\uB85C\uBC84"
+        text: "\uC544 \uADF8\uB7AC\uC2B5\uB2C8\uAE4C? \uC800\uB294 \uC798 \uBAA8\uB985\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -239,20 +277,20 @@ MonoBehaviour:
       - T_A_CONFESS_AUTH
       repeatable: 0
   - id: B
-    suspectName: "렉스"
-    occupation: "전산관리 부서 동료"
+    suspectName: "\uB809\uC2A4"
+    occupation: "\uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uB3D9\uB8CC"
     portrait: {fileID: 21300000, guid: ef9d4b9419cf96b498a774fc711db843, type: 3}
     useCustomPortraitSize: 0
     portraitSize: {x: 500, y: 633}
     questions:
     - id: B_WHERE
-      label: "사건 당시 어디에 있었습니까?"
+      label: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "사건 당시 어디에 있었습니까?"
-      - speaker: "렉스"
-        text: "그날 저는 회사에 있었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uADF8\uB0A0 \uC800\uB294 \uD68C\uC0AC\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -261,13 +299,16 @@ MonoBehaviour:
       - T_B_WHERE
       repeatable: 0
     - id: B_AUTH
-      label: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
+      label: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+        \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
-      - speaker: "렉스"
-        text: "저는 보안이 걸려있는 문서는 아무것도 접근할 수 없습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+          \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uC800\uB294 \uBCF4\uC548\uC774 \uAC78\uB824\uC788\uB294 \uBB38\uC11C\uB294
+          \uC544\uBB34\uAC83\uB3C4 \uC811\uADFC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -276,13 +317,16 @@ MonoBehaviour:
       - T_B_AUTH
       repeatable: 0
     - id: B_COMPANY
-      label: "사건 당일 날 부서에 누가 있었습니까?"
+      label: "\uC0AC\uAC74 \uB2F9\uC77C \uB0A0 \uBD80\uC11C\uC5D0 \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "사건 당일 날 부서에 누가 있었습니까?"
-      - speaker: "렉스"
-        text: "그날은 클레이튼 과장과 핸더슨 부장이 회의를 진행하고 클레이튼 과장은 바로 출장을 나가 저랑 핸더슨 부장만 있었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC77C \uB0A0 \uBD80\uC11C\uC5D0 \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uADF8\uB0A0\uC740 \uD074\uB808\uC774\uD2BC \uACFC\uC7A5\uACFC \uD578\uB354\uC2A8
+          \uBD80\uC7A5\uC774 \uD68C\uC758\uB97C \uC9C4\uD589\uD558\uACE0 \uD074\uB808\uC774\uD2BC
+          \uACFC\uC7A5\uC740 \uBC14\uB85C \uCD9C\uC7A5\uC744 \uB098\uAC00 \uC800\uB791
+          \uD578\uB354\uC2A8 \uBD80\uC7A5\uB9CC \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - B_WHERE
       requiredTestimonyIds: []
@@ -292,13 +336,16 @@ MonoBehaviour:
       - T_B_COMPANY
       repeatable: 0
     - id: B_COMPANY2
-      label: "그날 클로버는 출근을 하지 않았습니까?"
+      label: "\uADF8\uB0A0 \uD074\uB85C\uBC84\uB294 \uCD9C\uADFC\uC744 \uD558\uC9C0
+        \uC54A\uC558\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "그날 클로버는 출근을 하지 않았습니까?"
-      - speaker: "렉스"
-        text: "제 기억에 클로버씨는 그날 연차였습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uADF8\uB0A0 \uD074\uB85C\uBC84\uB294 \uCD9C\uADFC\uC744 \uD558\uC9C0
+          \uC54A\uC558\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uC81C \uAE30\uC5B5\uC5D0 \uD074\uB85C\uBC84\uC528\uB294 \uADF8\uB0A0
+          \uC5F0\uCC28\uC600\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - B_COMPANY
       requiredTestimonyIds: []
@@ -308,13 +355,14 @@ MonoBehaviour:
       - T_B_COMPANY2
       repeatable: 0
     - id: B_CLOVER
-      label: "평소 클로버는 어떤 사람이었습니까?"
+      label: "\uD3C9\uC18C \uD074\uB85C\uBC84\uB294 \uC5B4\uB5A4 \uC0AC\uB78C\uC774\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "평소 클로버는 어떤 사람이었습니까?"
-      - speaker: "렉스"
-        text: "아. 근래에 뭔가 불안한 모습을 많이 보였습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD3C9\uC18C \uD074\uB85C\uBC84\uB294 \uC5B4\uB5A4 \uC0AC\uB78C\uC774\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uC544. \uADFC\uB798\uC5D0 \uBB54\uAC00 \uBD88\uC548\uD55C \uBAA8\uC2B5\uC744
+          \uB9CE\uC774 \uBCF4\uC600\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - A_FIRSTLIE
       requiredTestimonyIds: []
@@ -324,13 +372,14 @@ MonoBehaviour:
       - T_B_CLOVER
       repeatable: 0
     - id: B_CLOVER2
-      label: "이상한 행동을 하진 않았습니까?"
+      label: "\uC774\uC0C1\uD55C \uD589\uB3D9\uC744 \uD558\uC9C4 \uC54A\uC558\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "이상한 행동을 하진 않았습니까?"
-      - speaker: "렉스"
-        text: "책상의 있는 자신의 아버지 사진을 보며 눈물을 흘리곤 했습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC774\uC0C1\uD55C \uD589\uB3D9\uC744 \uD558\uC9C4 \uC54A\uC558\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uCC45\uC0C1\uC758 \uC788\uB294 \uC790\uC2E0\uC758 \uC544\uBC84\uC9C0
+          \uC0AC\uC9C4\uC744 \uBCF4\uBA70 \uB208\uBB3C\uC744 \uD758\uB9AC\uACE4 \uD588\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - B_CLOVER
       requiredTestimonyIds: []
@@ -340,13 +389,16 @@ MonoBehaviour:
       - T_B_CLOVER2
       repeatable: 0
     - id: B_CLOVER3
-      label: "클로버의 이야기를 알고있습니까?"
+      label: "\uD074\uB85C\uBC84\uC758 \uC774\uC57C\uAE30\uB97C \uC54C\uACE0\uC788\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "클로버의 이야기를 알고있습니까?"
-      - speaker: "렉스"
-        text: "자세히는 모르지만 소문에 의하면 클로버씨의 아버지가 독립영웅인데, 독립 후 더킹에 의해 숙청당했다고 들었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC758 \uC774\uC57C\uAE30\uB97C \uC54C\uACE0\uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uB809\uC2A4"
+        text: "\uC790\uC138\uD788\uB294 \uBAA8\uB974\uC9C0\uB9CC \uC18C\uBB38\uC5D0
+          \uC758\uD558\uBA74 \uD074\uB85C\uBC84\uC528\uC758 \uC544\uBC84\uC9C0\uAC00
+          \uB3C5\uB9BD\uC601\uC6C5\uC778\uB370, \uB3C5\uB9BD \uD6C4 \uB354\uD0B9\uC5D0
+          \uC758\uD574 \uC219\uCCAD\uB2F9\uD588\uB2E4\uACE0 \uB4E4\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - B_CLOVER2
       requiredTestimonyIds: []
@@ -356,20 +408,20 @@ MonoBehaviour:
       - T_B_CLOVER3
       repeatable: 0
   - id: C
-    suspectName: "핸더슨"
-    occupation: "정부기관 보안 담당자"
+    suspectName: "\uD578\uB354\uC2A8"
+    occupation: "\uC815\uBD80\uAE30\uAD00 \uBCF4\uC548 \uB2F4\uB2F9\uC790"
     portrait: {fileID: 21300000, guid: 10e43910728ecbf44b3b2f89cdcc2abf, type: 3}
     useCustomPortraitSize: 0
     portraitSize: {x: 500, y: 633}
     questions:
     - id: C_WHERE
-      label: "사건 당시 어디에 있었습니까?"
+      label: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "사건 당시 어디에 있었습니까?"
-      - speaker: "핸더슨"
-        text: "회사에서 회의를 하고 있었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uC0AC\uAC74 \uB2F9\uC2DC \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uD68C\uC0AC\uC5D0\uC11C \uD68C\uC758\uB97C \uD558\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -378,13 +430,16 @@ MonoBehaviour:
       - T_C_WHERE
       repeatable: 0
     - id: C_AUTH
-      label: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
+      label: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+        \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "본인은 어디등급의 보안 데이터에 접근이 가능합니까?"
-      - speaker: "핸더슨"
-        text: "저는 최고 등급까지 접근이 가능합니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uBCF8\uC778\uC740 \uC5B4\uB514\uB4F1\uAE09\uC758 \uBCF4\uC548 \uB370\uC774\uD130\uC5D0
+          \uC811\uADFC\uC774 \uAC00\uB2A5\uD569\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uC800\uB294 \uCD5C\uACE0 \uB4F1\uAE09\uAE4C\uC9C0 \uC811\uADFC\uC774
+          \uAC00\uB2A5\uD569\uB2C8\uB2E4."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
@@ -393,13 +448,17 @@ MonoBehaviour:
       - T_C_AUTH
       repeatable: 0
     - id: C_AUTH2
-      label: "회의를 하고 있었다는 증거가 있습니까?"
+      label: "\uD68C\uC758\uB97C \uD558\uACE0 \uC788\uC5C8\uB2E4\uB294 \uC99D\uAC70\uAC00
+        \uC788\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "회의를 하고 있었다는 증거가 있습니까?"
-      - speaker: "핸더슨"
-        text: "클레이튼 과장이나 렉스 사원에게 물어보면 제 알리바이를 증명해줄 겁니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD68C\uC758\uB97C \uD558\uACE0 \uC788\uC5C8\uB2E4\uB294 \uC99D\uAC70\uAC00
+          \uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uD074\uB808\uC774\uD2BC \uACFC\uC7A5\uC774\uB098 \uB809\uC2A4 \uC0AC\uC6D0\uC5D0\uAC8C
+          \uBB3C\uC5B4\uBCF4\uBA74 \uC81C \uC54C\uB9AC\uBC14\uC774\uB97C \uC99D\uBA85\uD574\uC904
+          \uAC81\uB2C8\uB2E4."
       requiredQuestionIds:
       - C_AUTH
       requiredTestimonyIds: []
@@ -409,13 +468,15 @@ MonoBehaviour:
       - T_C_AUTH2
       repeatable: 0
     - id: C_AUTH3
-      label: "그럼 해당 보안 등급을 가지고 있는 사람이 또 있습니까?"
+      label: "\uADF8\uB7FC \uD574\uB2F9 \uBCF4\uC548 \uB4F1\uAE09\uC744 \uAC00\uC9C0\uACE0
+        \uC788\uB294 \uC0AC\uB78C\uC774 \uB610 \uC788\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "그럼 해당 보안 등급을 가지고 있는 사람이 또 있습니까?"
-      - speaker: "핸더슨"
-        text: "클레이튼 과장과 클로버 사원입니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uADF8\uB7FC \uD574\uB2F9 \uBCF4\uC548 \uB4F1\uAE09\uC744 \uAC00\uC9C0\uACE0
+          \uC788\uB294 \uC0AC\uB78C\uC774 \uB610 \uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uD074\uB808\uC774\uD2BC \uACFC\uC7A5\uACFC \uD074\uB85C\uBC84 \uC0AC\uC6D0\uC785\uB2C8\uB2E4."
       requiredQuestionIds:
       - C_AUTH2
       requiredTestimonyIds: []
@@ -425,13 +486,17 @@ MonoBehaviour:
       - T_C_AUTH3
       repeatable: 0
     - id: C_CLOVER
-      label: "클로버에 대해 더 아는 사실이 있습니까?"
+      label: "\uD074\uB85C\uBC84\uC5D0 \uB300\uD574 \uB354 \uC544\uB294 \uC0AC\uC2E4\uC774
+        \uC788\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "클로버에 대해 더 아는 사실이 있습니까?"
-      - speaker: "핸더슨"
-        text: "이번 사건과 관련이 있는 지는 모르겠으나, 클로버는 과거 해커로 활동했었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC5D0 \uB300\uD574 \uB354 \uC544\uB294 \uC0AC\uC2E4\uC774
+          \uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uC774\uBC88 \uC0AC\uAC74\uACFC \uAD00\uB828\uC774 \uC788\uB294 \uC9C0\uB294
+          \uBAA8\uB974\uACA0\uC73C\uB098, \uD074\uB85C\uBC84\uB294 \uACFC\uAC70 \uD574\uCEE4\uB85C
+          \uD65C\uB3D9\uD588\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - A_SECONDLIE
       requiredTestimonyIds: []
@@ -441,13 +506,16 @@ MonoBehaviour:
       - T_C_CLOVER
       repeatable: 0
     - id: C_CLOVER2
-      label: "클로버의 아버지에 대해 알고 있습니까?"
+      label: "\uD074\uB85C\uBC84\uC758 \uC544\uBC84\uC9C0\uC5D0 \uB300\uD574 \uC54C\uACE0
+        \uC788\uC2B5\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "클로버의 아버지에 대해 알고 있습니까?"
-      - speaker: "핸더슨"
-        text: "클로버의 아버지... 더 킹에 의해 살해되었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC758 \uC544\uBC84\uC9C0\uC5D0 \uB300\uD574 \uC54C\uACE0
+          \uC788\uC2B5\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uD074\uB85C\uBC84\uC758 \uC544\uBC84\uC9C0... \uB354 \uD0B9\uC5D0
+          \uC758\uD574 \uC0B4\uD574\uB418\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - C_CLOVER
       requiredTestimonyIds: []
@@ -457,13 +525,15 @@ MonoBehaviour:
       - T_C_CLOVER2
       repeatable: 0
     - id: C_CLOVER3
-      label: "클로버에게 더 킹이란 어떤 사람입니까?"
+      label: "\uD074\uB85C\uBC84\uC5D0\uAC8C \uB354 \uD0B9\uC774\uB780 \uC5B4\uB5A4
+        \uC0AC\uB78C\uC785\uB2C8\uAE4C?"
       kind: 0
       lines:
-      - speaker: "월터"
-        text: "클로버에게 더 킹이란 어떤 사람입니까?"
-      - speaker: "핸더슨"
-        text: "증오의 대상이었습니다."
+      - speaker: "\uC6D4\uD130"
+        text: "\uD074\uB85C\uBC84\uC5D0\uAC8C \uB354 \uD0B9\uC774\uB780 \uC5B4\uB5A4
+          \uC0AC\uB78C\uC785\uB2C8\uAE4C?"
+      - speaker: "\uD578\uB354\uC2A8"
+        text: "\uC99D\uC624\uC758 \uB300\uC0C1\uC774\uC5C8\uC2B5\uB2C8\uB2E4."
       requiredQuestionIds:
       - C_CLOVER2
       requiredTestimonyIds: []
@@ -475,41 +545,43 @@ MonoBehaviour:
   culpritSuspectId: A
   verdictTypoThreshold: 0.8
   minimumCorrectFields: 0
-  verdictTemplate: "{범인}은(는) {동기} 때문에\n{대상}을(를) 노려 {수단}(으)로\n국가 DB를 침입해, 전산망을 {목적}시키려 했다."
+  verdictTemplate: "{\uBC94\uC778}\uC740(\uB294) {\uB3D9\uAE30} \uB54C\uBB38\uC5D0\n{\uB300\uC0C1}\uC744(\uB97C)
+    \uB178\uB824 {\uC218\uB2E8}(\uC73C)\uB85C\n\uAD6D\uAC00 DB\uB97C \uCE68\uC785\uD574,
+    \uC804\uC0B0\uB9DD\uC744 {\uBAA9\uC801}\uC2DC\uD0A4\uB824 \uD588\uB2E4."
   verdictFields:
-  - label: "동기"
-    prompt:
-    answer: "증오"
+  - label: "\uB3D9\uAE30"
+    prompt: 
+    answer: "\uC99D\uC624"
     options:
-    - value: "증오"
+    - value: "\uC99D\uC624"
       synonyms:
-      - "반감"
-      - "적대"
-      - "혐오"
-  - label: "대상"
-    prompt:
-    answer: "더 킹"
+      - "\uBC18\uAC10"
+      - "\uC801\uB300"
+      - "\uD610\uC624"
+  - label: "\uB300\uC0C1"
+    prompt: 
+    answer: "\uB354 \uD0B9"
     options:
-    - value: "더 킹"
+    - value: "\uB354 \uD0B9"
       synonyms:
-      - "국왕"
-      - "지배자"
-      - "체제"
-      - "정부"
-  - label: "수단"
-    prompt:
-    answer: "해킹"
+      - "\uAD6D\uC655"
+      - "\uC9C0\uBC30\uC790"
+      - "\uCCB4\uC81C"
+      - "\uC815\uBD80"
+  - label: "\uC218\uB2E8"
+    prompt: 
+    answer: "\uD574\uD0B9"
     options:
-    - value: "해킹"
+    - value: "\uD574\uD0B9"
       synonyms:
-      - "침입"
-      - "전산 공격"
-      - "공격"
-  - label: "목적"
-    prompt:
-    answer: "마비"
+      - "\uCE68\uC785"
+      - "\uC804\uC0B0 \uACF5\uACA9"
+      - "\uACF5\uACA9"
+  - label: "\uBAA9\uC801"
+    prompt: 
+    answer: "\uB9C8\uBE44"
     options:
-    - value: "마비"
+    - value: "\uB9C8\uBE44"
       synonyms:
-      - "정지"
-      - "중단"
+      - "\uC815\uC9C0"
+      - "\uC911\uB2E8"
