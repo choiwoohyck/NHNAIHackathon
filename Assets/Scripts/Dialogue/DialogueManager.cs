@@ -137,7 +137,7 @@ public class DialogueManager : MonoBehaviour
             DialogueUIUtil.Stretch(choiceListContainer, Vector2.zero, Vector2.one, new Vector2(200, 200), new Vector2(-200, -200));
 
             var layout = listGO.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 10;
+            layout.spacing = 16;
             layout.childForceExpandHeight = false;
             layout.childControlHeight = true;
             layout.childControlWidth = true;
@@ -265,7 +265,7 @@ public class DialogueManager : MonoBehaviour
             var color = q.kind == NodeKind.Contradiction ? contradictionChoiceColor : choiceButtonColor;
             var button = DialogueUIUtil.CreateTMPButton(choiceListContainer, "Choice_" + q.id, q.label, color, choiceButtonSprite);
             var le = button.gameObject.AddComponent<LayoutElement>();
-            le.preferredHeight = 20;
+            le.preferredHeight = 64;
 
             var captured = q;
             button.onClick.AddListener(() =>

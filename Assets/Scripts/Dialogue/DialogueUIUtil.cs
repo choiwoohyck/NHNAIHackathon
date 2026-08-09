@@ -172,12 +172,12 @@ public static class DialogueUIUtil
         if (bgSprite != null) image.sprite = bgSprite;
         var button = go.AddComponent<Button>();
 
-        var text = CreateTMPText(go.transform, "Label", 18, TextAnchor.MiddleCenter, Color.white);
+        var text = CreateTMPText(go.transform, "Label", 30, TextAnchor.MiddleCenter, Color.white);
         var textRt = text.rectTransform;
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero;
-        textRt.offsetMax = Vector2.zero;
+        textRt.offsetMin = new Vector2(16, 0);
+        textRt.offsetMax = new Vector2(-16, 0);
         text.text = label;
 
         return button;

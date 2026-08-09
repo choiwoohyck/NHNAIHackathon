@@ -311,9 +311,9 @@ public class EndingController : MonoBehaviour
         var result = GameSession.HasVerdict ? GameSession.LastVerdict : VerdictResult.WrongSuspect;
         bool success = result == VerdictResult.Success;
 
-        Sprite sprite = success ? successSprite
-                       : result == VerdictResult.WrongSuspect ? wrongSuspectSprite
-                       : insufficientSprite;
+        Sprite sprite = success ? Resolve(successSprite, "Cut_Guilty_Cell")
+                       : result == VerdictResult.WrongSuspect ? Resolve(wrongSuspectSprite, "Cut_Innocent_End")
+                       : Resolve(insufficientSprite, "Cut_Innocent_End");
         string label = success ? successText
                       : result == VerdictResult.WrongSuspect ? wrongText
                       : insufficientText;

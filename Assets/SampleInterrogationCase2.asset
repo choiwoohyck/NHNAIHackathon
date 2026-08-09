@@ -12,355 +12,257 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d608b9d9a55a2646918144c0cc2dce0, type: 3}
   m_Name: SampleInterrogationCase2
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationCase
-  caseId: CASE_NETWORK_INTRUSION
-  caseTitle: "\uC544\uC2AC\uB77C\uB2C8\uC544 \uAD6D\uAC00 \uC804\uC0B0\uB9DD \uCE68\uC785
-    \uC0AC\uAC74"
-  briefing: "7\uC6D4 23\uC77C \uC624\uD6C4 3\uC2DC 20\uBD84, \uAD6D\uAC00 DB\uC5D0
-    \uBE44\uC778\uAC00 \uC811\uADFC\uC774 \uBC1C\uC0DD\uD574 \uC804\uC0B0\uB9DD\uC774
-    \uC57D 15\uBD84\uAC04 \uB9C8\uBE44\uB418\uC5C8\uB2E4.\n\uCE68\uC785 \uACFC\uC815\uC5D0\uC11C
-    \uB0B4\uBD80 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC0AC\uC6A9\uB418\uC5C8\uB2E4.
-    \uB0B4\uBD80 \uC2DC\uC2A4\uD15C\uC5D0 \uC811\uADFC \uAC00\uB2A5\uD55C 3\uC778\uC744
-    \uCDE8\uC870\uD558\uB77C."
+  caseId: CASE_PENTHOUSE_MURDER
+  caseTitle: "이재훈 대표 자택 살인 사건"
+  briefing: "8월 3일 늦은 밤, OO상사 이재훈 대표가 자택 서재에서 목을 맨 채 숨진 상태로 발견되었다.\n처음엔 자살로 추정되었으나 부검 결과 사망 전 저항흔과 목 뒤쪽의 눌린 자국이 발견되어 타살 가능성이 제기되었다.\n피해자와 관계있는 용의자 3인을 취조하라."
+  caseNumber: CASE-001
+  caseImage: {fileID: 0}
   testimonies:
-  - id: T_A_ALIBI
+  - id: T_A_WHERE
     ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uD68C\uC0AC\uC5D0\uC11C
-      \uC815\uC0C1 \uADFC\uBB34\uD588\uB2E4\uACE0 \uC8FC\uC7A5\uD568."
+    ownerSuspectName: "김도윤"
+    text: "김도윤은 사건 당일 일찍 퇴근해 집에 있었다고 주장함."
     keywords:
-    - "\uD68C\uC0AC"
-    - "\uADFC\uBB34"
-    - "\uC54C\uB9AC\uBC14\uC774"
-  - id: T_A_NOAUTH
+    - "알리바이"
+    - "귀가"
+  - id: T_A_NOMONEY
     ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uD074\uB85C\uBC84\uB294 \uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uAD8C\uD55C\uC774
-      \uC5C6\uB2E4\uACE0 \uC9C4\uC220\uD568."
+    ownerSuspectName: "김도윤"
+    text: "김도윤은 회사 자금 문제로 피해자와 갈등이 없었다고 부인함."
     keywords:
-    - "\uAD8C\uD55C"
-    - "\uAD00\uB9AC\uC790"
+    - "자금"
+    - "부인"
   - id: T_A_RELATION
     ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uD074\uB85C\uBC84\uB294 \uD53C\uD574 \uAE30\uAD00\uACFC \uAC1C\uC778\uC801
-      \uC774\uD574\uAD00\uACC4\uAC00 \uC5C6\uB2E4\uACE0 \uC8FC\uC7A5\uD568."
+    ownerSuspectName: "김도윤"
+    text: "김도윤은 피해자와 가장 친한 동업자였으며 갈등이 없었다고 주장함."
     keywords:
-    - "\uAD00\uACC4"
-  - id: T_B_LEAVE
+    - "관계"
+    - "동업자"
+  - id: T_A_CONFESS_MONEY
+    ownerSuspectId: A
+    ownerSuspectName: "김도윤"
+    text: "김도윤은 회삿돈 횡령 사실이 드러나 피해자와 크게 다퉜음을 인정함."
+    keywords:
+    - "번복"
+    - "횡령"
+  - id: T_A_CONFESS_WHERE
+    ownerSuspectId: A
+    ownerSuspectName: "김도윤"
+    text: "김도윤은 사건 당일 밤 피해자의 자택에 들렀음을 인정함."
+    keywords:
+    - "번복"
+    - "자택방문"
+  - id: T_B_WHERE
     ownerSuspectId: B
-    ownerSuspectName: "\uB9AC\uB098"
-    text: "\uB3D9\uB8CC\uB294 \uD074\uB85C\uBC84\uAC00 \uC0AC\uAC74 \uB2F9\uC77C
-      \uC5F0\uCC28\uB77C \uD68C\uC0AC\uC5D0 \uC5C6\uC5C8\uB2E4\uACE0 \uC9C4\uC220\uD568."
+    ownerSuspectName: "서혜인"
+    text: "서혜인은 사건 당일 야근으로 사무실에 있었다고 진술함."
     keywords:
-    - "\uC5F0\uCC28"
-    - "\uACB0\uADFC"
-  - id: T_B_CONFLICT
+    - "알리바이"
+    - "야근"
+  - id: T_B_EMBEZZLE
     ownerSuspectId: B
-    ownerSuspectName: "\uB9AC\uB098"
-    text: "\uB3D9\uB8CC\uB294 \uCD5C\uADFC \uD074\uB85C\uBC84\uC640 \uC5C5\uBB34\uC0C1
-      \uAC08\uB4F1\uC774 \uC788\uC5C8\uB2E4\uACE0 \uC778\uC815\uD568."
+    ownerSuspectName: "서혜인"
+    text: "서혜인은 김도윤의 횡령 정황을 발견해 피해자에게 알렸고, 피해자가 크게 화를 냈다고 진술함."
     keywords:
-    - "\uAC08\uB4F1"
-  - id: T_C_ADMIN
+    - "횡령"
+    - "제보"
+  - id: T_C_WHERE
     ownerSuspectId: C
-    ownerSuspectName: "\uAC00\uB81B"
-    text: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uD074\uB85C\uBC84\uC5D0\uAC8C \uC9C0\uB09C\uB2EC\uBD80\uD130
-      \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0
-      \uC9C4\uC220\uD568."
+    ownerSuspectName: "박성민"
+    text: "박성민은 사건 당일 밤 피해자의 집 근처 카페에서 형을 기다리고 있었다고 진술함."
     keywords:
-    - "\uAD00\uB9AC\uC790"
-    - "\uAD8C\uD55C"
-  - id: T_C_INTERNAL
+    - "알리바이"
+    - "카페"
+  - id: T_C_SAWCAR
     ownerSuspectId: C
-    ownerSuspectName: "\uAC00\uB81B"
-    text: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uCE68\uC785 \uB85C\uADF8\uAC00
-      \uC678\uBD80\uAC00 \uC544\uB2CC \uB0B4\uBD80 \uC811\uC18D\uC774\uC5C8\uB2E4\uACE0
-      \uC9C4\uC220\uD568."
+    ownerSuspectName: "박성민"
+    text: "박성민은 그날 밤 피해자의 집 근처에서 김도윤의 차를 봤다고 진술함."
     keywords:
-    - "\uB0B4\uBD80"
-    - "\uB85C\uADF8"
-  - id: T_A_RECANT_LEAVE
-    ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uCD94\uAD81\uB2F9\uD558\uC790 \uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C
-      \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC74C\uC744 \uC778\uC815\uD568."
-    keywords:
-    - "\uBC88\uBCF5"
-    - "\uACB0\uADFC"
-  - id: T_A_RECANT_ADMIN
-    ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uD074\uB85C\uBC84\uB294 \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC744
-      \uAC16\uACE0 \uC788\uC5C8\uC74C\uC744 \uC778\uC815\uD568."
-    keywords:
-    - "\uBC88\uBCF5"
-    - "\uAD8C\uD55C"
-  - id: T_A_KNOWLEDGE
-    ownerSuspectId: A
-    ownerSuspectName: "\uD074\uB85C\uBC84"
-    text: "\uD074\uB85C\uBC84\uAC00 \uBBF8\uACF5\uAC1C \uC815\uBCF4\uC778 '\uAE30\uB85D
-      \uC0AD\uC81C' \uC0AC\uC2E4\uC744 \uC54C\uACE0 \uC788\uC5C8\uC74C\uC774 \uB4DC\uB7EC\uB0A8."
-    keywords:
-    - "\uBBF8\uACF5\uAC1C"
-    - "\uC9C0\uC2DD\uBAA8\uC21C"
+    - "목격"
+    - "차량"
   suspects:
   - id: A
-    suspectName: "\uD074\uB85C\uBC84"
-    occupation: "\uC815\uBD80\uAE30\uAD00 \uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uC9C1\uC6D0"
+    suspectName: "김도윤"
+    occupation: "OO상사 부사장 겸 피해자의 동업자"
     questions:
     - id: A_WHERE
-      label: "\uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+      label: "사건 당일 어디에 있었습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uC0AC\uAC74 \uB2F9\uC77C \uC624\uD6C4 3\uC2DC, \uC5B4\uB514\uC5D0
-          \uACC4\uC168\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\uD68C\uC0AC\uC5D0\uC11C \uACC4\uC18D \uADFC\uBB34\uD558\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "사건 당일 밤, 어디에 계셨습니까?"
+      - speaker: "김도윤"
+        text: "그날 저는 일찍 퇴근해서 집에 있었습니다."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_A_ALIBI
+      - T_A_WHERE
       repeatable: 0
-    - id: A_AUTH
-      label: "\uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uAD8C\uD55C\uC774 \uC788\uC2B5\uB2C8\uAE4C?"
+    - id: A_MONEY
+      label: "회사 자금 문제로 피해자와 갈등이 있었습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uAD6D\uAC00 DB\uB97C \uC218\uC815\uD560 \uC218 \uC788\uB294 \uAD8C\uD55C\uC744
-          \uAC16\uACE0 \uACC4\uC168\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\uC544\uB2C8\uC694. \uC800\uC5D0\uAC8C \uADF8\uB7F0 \uAD8C\uD55C\uC740
-          \uC5C6\uC2B5\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "최근 회사 자금 문제로 피해자와 다툰 적이 있습니까?"
+      - speaker: "김도윤"
+        text: "아니요, 그런 문제는 없었습니다."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_A_NOAUTH
+      - T_A_NOMONEY
       repeatable: 0
     - id: A_RELATION
-      label: "\uD53C\uD574 \uAE30\uAD00\uACFC \uC5B4\uB5A4 \uAD00\uACC4\uC785\uB2C8\uAE4C?"
+      label: "피해자와는 어떤 관계였습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uD53C\uD574\uB97C \uC785\uC740 \uAE30\uAD00\uACFC \uAC1C\uC778\uC801\uC778
-          \uC774\uD574\uAD00\uACC4\uAC00 \uC788\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\uC804\uD600\uC694. \uADF8\uC800 \uC5C5\uBB34\uB85C \uC5EE\uC600\uC744
-          \uBFD0\uC785\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "피해자와는 평소 어떤 관계였습니까?"
+      - speaker: "김도윤"
+        text: "가장 친한 동업자였습니다. 갈등 같은 건 없었습니다."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
       - T_A_RELATION
       repeatable: 0
-    - id: A_WHO_WITH
-      label: "\uADF8 \uC2DC\uAC04 \uD68C\uC0AC\uC5D0 \uB204\uAC00 \uD568\uAED8 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
-      kind: 0
-      lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uADFC\uBB34 \uC911\uC774\uC5C8\uB2E4\uBA74, \uADF8 \uC2DC\uAC04 \uACC1\uC5D0
-          \uB204\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\uB2E4\uB4E4 \uAC01\uC790 \uC790\uB9AC\uC5D0 \uC788\uC5B4\uC11C\u2026
-          \uB531\uD788 \uC800\uB97C \uBCF8 \uC0AC\uB78C\uC740 \uC5C6\uC744 \uAC81\uB2C8\uB2E4."
-      requiredQuestionIds:
-      - A_WHERE
-      requiredTestimonyIds: []
-      requireAll: 1
-      requiredSelectedTestimonyId: 
-      grantTestimonyIds: []
-      repeatable: 0
-    - id: A_C_LEAVE
-      label: "\uB3D9\uB8CC\uB294 \uB2F9\uC2E0\uC774 \uADF8\uB0A0 \uC5F0\uCC28\uC600\uB2E4\uACE0
-        \uD569\uB2C8\uB2E4. \uC5B4\uB290 \uCABD\uC774 \uC0AC\uC2E4\uC785\uB2C8\uAE4C?"
+    - id: A_LIE_MONEY
+      label: "비서의 증언에 따르면 당신의 횡령 사실이 드러나 피해자와 크게 다퉜다고 합니다."
       kind: 1
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uB2F9\uC2E0\uC740 \uADF8\uB0A0 \uD68C\uC0AC\uC5D0\uC11C \uADFC\uBB34\uD588\uB2E4\uACE0
-          \uD588\uC2B5\uB2C8\uB2E4. \uADF8\uB7F0\uB370 \uB3D9\uB8CC\uB294 \uB2F9\uC2E0\uC774
-          \uC5F0\uCC28\uB97C \uC368\uC11C \uB098\uC624\uC9C0 \uC54A\uC558\uB2E4\uACE0
-          \uC9C4\uC220\uD588\uC2B5\uB2C8\uB2E4. \uC5B4\uB290 \uCABD\uC774 \uC0AC\uC2E4\uC785\uB2C8\uAE4C?"
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\u2026\uADF8\uB0A0\uC740, \uC0AC\uC2E4 \uCD9C\uADFC\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.
-          \uC81C\uAC00 \uCC29\uAC01\uD588\uB358 \uBAA8\uC591\uC785\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "비서의 증언에 따르면, 당신이 회삿돈을 횡령한 정황이 드러나 피해자와 크게 다퉜다고 합니다."
+      - speaker: "김도윤"
+        text: "...맞습니다. 사실 횡령한 걸 들켜서 다퉜습니다."
       requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_ALIBI
-      requireAll: 1
-      requiredSelectedTestimonyIds:
-      - T_A_ALIBI
-      - T_B_LEAVE
-      grantTestimonyIds:
-      - T_A_RECANT_LEAVE
-      repeatable: 0
-    - id: A_C_ADMIN
-      label: "\uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uB2F9\uC2E0\uC5D0\uAC8C \uAD00\uB9AC\uC790
-        \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0 \uD569\uB2C8\uB2E4."
-      kind: 1
-      lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uAD8C\uD55C\uC774 \uC5C6\uB2E4\uACE0 \uD558\uC168\uC8E0. \uADF8\uB7F0\uB370
-          \uBCF4\uC548 \uB2F4\uB2F9\uC790\uB294 \uC9C0\uB09C\uB2EC\uBD80\uD130 \uB2F9\uC2E0\uC5D0\uAC8C
-          \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC788\uC5C8\uB2E4\uACE0
-          \uC9C4\uC220\uD588\uC2B5\uB2C8\uB2E4."
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\u2026\uC784\uC2DC \uAD8C\uD55C\uC774 \uC788\uAE34 \uD588\uC2B5\uB2C8\uB2E4.
-          \uB9D0\uD560 \uD544\uC694\uAC00 \uC5C6\uB2E4\uACE0 \uC0DD\uAC01\uD588\uC744
-          \uBFD0\uC785\uB2C8\uB2E4."
-      requiredQuestionIds: []
-      requiredTestimonyIds:
-      - T_A_NOAUTH
-      requireAll: 1
-      requiredSelectedTestimonyIds:
-      - T_A_NOAUTH
-      - T_C_ADMIN
-      grantTestimonyIds:
-      - T_A_RECANT_ADMIN
-      repeatable: 0
-    - id: A_KNOWLEDGE
-      label: "\uC0AD\uC81C\uB41C \uAE30\uB85D\uC744 \uC5B4\uB5BB\uAC8C \uC54C\uACE0
-        \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
-      kind: 0
-      lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uD55C \uAC00\uC9C0 \uB354. \uB2F9\uC2E0\uC740 \uBC29\uAE08 '\uAE30\uB85D\uC774
-          \uC0AD\uC81C\uB410\uB2E4'\uACE0 \uD588\uC2B5\uB2C8\uB2E4. \uADF8 \uC0AC\uC2E4\uC740
-          \uC678\uBD80\uC5D0 \uACF5\uAC1C\uB41C \uC801\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
-      - speaker: "\uD074\uB85C\uBC84"
-        text: "\uADF8\uAC74\u2026 \uADF8\uC800 \uC9D0\uC791\uC774\uC5C8\uC2B5\uB2C8\uB2E4."
-      requiredQuestionIds:
-      - A_C_ADMIN
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds:
+      - T_A_NOMONEY
+      - T_B_EMBEZZLE
       grantTestimonyIds:
-      - T_A_KNOWLEDGE
+      - T_A_CONFESS_MONEY
+      repeatable: 0
+    - id: A_LIE_WHERE
+      label: "동생분의 증언에 따르면 그날 밤 피해자의 자택 근처에서 당신 차를 봤다고 합니다."
+      kind: 1
+      lines:
+      - speaker: "월터"
+        text: "피해자의 동생 증언에 따르면, 그날 밤 피해자의 자택 근처에 당신 차가 있었다고 합니다."
+      - speaker: "김도윤"
+        text: "...그날 밤 잠깐 들르긴 했습니다."
+      requiredQuestionIds: []
+      requiredTestimonyIds: []
+      requireAll: 1
+      requiredSelectedTestimonyIds:
+      - T_A_WHERE
+      - T_C_SAWCAR
+      grantTestimonyIds:
+      - T_A_CONFESS_WHERE
       repeatable: 0
   - id: B
-    suspectName: "\uB9AC\uB098"
-    occupation: "\uC804\uC0B0\uAD00\uB9AC \uBD80\uC11C \uB3D9\uB8CC"
+    suspectName: "서혜인"
+    occupation: "피해자의 개인 비서"
     questions:
-    - id: B_A_WHERE
-      label: "\uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C \uC5B4\uB514\uC5D0
-        \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
+    - id: B_WHERE
+      label: "사건 당일 어디에 있었습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uB3D9\uB8CC\uC778 \uD074\uB85C\uBC84\uB294 \uC0AC\uAC74 \uB2F9\uC77C
-          \uC5B4\uB514\uC5D0 \uC788\uC5C8\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uB9AC\uB098"
-        text: "\uD074\uB85C\uBC84\uC694? \uADF8\uB0A0 \uC5F0\uCC28 \uC37C\uC5B4\uC694.
-          \uD68C\uC0AC\uC5D0 \uC548 \uB098\uC654\uC2B5\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "사건 당일 밤, 어디에 계셨습니까?"
+      - speaker: "서혜인"
+        text: "저는 야근하느라 사무실에 있었습니다."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_B_LEAVE
+      - T_B_WHERE
       repeatable: 0
-    - id: B_RELATION
-      label: "\uD074\uB85C\uBC84\uC640\uC758 \uAD00\uACC4\uB294 \uC5B4\uB5BB\uC2B5\uB2C8\uAE4C?"
+    - id: B_KNOW
+      label: "회사 자금과 관련해서 아는 것이 있습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uD074\uB85C\uBC84\uC640\uC758 \uC0AC\uC774\uB294 \uC5B4\uB5BB\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uB9AC\uB098"
-        text: "\uC694\uC998 \uC5C5\uBB34 \uB54C\uBB38\uC5D0 \uC880 \uBD80\uB52A\uD614\uC5B4\uC694.
-          \uC194\uC9C1\uD788 \uD3B8\uD55C \uC0AC\uC774\uB294 \uC544\uB2D9\uB2C8\uB2E4."
-      requiredQuestionIds: []
+      - speaker: "월터"
+        text: "회사 자금과 관련해서 최근 알게 된 사실이 있습니까?"
+      - speaker: "서혜인"
+        text: "사실 최근 도윤 부사장님이 회삿돈을 개인적으로 쓰신 정황을 발견해서 대표님께 말씀드렸습니다. 대표님이 크게 화내셨어요."
+      requiredQuestionIds:
+      - B_WHERE
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_B_CONFLICT
+      - T_B_EMBEZZLE
       repeatable: 0
   - id: C
-    suspectName: "\uAC00\uB81B"
-    occupation: "\uC815\uBD80\uAE30\uAD00 \uBCF4\uC548 \uB2F4\uB2F9\uC790"
+    suspectName: "박성민"
+    occupation: "피해자의 친동생"
     questions:
-    - id: C_ADMIN
-      label: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740
-        \uC5B4\uB560\uC2B5\uB2C8\uAE4C?"
+    - id: C_WHERE
+      label: "사건 당일 어디에 있었습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uD074\uB85C\uBC84\uC758 \uC2DC\uC2A4\uD15C \uC811\uADFC \uAD8C\uD55C\uC740
-          \uC5B4\uB290 \uC815\uB3C4\uC600\uC2B5\uB2C8\uAE4C?"
-      - speaker: "\uAC00\uB81B"
-        text: "\uC9C0\uB09C\uB2EC\uBD80\uD130 \uC784\uC2DC \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774
-          \uBD80\uC5EC\uB3FC \uC788\uC5C8\uC2B5\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "사건 당일 밤, 어디에 계셨습니까?"
+      - speaker: "박성민"
+        text: "저는 형 집 근처 카페에서 형을 기다리고 있었습니다. 유산 문제로 상의할 게 있어서요."
       requiredQuestionIds: []
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_C_ADMIN
+      - T_C_WHERE
       repeatable: 0
-    - id: C_BREACH
-      label: "\uAD8C\uD55C\uC740 \uC5B4\uB5BB\uAC8C \uD0C8\uCDE8\uB410\uB2E4\uACE0
-        \uBD05\uB2C8\uAE4C?"
+    - id: C_SAW
+      label: "그날 밤 특이한 점을 보셨습니까?"
       kind: 0
       lines:
-      - speaker: "\uC6D4\uD130"
-        text: "\uADF8 \uAD8C\uD55C\uC774 \uC678\uBD80\uC5D0\uC11C \uD0C8\uCDE8\uB410\uB2E4\uACE0
-          \uBCF4\uC2ED\uB2C8\uAE4C?"
-      - speaker: "\uAC00\uB81B"
-        text: "\uCC98\uC74C\uC5D4 \uADF8\uB807\uAC8C \uBD24\uC2B5\uB2C8\uB2E4. \uADF8\uB7F0\uB370
-          \uB85C\uADF8\uB97C \uB2E4\uC2DC \uBCF4\uB2C8\u2026 \uC811\uC18D\uC740 \uB0B4\uBD80\uC5D0\uC11C
-          \uC774\uB904\uC84C\uC2B5\uB2C8\uB2E4."
+      - speaker: "월터"
+        text: "카페에서 기다리는 동안 특이한 점을 보셨습니까?"
+      - speaker: "박성민"
+        text: "형 집 근처에서 도윤 부사장님 차를 봤습니다. 이상하다고 생각했어요."
       requiredQuestionIds:
-      - C_ADMIN
+      - C_WHERE
       requiredTestimonyIds: []
       requireAll: 1
-      requiredSelectedTestimonyId: 
+      requiredSelectedTestimonyIds: []
       grantTestimonyIds:
-      - T_C_INTERNAL
+      - T_C_SAWCAR
       repeatable: 0
   culpritSuspectId: A
   verdictTypoThreshold: 0.8
   minimumCorrectFields: 0
-  verdictTemplate: "{\uBC94\uC778}\uC740(\uB294) {\uB3D9\uAE30} \uB54C\uBB38\uC5D0\n{\uB300\uC0C1}\uC744(\uB97C)
-    \uB178\uB824 {\uC218\uB2E8}(\uC73C)\uB85C\n\uAD6D\uAC00 DB\uB97C \uCE68\uC785\uD574,
-    \uC804\uC0B0\uB9DD\uC744 {\uBAA9\uC801}\uC2DC\uD0A4\uB824 \uD588\uB2E4."
+  verdictTemplate: "{범인}은(는) {동기} 때문에\n피해자를 {수단}(으)로 살해하고,\n이를 {위장}(으)로 꾸미려 했다."
   verdictFields:
-  - label: "\uB3D9\uAE30"
-    prompt: 
-    answer: "\uC99D\uC624"
+  - label: "동기"
+    prompt:
+    answer: "횡령"
     options:
-    - value: "\uC99D\uC624"
+    - value: "횡령"
       synonyms:
-      - "\uBC18\uAC10"
-      - "\uC801\uB300"
-      - "\uD610\uC624"
-  - label: "\uB300\uC0C1"
-    prompt: 
-    answer: "\uB354 \uD0B9"
+      - "배임"
+      - "자금횡령"
+      - "돈"
+  - label: "수단"
+    prompt:
+    answer: "질식사"
     options:
-    - value: "\uB354 \uD0B9"
+    - value: "질식사"
       synonyms:
-      - "\uAD6D\uC655"
-      - "\uC9C0\uBC30\uC790"
-      - "\uCCB4\uC81C"
-      - "\uC815\uBD80"
-  - label: "\uC218\uB2E8"
-    prompt: 
-    answer: "\uD574\uD0B9"
+      - "교살"
+      - "목 조름"
+      - "질식"
+  - label: "위장"
+    prompt:
+    answer: "자살"
     options:
-    - value: "\uD574\uD0B9"
+    - value: "자살"
       synonyms:
-      - "\uCE68\uC785"
-      - "\uC804\uC0B0 \uACF5\uACA9"
-      - "\uACF5\uACA9"
-  - label: "\uBAA9\uC801"
-    prompt: 
-    answer: "\uB9C8\uBE44"
-    options:
-    - value: "\uB9C8\uBE44"
-      synonyms:
-      - "\uC815\uC9C0"
-      - "\uC911\uB2E8"
+      - "극단적 선택"
+      - "자결"

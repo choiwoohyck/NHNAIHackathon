@@ -386,7 +386,16 @@ public class InterrogationController : MonoBehaviour
             // 모순 성립 → 근거를 제공한 용의자와 무관하게, 해당 진술의 소유자에게 곧바로 추궁(대상이 바뀌면 자동 전환).
             currentSuspectId = owner;
             ContradictionResolved?.Invoke(node);
-            OnQuestionSelected(node);
+
+            // 용의자를 부를 때와 같은 암전 → 인물 등장 연출로 초상화를 띄운 뒤 추궁 대사를 출력한다.
+            var suspect = graph.GetSuspect(owner);
+            if (lightFlicker != null && suspect != null)
+                lightFlicker.PlayCharacterCall(
+                    suspect.portrait,
+                    () => OnQuestionSelected(node),
+                    suspect.useCustomPortraitSize ? suspect.portraitSize : (Vector2?)null);
+            else
+                OnQuestionSelected(node);
             return;
         }
 
